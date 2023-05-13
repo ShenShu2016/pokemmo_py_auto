@@ -1,7 +1,11 @@
 from ctypes import WINFUNCTYPE, byref, c_ubyte, create_unicode_buffer, windll
 from ctypes.wintypes import BOOL, HWND, LPARAM, RECT
 
+import cv2
 import numpy as np
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 from unidecode import unidecode
 
 
@@ -82,10 +86,70 @@ class PokeMMO:
                 return True
         return True
 
+    def draw_custom_box(
+        self,
+        image,
+        box_width=200,
+        box_height=200,
+        color=(0, 0, 255),
+        thickness=2,
+        offset_x=0,
+        offset_y=0,
+    ):
+        # Calculate the center of the image
+        height, width, _ = image.shape
+        center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
+
+        # Calculate the top-left and bottom-right points of the rectangle
+        start_point = (center_x - box_width // 2, center_y - box_height // 2)
+        end_point = (center_x + box_width // 2, center_y + box_height // 2)
+
+        # Draw the rectangle on the image
+        cv2.rectangle(image, start_point, end_point, color, thickness)
+
+        # Return the coordinates of the top-left and bottom-right corners
+        return start_point, end_point
+
+    def get_text_from_area(
+        self, image, top_left, bottom_right, config="--psm 6", lang="eng"
+    ):
+        # Extract the area from the image
+        area = image[top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]]
+
+        # Convert the area to grayscale
+        gray = cv2.cvtColor(area, cv2.COLOR_BGRA2GRAY)
+
+        # Recognize the text in the area
+        text = pytesseract.image_to_string(gray, config=config, lang=lang)
+        print(f"Text: {text}")
+
+        return text
+
+    def draw_box_and_get_text(
+        self,
+        image,
+        box_width=200,
+        box_height=200,
+        color=(0, 0, 255),
+        thickness=2,
+        offset_x=0,
+        offset_y=0,
+        config="--psm 6",
+        lang="eng",
+    ):
+        # Draw the box and get its coordinates
+        start_point, end_point = self.draw_custom_box(
+            image, box_width, box_height, color, thickness, offset_x, offset_y
+        )
+
+        # Get the text from the area inside the box
+        text = self.get_text_from_area(image, start_point, end_point, config, lang)
+
+        # Return the text
+        return text
+
 
 if __name__ == "__main__":
-    import cv2
-
     # Make the process DPI-aware
     windll.user32.SetProcessDPIAware()
 
