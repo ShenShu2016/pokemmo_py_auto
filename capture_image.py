@@ -1,4 +1,4 @@
-from ctypes import WINFUNCTYPE, byref, c_ubyte, create_unicode_buffer, windll
+from ctypes import POINTER, WINFUNCTYPE, byref, c_ubyte, create_unicode_buffer, windll
 from ctypes.wintypes import BOOL, HWND, LPARAM, RECT
 
 import numpy as np
@@ -33,6 +33,14 @@ class PokeMMO:
         self.ReleaseDC = windll.user32.ReleaseDC
 
     def capture(self):
+        """窗口客户区截图
+
+        Args:
+            handle (HWND): 要截图的窗口句柄
+
+        Returns:
+            numpy.ndarray: 截图数据
+        """
         # 获取窗口客户区的大小
         r = RECT()
         self.GetClientRect(self.handle, byref(r))
@@ -56,6 +64,11 @@ class PokeMMO:
         return np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
 
     def get_current_image(self):
+        """获取当前窗口的截图
+
+        Returns:
+            numpy.ndarray: 截图数据
+        """
         return self.capture()
 
     def get_window_name(self):
@@ -67,8 +80,7 @@ class PokeMMO:
         if self.window_name is None:
             # close this program
             exit(0)
-        else:
-            print(f"window name: {self.window_name}")
+
         return self.window_name
 
     def foreach_window(self, hwnd, lParam):
