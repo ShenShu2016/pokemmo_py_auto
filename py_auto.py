@@ -110,7 +110,7 @@ class PokeMMO:
                 return True
         return True
 
-    def get_box_coordinate_start_from_center(
+    def get_box_coordinate_from_center(
         self,
         image_normal,
         box_width=200,
@@ -162,13 +162,13 @@ class PokeMMO:
         lang="eng",
     ):
         # Draw the box and get its coordinates
-        start_point, end_point = self.get_box_coordinate_start_from_center(
+        top_left, bottom_right = self.get_box_coordinate_from_center(
             image, box_width, box_height, color, thickness, offset_x, offset_y
         )
 
         # Get the text from the area inside the box
         text = self.get_text_from_box_coordinate(
-            image, start_point, end_point, config, lang
+            image, top_left, bottom_right, config, lang
         )
 
         # Return the text
