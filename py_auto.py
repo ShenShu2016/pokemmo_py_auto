@@ -1,3 +1,4 @@
+import json
 import logging
 from ctypes import WINFUNCTYPE, byref, c_ubyte, create_unicode_buffer, windll
 from ctypes.wintypes import BOOL, HWND, LPARAM, RECT
@@ -11,7 +12,7 @@ from unidecode import unidecode
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
 SRCCOPY = 0x00CC0020  # Raster operation code
 
 
@@ -31,6 +32,22 @@ class PokeMMO:
         """Initialize the PokeMMO class."""
         self.window_name = self.get_window_name()
         self.handle = windll.user32.FindWindowW(None, self.window_name)
+
+        with open("configure.json", "r") as f:
+            self.config = json.load(f)
+        pytesseract.pytesseract.tesseract_cmd = self.config["tesseract"]
+
+        # Load the template images
+        for key, path in self.config.items():
+            if path.endswith(".png"):
+                # Create variable name
+                var_name = key.replace("_path", "_color")
+                # Load image and set it as instance variable
+                setattr(self, var_name, cv2.imread(path, cv2.IMREAD_COLOR))
+
+                print(
+                    f"Successfully initialized variable: {var_name} with path: {path}"
+                )
 
         self.GetDC = windll.user32.GetDC
         self.CreateCompatibleDC = windll.gdi32.CreateCompatibleDC
@@ -66,9 +83,9 @@ class PokeMMO:
         # 返回截图数据为numpy.ndarray
         return np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
 
-    def get_current_image(self):
+    def get_current_image_normal(self):
         """Get the current screenshot of the PokeMMO game."""
-        return self.capture()
+        return self.capture()  # return image_normal
 
     def get_window_name(self):
         """Get the window name of the PokeMMO game."""
@@ -93,9 +110,9 @@ class PokeMMO:
                 return True
         return True
 
-    def draw_custom_box(
+    def get_box_coordinate_start_from_center(
         self,
-        image,
+        image_normal,
         box_width=200,
         box_height=200,
         color=(0, 0, 255),
@@ -104,20 +121,20 @@ class PokeMMO:
         offset_y=0,
     ):
         """Draw a box on the image and get the text from the area inside the box."""
-        height, width, _ = image.shape
+        height, width, _ = image_normal.shape
         center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
 
         # Calculate the top-left and bottom-right points of the rectangle
-        start_point = (center_x - box_width // 2, center_y - box_height // 2)
-        end_point = (center_x + box_width // 2, center_y + box_height // 2)
+        top_left = (center_x - box_width // 2, center_y - box_height // 2)
+        bottom_right = (center_x + box_width // 2, center_y + box_height // 2)
 
         # Draw the rectangle on the image
-        cv2.rectangle(image, start_point, end_point, color, thickness)
+        # cv2.rectangle(image, start_point, end_point, color, thickness)
 
         # Return the coordinates of the top-left and bottom-right corners
-        return start_point, end_point
+        return top_left, bottom_right
 
-    def get_text_from_area(
+    def get_text_from_box_coordinate(
         self, image, top_left, bottom_right, config="--psm 6", lang="eng"
     ):
         # Extract the area from the image
@@ -132,7 +149,7 @@ class PokeMMO:
 
         return text
 
-    def draw_box_and_get_text(
+    def get_text_from_center(
         self,
         image,
         box_width=200,
@@ -145,72 +162,85 @@ class PokeMMO:
         lang="eng",
     ):
         # Draw the box and get its coordinates
-        start_point, end_point = self.draw_custom_box(
+        start_point, end_point = self.get_box_coordinate_start_from_center(
             image, box_width, box_height, color, thickness, offset_x, offset_y
         )
 
         # Get the text from the area inside the box
-        text = self.get_text_from_area(image, start_point, end_point, config, lang)
+        text = self.get_text_from_box_coordinate(
+            image, start_point, end_point, config, lang
+        )
 
         # Return the text
         return text
 
-    def get_text_from_area_start_from_center(
-        self,
-        image,
-        box_width=200,
-        box_height=200,
-        offset_x=0,
-        offset_y=0,
-        config="--psm 6",
-        lang="eng",
+    def find_items(
+        self, image_color, template_color, threshold=1, max_matches=10, display=False
     ):
-        """Recognize the text in the given area from the center of the image."""
-        height, width, _ = image.shape
-        center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
-
-        # Calculate the top-left and bottom-right points of the rectangle
-        top_left = (center_x - box_width // 2, center_y - box_height // 2)
-        bottom_right = (center_x + box_width // 2, center_y + box_height // 2)
-
-        # Extract the area from the image
-        area = image[top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]]
-
-        # Convert the area to grayscale
-        gray = cv2.cvtColor(area, cv2.COLOR_BGRA2GRAY)
-
-        # Recognize the text in the area
-        text = pytesseract.image_to_string(gray, config=config, lang=lang)
-        print(f"Text: {text}")
-
-        return text
-
-    def find_items(self, template_path, threshold=0.95):
         """Find items in the PokeMMO game by matching a template image with the game screenshot."""
-
-        # Capture the current image from the game window
-        image = self.get_current_image()
-        image_color = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
-
-        # Load the template image
-        template_color = cv2.imread(template_path, cv2.IMREAD_COLOR)
 
         # Perform template matching
         result = cv2.matchTemplate(image_color, template_color, cv2.TM_CCORR_NORMED)
 
         # Apply the threshold to the result
         _, result = cv2.threshold(result, threshold, 1.0, cv2.THRESH_BINARY)
-        result = np.where(result >= threshold)
+        # print(f"Result: {result}")
+        result = np.where(result >= threshold)  #! i don't know what this does
+        # print(f"Result: {result}")
+
+        # Check the number of matches
+        num_matches = len(result[0])  # Get the number of matches
+        if num_matches > max_matches:
+            raise Exception(f"Too many matches for template: {num_matches}")
+        print(f"Number of matches: {num_matches}")
 
         h, w = template_color.shape[:2]
+        match_coordinates = []
         for index, pt in enumerate(zip(*result[::-1])):
-            # Draw a rectangle on the original image
-            cv2.rectangle(image_color, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
-            # print all the coordinates and values
-            print(index, pt[0], pt[1])
+            match_coordinates.append((pt[0], pt[1], pt[0] + w, pt[1] + h))
 
-        cv2.imshow("Match Template", image_color)
-        cv2.waitKey()
+        if display:
+            for pt in match_coordinates:
+                # Draw a rectangle on the original image
+                cv2.rectangle(image_color, pt[:2], pt[2:], (0, 0, 255), 2)
+            cv2.imshow("Match Template", image_color)
+            cv2.waitKey()
+
+        return match_coordinates
+
+    def check_game_status(self, image_normal, threshold=0.985):
+        """Check the game state based on the existence of certain images."""
+        # Capture the current image from the game window
+        image_color = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
+
+        # Try to find each template in the image
+        if (
+            self.find_items(
+                image_color, self.face_down_color, threshold=threshold, max_matches=5
+            )
+            or self.find_items(
+                image_color,
+                template_color=self.face_up_color,
+                threshold=threshold,
+                max_matches=5,
+            )
+            or self.find_items(
+                image_color, self.face_left_color, threshold=threshold, max_matches=5
+            )
+            or self.find_items(
+                image_color, self.face_right_color, threshold=threshold, max_matches=5
+            )
+        ):
+            print("Player character detected.")
+            return "NORMAL"
+        elif self.find_items(
+            image_color, self.enemy_hp_bar_color, threshold=threshold, max_matches=2
+        ):
+            print("Enemy HP bar detected.")
+            return "BATTLE"
+        else:
+            print("Unknown game state.")
+            return "OTHER"
 
 
 if __name__ == "__main__":
@@ -221,16 +251,39 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
 
     try:
-        image = pokeMMO.get_current_image()
+        image_normal = pokeMMO.get_current_image_normal()
     except Exception as e:
         print(f"Failed to get image: {e}")
         exit(1)
 
     # Convert the color from BGRA to BGR and display the image
-    image_color = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+    image_color = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
 
-    cv2.imshow("Match Template", image_color)
-    cv2.waitKey()
+    # get text
+    pokeMMO.get_text_from_box_coordinate(
+        image_normal, (30, 0), (250, 25)
+    )  # city& channel
+    pokeMMO.get_text_from_box_coordinate(
+        image_normal,
+        (37, 30),
+        (130, 45),
+        config="--psm 6 -c tessedit_char_whitelist=0123456789",
+    )
+    pokeMMO.get_text_from_center(
+        image_color,
+        box_width=125,
+        box_height=25,
+        offset_x=0,
+        offset_y=104,
+    )  # Player Name and guild name
+    pokeMMO.find_items(
+        image_color,
+        pokeMMO.Pokemon_Summary_Exit_Button_color,
+    )
+    pokeMMO.check_game_status(image_normal)
+
+    # cv2.imshow("Match Template", image_color)
+    # cv2.waitKey()
 
     # Close the image window
     cv2.destroyAllWindows()
