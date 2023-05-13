@@ -1,16 +1,25 @@
+import logging
 from ctypes import WINFUNCTYPE, byref, c_ubyte, create_unicode_buffer, windll
 from ctypes.wintypes import BOOL, HWND, LPARAM, RECT
 
 import cv2
 import numpy as np
 import pytesseract
+from unidecode import unidecode
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-from unidecode import unidecode
+SRCCOPY = 0x00CC0020  # Raster operation code
 
 
 class PokeMMO:
+    """A class to interact with the PokeMMO game."""
+
     # Define necessary Windows API functions
+
     GetWindowText = windll.user32.GetWindowTextW
     GetWindowTextLength = windll.user32.GetWindowTextLengthW
     IsWindowVisible = windll.user32.IsWindowVisible
@@ -18,10 +27,8 @@ class PokeMMO:
     # Define the callback function prototype
     EnumWindowsProc = WINFUNCTYPE(BOOL, HWND, LPARAM)
 
-    window_name = None
-
-    # init
     def __init__(self):
+        """Initialize the PokeMMO class."""
         self.window_name = self.get_window_name()
         self.handle = windll.user32.FindWindowW(None, self.window_name)
 
@@ -37,7 +44,7 @@ class PokeMMO:
         self.ReleaseDC = windll.user32.ReleaseDC
 
     def capture(self):
-        # 获取窗口客户区的大小
+        """Capture a screenshot of the PokeMMO game."""
         r = RECT()
         self.GetClientRect(self.handle, byref(r))
         width, height = r.right, r.bottom
@@ -60,19 +67,19 @@ class PokeMMO:
         return np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
 
     def get_current_image(self):
+        """Get the current screenshot of the PokeMMO game."""
         return self.capture()
 
     def get_window_name(self):
-        # Create a C-compatible callback function
+        """Get the window name of the PokeMMO game."""
         callback = self.EnumWindowsProc(self.foreach_window)
 
         windll.user32.EnumWindows(callback, 0)
 
         if self.window_name is None:
-            # close this program
-            exit(0)
-        else:
-            print(f"window name: {self.window_name}")
+            raise Exception("Failed to find window name for PokeMMO")
+
+        logger.debug(f"window name: {self.window_name}")
         return self.window_name
 
     def foreach_window(self, hwnd, lParam):
@@ -96,7 +103,7 @@ class PokeMMO:
         offset_x=0,
         offset_y=0,
     ):
-        # Calculate the center of the image
+        """Draw a box on the image and get the text from the area inside the box."""
         height, width, _ = image.shape
         center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
 
@@ -147,6 +154,63 @@ class PokeMMO:
 
         # Return the text
         return text
+
+    def get_text_from_area_start_from_center(
+        self,
+        image,
+        box_width=200,
+        box_height=200,
+        offset_x=0,
+        offset_y=0,
+        config="--psm 6",
+        lang="eng",
+    ):
+        """Recognize the text in the given area from the center of the image."""
+        height, width, _ = image.shape
+        center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
+
+        # Calculate the top-left and bottom-right points of the rectangle
+        top_left = (center_x - box_width // 2, center_y - box_height // 2)
+        bottom_right = (center_x + box_width // 2, center_y + box_height // 2)
+
+        # Extract the area from the image
+        area = image[top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]]
+
+        # Convert the area to grayscale
+        gray = cv2.cvtColor(area, cv2.COLOR_BGRA2GRAY)
+
+        # Recognize the text in the area
+        text = pytesseract.image_to_string(gray, config=config, lang=lang)
+        print(f"Text: {text}")
+
+        return text
+
+    def find_items(self, template_path, threshold=0.95):
+        """Find items in the PokeMMO game by matching a template image with the game screenshot."""
+
+        # Capture the current image from the game window
+        image = self.get_current_image()
+        image_color = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+
+        # Load the template image
+        template_color = cv2.imread(template_path, cv2.IMREAD_COLOR)
+
+        # Perform template matching
+        result = cv2.matchTemplate(image_color, template_color, cv2.TM_CCORR_NORMED)
+
+        # Apply the threshold to the result
+        _, result = cv2.threshold(result, threshold, 1.0, cv2.THRESH_BINARY)
+        result = np.where(result >= threshold)
+
+        h, w = template_color.shape[:2]
+        for index, pt in enumerate(zip(*result[::-1])):
+            # Draw a rectangle on the original image
+            cv2.rectangle(image_color, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+            # print all the coordinates and values
+            print(index, pt[0], pt[1])
+
+        cv2.imshow("Match Template", image_color)
+        cv2.waitKey()
 
 
 if __name__ == "__main__":

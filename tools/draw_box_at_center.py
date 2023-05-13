@@ -45,7 +45,7 @@ if __name__ == "__main__":
         color=(0, 0, 255),
         thickness=2,
         offset_x=0,
-        offset_y=100,
+        offset_y=104,
     )
 
     # Display the image
