@@ -15,16 +15,21 @@ class GameStatus:
         self.pokeMMO = pokeMMO_instance
 
     def calculate_black_ratio(self):
-        """Calculate the ratio of black pixels in the image."""
-        image_normal = self.pokeMMO.get_most_recent_image_normal()
-        height, width, _ = image_normal.shape
+        """Calculate the ratio of black area in the image."""
+        # Get the current image
+        image_BRG = self.pokeMMO.get_most_recent_image_BRG()
 
-        total_pixels = width * height
-        black_pixels = np.sum(np.all(image_normal[:, :, :3] == [0, 0, 0], axis=2))
+        # Define the value for black pixels in RGB
+        black_value = [0, 0, 0]
 
+        # Count the number of black pixels
+        black_pixels = np.sum(np.all(image_BRG == black_value, axis=-1))
+
+        # Get the total number of pixels in the image
+        total_pixels = image_BRG.shape[0] * image_BRG.shape[1]
+
+        # Calculate and return the ratio of black pixels
         black_ratio = black_pixels / total_pixels
-        print(f"Black ratio: {black_ratio}")
-
         return black_ratio
 
     # def check_game_status(self, threshold=0.986):
