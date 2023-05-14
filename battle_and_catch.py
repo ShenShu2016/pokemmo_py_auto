@@ -1,6 +1,6 @@
 from time import sleep
 
-from py_auto import PokeMMO
+from main import PokeMMO
 
 pokeMMO = PokeMMO()
 pokeMMO.controller.move_to(589, 771)

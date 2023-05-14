@@ -42,7 +42,7 @@ class Controller:
 
 
 if __name__ == "__main__":
-    from py_auto import PokeMMO
+    from main import PokeMMO
 
     pokeMMO = PokeMMO()
 

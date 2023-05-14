@@ -1,7 +1,8 @@
 from time import sleep
 
 from keyboard_message import KeyPresser
-from py_auto import PokeMMO
+
+from main import PokeMMO
 
 pokeMMO = PokeMMO()
 

@@ -10,7 +10,7 @@ parent_directory = os.path.dirname(current_directory)
 
 # Add the parent directory to sys.path
 sys.path.append(parent_directory)
-from py_auto import PokeMMO
+from main import PokeMMO
 
 if __name__ == "__main__":
     import cv2

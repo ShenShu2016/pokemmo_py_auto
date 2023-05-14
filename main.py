@@ -10,8 +10,8 @@ import cv2
 import numpy as np
 import pytesseract
 
-from controller import Controller
-from window_manager import Window_Manager
+from utils.controller import Controller
+from utils.window_manager import Window_Manager
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
