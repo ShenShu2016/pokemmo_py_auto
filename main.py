@@ -11,6 +11,7 @@ import numpy as np
 import pytesseract
 
 from constant import target_words_dict
+from game_status import GameStatus
 from utils.controller import Controller
 from utils.window_manager import Window_Manager
 from utils.word_recognizer import Word_Recognizer
@@ -69,7 +70,7 @@ class PokeMMO:
 
         self.state_dict_lock = threading.Lock()
         self.state_dict = {}
-
+        self.game_status_checker = GameStatus(self)
         self.controller = Controller(handle=self.handle)
         self.word_recognizer = Word_Recognizer()
 
@@ -106,7 +107,7 @@ class PokeMMO:
 
     def update_game_status(self):
         while True:
-            self.game_status = self.check_game_status()
+            self.game_status = self.game_status_checker.check_game_status()
             time.sleep(1)  # wait for 3 seconds
 
     def update_state_dict(self):
@@ -298,47 +299,6 @@ class PokeMMO:
 
         return match_coordinates
 
-    def check_game_status(self, threshold=0.986):
-        face_area = self.get_box_coordinate_from_center(
-            box_width=65,
-            box_height=65,
-            offset_x=0,
-            offset_y=65,
-        )
-        face_area_l = face_area[0]
-        face_area_r = face_area[1]
-
-        templates = [
-            self.face_down_color,
-            self.face_up_color,
-            self.face_left_color,
-            self.face_right_color,
-        ]
-        template_names = [
-            "face_down_color",
-            "face_up_color",
-            "face_left_color",
-            "face_right_color",
-        ]
-
-        for template, template_name in zip(templates, template_names):
-            if self.find_items(
-                template_color=template,
-                threshold=threshold,
-                max_matches=5,
-                top_left=face_area_l,
-                bottom_right=face_area_r,
-            ):
-                # print(f"{template_name} detected.")
-                return "NORMAL"
-
-        if self.find_items(self.enemy_hp_bar_color, threshold=0.99, max_matches=10):
-            # print("Enemy HP bar detected.")
-            return "BATTLE"
-        else:
-            # print("Unknown game state.")
-            return "OTHER"
-
 
 if __name__ == "__main__":
     # Make the process DPI-aware
@@ -360,9 +320,13 @@ if __name__ == "__main__":
         box_height=25,
         offset_x=0,
         offset_y=104,
+        config="--psm 7",
     )  # Player Name and guild name
     is_match, match_ratio = pokeMMO.word_recognizer.compare_with_target(
-        my_name_ORC, target_words=target_words_dict["name_area"]
+        my_name_ORC,
+        target_words=target_words_dict["my_name_ORC"],
+        threshold=40,
+        mode="partial_ratio",
     )
     print(
         f"my_name_ORC: {my_name_ORC}, is_match: {is_match}, match_ratio: {match_ratio}"
@@ -371,7 +335,7 @@ if __name__ == "__main__":
     pokeMMO.find_items(
         template_color=pokeMMO.Pokemon_Summary_Exit_Button_color,
     )
-    pokeMMO.check_game_status()
+    pokeMMO.game_status_checker.check_game_status()
 
     # cv2.imshow("Match Template", image_color)
     # cv2.waitKey()

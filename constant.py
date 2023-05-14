@@ -1,5 +1,5 @@
 target_words_dict = {
-    "battle_option": [
+    "battle_option_ORC": [
         "FIGHT",
         "Select your attack move",
         "BAG",
@@ -9,5 +9,5 @@ target_words_dict = {
         "Run",
         "Escape from battle",
     ],
-    "name_area": ["[JNTM]Hodson"],
+    "my_name_ORC": ["[JNTM]Hodson"],
 }
