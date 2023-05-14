@@ -10,8 +10,10 @@ import cv2
 import numpy as np
 import pytesseract
 
+from constant import target_words_dict
 from utils.controller import Controller
 from utils.window_manager import Window_Manager
+from utils.word_recognizer import Word_Recognizer
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -69,6 +71,7 @@ class PokeMMO:
         self.state_dict = {}
 
         self.controller = Controller(handle=self.handle)
+        self.word_recognizer = Word_Recognizer()
 
         # Start the threads
         self.start_threads()
@@ -277,7 +280,7 @@ class PokeMMO:
             print(f"Too many matches for template: {num_matches}")
             return None
         if num_matches != 0:
-            print(f"Number of matches: {num_matches}")
+            # print(f"Number of matches: {num_matches}")
             pass
 
         h, w = template_color.shape[:2]
@@ -326,14 +329,14 @@ class PokeMMO:
                 top_left=face_area_l,
                 bottom_right=face_area_r,
             ):
-                print(f"{template_name} detected.")
+                # print(f"{template_name} detected.")
                 return "NORMAL"
 
         if self.find_items(self.enemy_hp_bar_color, threshold=0.99, max_matches=10):
-            print("Enemy HP bar detected.")
+            # print("Enemy HP bar detected.")
             return "BATTLE"
         else:
-            print("Unknown game state.")
+            # print("Unknown game state.")
             return "OTHER"
 
 
@@ -352,12 +355,19 @@ if __name__ == "__main__":
         (130, 45),
         config="--psm 6 -c tessedit_char_whitelist=0123456789",
     )
-    pokeMMO.get_text_from_center(
+    my_name_ORC = pokeMMO.get_text_from_center(
         box_width=125,
         box_height=25,
         offset_x=0,
         offset_y=104,
     )  # Player Name and guild name
+    is_match, match_ratio = pokeMMO.word_recognizer.compare_with_target(
+        my_name_ORC, target_words=target_words_dict["name_area"]
+    )
+    print(
+        f"my_name_ORC: {my_name_ORC}, is_match: {is_match}, match_ratio: {match_ratio}"
+    )
+
     pokeMMO.find_items(
         template_color=pokeMMO.Pokemon_Summary_Exit_Button_color,
     )
