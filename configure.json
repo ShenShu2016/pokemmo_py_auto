@@ -1,5 +1,6 @@
 {
     "tesseract": "C:/Program Files/Tesseract-OCR/tesseract.exe",
+    "battle_option_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\battle_option.png",
     "enemy_hp_bar_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\enemy_hp_bar.png",
     "face_down_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\face_down.png",
     "face_left_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\face_left.png",
@@ -7,5 +8,6 @@
     "face_up_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\face_up.png",
     "Pokemon_Summary_Bar_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\Pokemon_Summary_Bar.png",
     "Pokemon_Summary_Exit_Button_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\Pokemon_Summary_Exit_Button.png",
+    "shiny_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\shiny.png",
     "WeChat Screenshot_20230512204916_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\WeChat Screenshot_20230512204916.png"
 }

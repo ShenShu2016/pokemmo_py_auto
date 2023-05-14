@@ -63,6 +63,9 @@ class PokeMMO:
         self.DeleteObject = windll.gdi32.DeleteObject
         self.ReleaseDC = windll.user32.ReleaseDC
 
+        SetForegroundWindow = windll.user32.SetForegroundWindow
+        SetForegroundWindow(self.handle)
+
         self.images_normal_list_lock = threading.Lock()
         self.images_normal_list = []
 
@@ -76,7 +79,7 @@ class PokeMMO:
         self.state_dict = {}
 
         # Start the threads
-        # self.start_threads()
+        self.start_threads()
 
     def start_threads(self):
         threading.Thread(target=self.update_images_normal_list).start()
@@ -110,7 +113,7 @@ class PokeMMO:
         while True:
             if self.most_recent_image_normal is None:
                 logger.error("Failed to capture image.")
-                time.sleep(3)
+                time.sleep(1)
                 continue
             with self.most_recent_image_normal_lock:
                 image_normal_copy = self.most_recent_image_normal.copy()
@@ -287,8 +290,9 @@ class PokeMMO:
 
     def find_items(
         self,
-        image_color,
-        template_color,
+        image_color=None,
+        template_color=None,
+        image_normal=None,
         top_left=None,
         bottom_right=None,
         threshold=1,
@@ -296,7 +300,9 @@ class PokeMMO:
         display=False,
     ):
         """Find items in the PokeMMO game by matching a template image with the game screenshot."""
-        print(top_left, bottom_right)
+        # print(top_left, bottom_right)
+        if image_color is None and image_normal is not None:
+            image_color = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
         if top_left and bottom_right:
             image_color = image_color[
                 top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]
@@ -318,6 +324,7 @@ class PokeMMO:
             return None
         if num_matches != 0:
             print(f"Number of matches: {num_matches}")
+            pass
 
         h, w = template_color.shape[:2]
         match_coordinates = []
@@ -326,6 +333,7 @@ class PokeMMO:
 
         if display:
             for pt in match_coordinates:
+                print(pt)
                 # Draw a rectangle on the original image
                 cv2.rectangle(image_color, pt[:2], pt[2:], (0, 0, 255), 2)
             cv2.imshow("Match Template", image_color)
@@ -333,15 +341,15 @@ class PokeMMO:
 
         return match_coordinates
 
-    def check_game_status(self, image_normal, threshold=0.985):
+    def check_game_status(self, image_normal, threshold=0.986):
         """Check the game state based on the existence of certain images."""
         # Capture the current image from the game window
         image_color = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
         face_area = self.get_box_coordinate_from_center(
-            box_width=150,
-            box_height=150,
+            box_width=65,
+            box_height=65,
             offset_x=0,
-            offset_y=50,
+            offset_y=65,
         )
         face_area_l = face_area[0]
         face_area_r = face_area[1]
@@ -380,16 +388,63 @@ class PokeMMO:
                 bottom_right=face_area_r,
             )
         ):
-            print("Player character detected.")
+            # print("Player character detected.")
             return "NORMAL"
         elif self.find_items(
-            image_color, self.enemy_hp_bar_color, threshold=0.99, max_matches=10
+            image_color, self.enemy_hp_bar_color, threshold=0.98, max_matches=10
         ):
-            print("Enemy HP bar detected.")
+            # print("Enemy HP bar detected.")
             return "BATTLE"
         else:
-            print("Unknown game state.")
+            # print("Unknown game state.")
             return "OTHER"
+
+    def detect_and_draw_edges(
+        self,
+    ):
+        image_normal = self.get_current_image_normal()
+        # Convert the image to grayscale
+        gray = cv2.cvtColor(image_normal, cv2.COLOR_BGR2GRAY)
+
+        # Use Canny edge detection to find edges
+        edges = cv2.Canny(gray, 50, 150)
+        lines = cv2.HoughLinesP(
+            edges, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=10
+        )
+        # Create a copy of the original image to draw edges on
+        line_image = image_normal.copy()
+
+        # # Check the number of channels in the image
+        # if len(edge_image.shape) == 3:
+        #     # Color image
+        #     num_channels = edge_image.shape[2]
+        # else:
+        #     # Grayscale image
+        #     num_channels = 1
+
+        # # Draw edges
+        # if num_channels == 3:
+        #     edge_image[edges == 255] = [0, 0, 255]  # BGR image
+        # elif num_channels == 4:
+        #     edge_image[edges == 255] = [0, 0, 255, 255]  # RGBA image
+        # else:
+        #     edge_image[edges == 255] = 255  # grayscale image
+        #     # Display the image
+        # Draw lines
+        # Draw lines
+        if lines is not None:
+            for line in lines:
+                x1, y1, x2, y2 = line[0]
+
+                # calculate the slope of the line
+                if x2 - x1 == 0:  # line is vertical
+                    cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                elif y2 - y1 == 0:  # line is horizontal
+                    cv2.line(line_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+        cv2.imshow("Image with Edges", line_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
@@ -398,6 +453,7 @@ if __name__ == "__main__":
 
     # Initialize the PokeMMO class and get a screenshot
     pokeMMO = PokeMMO()
+    time.sleep(2)
 
     try:
         image_normal = pokeMMO.get_current_image_normal()
