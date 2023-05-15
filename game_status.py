@@ -41,6 +41,11 @@ class GameStatus:
 
     def determine_game_status(self):
         if (
+            "important" in self.game_status_dict
+            and self.game_status_dict["important"] == "not active"
+        ):
+            return "Not Active Game Status"
+        if (
             "check_normal" in self.game_status_dict
             and self.game_status_dict["check_normal"] > 60
         ):
@@ -68,28 +73,36 @@ class GameStatus:
     def check_game_status(self):
         timestamp = time.time()
 
-        def save_screenshot_check_status(self, timestamp):
+        def save_screenshot_check_status(timestamp):
             if time.time() - self.last_image_save_time >= 15:
                 self.last_image_save_time = time.time()
                 image = self.pokeMMO.get_most_recent_image_BRG()
                 timestamp_str = time.strftime("%Y%m%d%H%M%S", time.localtime(timestamp))
                 filename = f"screenshot\image_{timestamp_str}.png"
                 cv2.imwrite(filename, image)
-                self.recent_images.append((timestamp, filename))
-                # print(f"Saved image to {filename}")
 
                 # Compare with last image if available
-                if len(self.recent_images) > 1:
-                    _, last_filename = self.recent_images[-2]
+                if len(self.recent_images) > 0:
+                    _, last_filename, _ = self.recent_images[-1]
                     last_image = cv2.imread(last_filename, cv2.IMREAD_GRAYSCALE)
                     current_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                     result = cv2.matchTemplate(
                         last_image, current_image, cv2.TM_CCOEFF_NORMED
                     )
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                    print(f"Match ratio with last image: {max_val}")
-                    self.game_status_dict["match_ratio_with_last_image"] = max_val
-                    return {max_val}
+
+                    # Save the image, timestamp and match ratio to recent_images
+                    self.recent_images.append((timestamp, filename, max_val))
+
+                    # Check if all max_vals in recent_images are not below 0
+                    if all(
+                        image_data[2] is not None and image_data[2] >= 0
+                        for image_data in self.recent_images
+                    ):
+                        self.game_status_dict["important"] = "not active"
+                else:
+                    # For the first image, no comparison can be made, so match ratio is None
+                    self.recent_images.append((timestamp, filename, None))
 
         def check_normal():  # use name to check status
             my_name_ORC = self.pokeMMO.get_text_from_center(
@@ -147,14 +160,15 @@ class GameStatus:
 
         check_normal()
         check_battle()
-        save_screenshot_check_status(self, timestamp)
+        save_screenshot_check_status(timestamp)
 
+        print(self.game_status_dict)
+        return_status = self.determine_game_status()
+        self.game_status_dict["return_status"] = return_status
         self.recent_status_game_status_dict_list.append(
             (timestamp, self.game_status_dict)
         )
-        print(self.game_status_dict)
-        # 我需要在这里判断到底时什么情况，然后返回一个状态
-        return self.determine_game_status()
+        return return_status
 
 
 if __name__ == "__main__":
