@@ -40,6 +40,9 @@ class GameStatus:
         return black_ratio
 
     def determine_game_status(self):
+        timestamp = time.time()
+
+        # Check if the current status is "Unknown Game Status"
         if (
             "important" in self.game_status_dict
             and self.game_status_dict["important"] == "not active"
@@ -50,25 +53,32 @@ class GameStatus:
             and self.game_status_dict["check_normal"] > 60
         ):
             return "Normal Game Status"
-        elif (
-            "black_ratio" in self.game_status_dict
-            and self.game_status_dict["black_ratio"] > 0.35
+
+        # Check if the current status is "Unknown Game Status" and if there is a recent status change
+        if (
+            "return_status" in self.game_status_dict
+            and self.game_status_dict["return_status"] == "Unknown Game Status"
         ):
-            if (
-                "battle_option_ORC" in self.game_status_dict
-                and self.game_status_dict["battle_option_ORC"]
+            recent_statuses = [
+                status_dict["return_status"]
+                for _, status_dict in reversed(self.recent_status_game_status_dict_list)
+            ]
+            recent_timestamps = [
+                timestamp
+                for timestamp, _ in reversed(self.recent_status_game_status_dict_list)
+            ]
+
+            for recent_status, recent_timestamp in zip(
+                recent_statuses, recent_timestamps
             ):
                 if (
-                    "battle_option_go_back_ORC" in self.game_status_dict
-                    and self.game_status_dict["battle_option_go_back_ORC"]
+                    recent_status != "Unknown Game Status"
+                    and timestamp - recent_timestamp <= 10
                 ):
-                    return "Battle Action Choice"
-                else:
-                    return "Battle Loading"
-            else:
-                return "Unknown Game Status"
-        else:
-            return "Unknown Game Status"
+                    return recent_status
+
+        # If no recent status change found, return the current status
+        return self.game_status_dict["return_status"]
 
     def check_game_status(self):
         timestamp = time.time()
