@@ -19,7 +19,9 @@ class GameStatus:
         self.recent_status_game_status_dict_list = deque(maxlen=100)
         self.recent_images = deque(maxlen=5)
         self.last_image_save_time = 0
-        self.game_status_dict = {}
+        self.game_status_dict = {
+            "real_status": "Unknown Game Status",
+        }
 
     def calculate_black_ratio(self):
         """Calculate the ratio of black area in the image."""
@@ -42,43 +44,53 @@ class GameStatus:
     def determine_game_status(self):
         timestamp = time.time()
 
-        # Check if the current status is "Unknown Game Status"
+        # Check if the current status is "Not Active Game Status" or "Normal Game Status"
         if (
             "important" in self.game_status_dict
             and self.game_status_dict["important"] == "not active"
         ):
+            self.game_status_dict["real_status"] = "Not Active Game Status"
             return "Not Active Game Status"
         if (
             "check_normal" in self.game_status_dict
             and self.game_status_dict["check_normal"] > 60
         ):
+            self.game_status_dict["real_status"] = "Normal Game Status"
             return "Normal Game Status"
 
-        # Check if the current status is "Unknown Game Status" and if there is a recent status change
+        # Check if the current status is "Battle Game Status"
         if (
-            "return_status" in self.game_status_dict
-            and self.game_status_dict["return_status"] == "Unknown Game Status"
+            "battle_option_ORC" in self.game_status_dict
+            and self.game_status_dict["battle_option_ORC"] == True
         ):
-            recent_statuses = [
-                status_dict["return_status"]
-                for _, status_dict in reversed(self.recent_status_game_status_dict_list)
-            ]
-            recent_timestamps = [
-                timestamp
-                for timestamp, _ in reversed(self.recent_status_game_status_dict_list)
-            ]
-
-            for recent_status, recent_timestamp in zip(
-                recent_statuses, recent_timestamps
-            ):
-                if (
-                    recent_status != "Unknown Game Status"
-                    and timestamp - recent_timestamp <= 10
+            self.game_status_dict["real_status"] = "Battle Option Status"
+            return "Battle Game Status"
+        elif (
+            "battle_option_go_back_ORC" in self.game_status_dict
+            and self.game_status_dict["battle_option_go_back_ORC"] == True
+        ):
+            self.game_status_dict["real_status"] = "Battle Go Back Status"
+            return "Battle Game Status"
+        elif self.game_status_dict["black_ratio"] > 0.65:
+            self.game_status_dict["real_status"] = "Battle loading Status"
+            return "Battle loading Status"
+        else:
+            # Look like it is an Unknown Game Status
+            self.game_status_dict["real_status"] = "Unknown Game Status"
+            # If no recent status change found, return the current status
+            if len(self.recent_status_game_status_dict_list) > 0:
+                for recent_timestamp, recent_status_dict in reversed(
+                    self.recent_status_game_status_dict_list
                 ):
-                    return recent_status
+                    recent_status = recent_status_dict.get("real_status")
+                    if (
+                        recent_status != "Unknown Game Status"
+                        and timestamp - recent_timestamp <= 10
+                    ):
+                        return recent_status
 
-        # If no recent status change found, return the current status
-        return self.game_status_dict["return_status"]
+        # If no recent status change found within 10 seconds, return "Unknown Game Status"
+        return "Unknown Game Status"
 
     def check_game_status(self):
         timestamp = time.time()
@@ -100,13 +112,15 @@ class GameStatus:
                         last_image, current_image, cv2.TM_CCOEFF_NORMED
                     )
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                    self.game_status_dict["image_match_ratio"] = max_val
 
                     # Save the image, timestamp and match ratio to recent_images
                     self.recent_images.append((timestamp, filename, max_val))
 
                     # Check if all max_vals in recent_images are not below 0
                     if all(
-                        image_data[2] is not None and image_data[2] >= 0
+                        image_data[2] is not None
+                        and image_data[2] >= 0.2  #! 当所有匹配都大于0.2时，说明游戏状态没有变化
                         for image_data in self.recent_images
                     ):
                         self.game_status_dict["important"] = "not active"
@@ -119,7 +133,9 @@ class GameStatus:
                 box_width=125, box_height=25, offset_x=0, offset_y=104, config="--psm 7"
             )  # Player Name and guild name
             is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
-                my_name_ORC, target_words=target_words_dict["my_name_ORC"], threshold=60
+                my_name_ORC,
+                target_words=target_words_dict["my_name_ORC"],
+                threshold=60,  #!
             )
             # print(
             #     f"my_name_ORC: {my_name_ORC}, is_match: {is_match}, match_ratio: {match_ratio}"
@@ -173,6 +189,7 @@ class GameStatus:
         save_screenshot_check_status(timestamp)
 
         print(self.game_status_dict)
+
         return_status = self.determine_game_status()
         self.game_status_dict["return_status"] = return_status
         self.recent_status_game_status_dict_list.append(
