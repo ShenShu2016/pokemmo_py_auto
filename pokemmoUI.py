@@ -1,11 +1,16 @@
+from __future__ import annotations
+
+import os
 import tkinter as tk
 from tkinter import ttk
+from typing import TYPE_CHECKING
 
-from main import PokeMMO
+if TYPE_CHECKING:
+    from main import PokeMMO
 
 
-class PokeMMOUI:
-    def __init__(self, pokeMMO):
+class PokemmoUI:
+    def __init__(self, pokeMMO: PokeMMO):
         self.pokeMMO = pokeMMO
 
         self.root = tk.Tk()
@@ -20,7 +25,17 @@ class PokeMMOUI:
         self.state_dict_text = tk.Text(self.root, height=10, width=50)
         self.state_dict_text.pack()
 
+        self.stop_button = ttk.Button(
+            self.root, text="Stop", command=self.stop_threads_and_exit
+        )
+        self.stop_button.pack()
+
         self.update_ui()
+
+    def stop_threads_and_exit(self):
+        self.pokeMMO.stop_threads()
+        self.root.quit()  # This will close the Tkinter window
+        os._exit(0)  # This will terminate the entire Python program
 
     def update_ui(self):
         game_status = self.pokeMMO.get_game_status()
@@ -47,10 +62,12 @@ class PokeMMOUI:
 
 if __name__ == "__main__":
     # Create an instance of the PokeMMO class
+    from main import PokeMMO
+
     pokeMMO = PokeMMO()
 
     # Create an instance of the PokeMMOUI class
-    ui = PokeMMOUI(pokeMMO)
+    ui = PokemmoUI(pokeMMO)
 
     # Run the UI
     ui.run()

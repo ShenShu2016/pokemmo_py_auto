@@ -12,6 +12,7 @@ import pytesseract
 
 from constant import target_words_dict
 from game_status import GameStatus
+from pokemmoUI import PokemmoUI
 from utils.controller import Controller
 from utils.window_manager import Window_Manager
 from utils.word_recognizer import Word_Recognizer
@@ -37,7 +38,7 @@ class PokeMMO:
         for key, path in self.config.items():
             if path.endswith(".png"):
                 # Create variable name
-                var_name = key.replace("_path", "_color")
+                var_name = key.replace("_path", "_BRG")
                 # Load image and set it as instance variable
                 setattr(self, var_name, cv2.imread(path, cv2.IMREAD_COLOR))
 
@@ -73,7 +74,10 @@ class PokeMMO:
         self.game_status_checker = GameStatus(self)
         self.controller = Controller(handle=self.handle)
         self.word_recognizer = Word_Recognizer()
+        self.ui = PokemmoUI(self)
 
+        # Initialize stop flag for threads
+        self.stop_threads_flag = False
         # Start the threads
         self.start_threads()
 
@@ -82,9 +86,16 @@ class PokeMMO:
         threading.Thread(target=self.update_game_status).start()
         threading.Thread(target=self.update_state_dict).start()
 
+    def stop_threads(self):
+        self.stop_threads_flag = True
+
+    def start_ui(self):
+        """Start the user interface."""
+        self.ui.run()
+
     def update_images_BRG_list(self):  # only image will be captured
         image_count = 0
-        while True:
+        while not self.stop_threads_flag:
             with self.images_BRG_list_lock:
                 # Add the current image, timestamp, and name to the list
                 image_name = f"image_{image_count}"
@@ -106,12 +117,12 @@ class PokeMMO:
             time.sleep(0.2)  # wait for 2 seconds
 
     def update_game_status(self):
-        while True:
+        while not self.stop_threads_flag:
             self.game_status = self.game_status_checker.check_game_status()
             time.sleep(1)  # wait for 3 seconds
 
     def update_state_dict(self):
-        while True:
+        while not self.stop_threads_flag:
             # Update every 30 seconds
             time.sleep(30)
             my_address = self.get_text_from_box_coordinate((30, 0), (250, 25))
@@ -126,9 +137,9 @@ class PokeMMO:
                     "address": my_address,
                     "money": my_money,
                 }
-                print(
-                    f"Updated state_dict at {current_time}, address: {my_address}, money: {my_money}"
-                )
+                # print(
+                #     f"Updated state_dict at {current_time}, address: {my_address}, money: {my_money}"
+                # )
                 # If the dictionary size has exceeded 10, remove the oldest entry
                 if len(self.state_dict) > 10:
                     oldest_entry = min(self.state_dict.keys())
@@ -218,7 +229,7 @@ class PokeMMO:
 
         # Recognize the text in the area
         text = pytesseract.image_to_string(gray, config=config, lang=lang)
-        print(f"Text: {text}")
+        # print(f"Text: {text}")
 
         return text
 
@@ -246,7 +257,7 @@ class PokeMMO:
 
     def find_items(
         self,
-        template_color=None,
+        temp_BRG=None,
         top_left=None,
         bottom_right=None,
         threshold=1,
@@ -262,7 +273,7 @@ class PokeMMO:
             ]
 
         # Perform template matching
-        result = cv2.matchTemplate(image_BRG, template_color, cv2.TM_CCORR_NORMED)
+        result = cv2.matchTemplate(image_BRG, temp_BRG, cv2.TM_CCORR_NORMED)
 
         # Apply the threshold to the result
         _, result = cv2.threshold(result, threshold, 1.0, cv2.THRESH_BINARY)
@@ -279,7 +290,7 @@ class PokeMMO:
             # print(f"Number of matches: {num_matches}")
             pass
 
-        h, w = template_color.shape[:2]
+        h, w = temp_BRG.shape[:2]
         match_coordinates = []
         for index, pt in enumerate(zip(*result[::-1])):
             match_coordinates.append((pt[0], pt[1], pt[0] + w, pt[1] + h))
@@ -301,6 +312,7 @@ if __name__ == "__main__":
 
     # Initialize the PokeMMO class and get a screenshot
     pokeMMO = PokeMMO()
+    pokeMMO.start_ui()
 
     my_address = pokeMMO.get_text_from_box_coordinate(
         (30, 0), (250, 25)
@@ -328,7 +340,7 @@ if __name__ == "__main__":
     )
 
     pokeMMO.find_items(
-        template_color=pokeMMO.Pokemon_Summary_Exit_Button_color,
+        temp_BRG=pokeMMO.Pokemon_Summary_Exit_Button_BRG,
     )
     pokeMMO.game_status_checker.check_game_status()
 

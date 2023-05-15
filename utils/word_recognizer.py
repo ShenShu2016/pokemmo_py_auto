@@ -24,8 +24,8 @@ class Word_Recognizer:
 
         target_text = " ".join(target_words)
 
-        print("recognized_text", recognized_text)
-        print("target_text", target_text)
+        # print("recognized_text", recognized_text)
+        # print("target_text", target_text)
 
         ratio_function = self.ratio_functions[mode]
         match_ratio = ratio_function(recognized_text, target_text)
@@ -41,8 +41,8 @@ class Word_Recognizer:
 
         target_text = " ".join(target_words)
 
-        print("recognized_text", recognized_text)
-        print("target_text", target_text)
+        # print("recognized_text", recognized_text)
+        # print("target_text", target_text)
 
         match_results = {}
         for mode, ratio_function in self.ratio_functions.items():

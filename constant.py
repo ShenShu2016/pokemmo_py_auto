@@ -10,4 +10,5 @@ target_words_dict = {
         "Escape from battle",
     ],
     "my_name_ORC": ["[JNTM]Hodson"],
+    "battle_option_go_back_ORC": ["GO BACK"],
 }

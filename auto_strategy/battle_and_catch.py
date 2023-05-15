@@ -1,7 +1,13 @@
+from __future__ import annotations
+
 from time import sleep
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from main import PokeMMO
 
 
-def battle_and_catch(pokeMMO):
+def battle_and_catch(pokeMMO: PokeMMO):
     stage = "walking"
     while True:
         sleep(1)
