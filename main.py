@@ -12,9 +12,9 @@ import pytesseract
 from constant import target_words_dict
 from game_status import GameStatus
 from pokemmoUI import PokemmoUI
-from utils.controller import Controller
-from utils.window_manager import Window_Manager
-from utils.word_recognizer import Word_Recognizer
+from utils.main.controller import Controller
+from utils.main.window_manager import Window_Manager
+from utils.main.word_recognizer import Word_Recognizer
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
