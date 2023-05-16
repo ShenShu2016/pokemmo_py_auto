@@ -149,7 +149,7 @@ class GameStatus:
 
     def check_battle_option(self):
         battle_option_x_y = (214, 482), (627, 583)
-        battle_option_ORC = self.pokeMMO.get_text_from_box_coordinate(
+        battle_option_ORC = self.pokeMMO.get_text_from_box_coords(
             battle_option_x_y[0], battle_option_x_y[1]
         )
         is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
@@ -160,7 +160,7 @@ class GameStatus:
 
     def check_battle_go_back(self):
         battle_option_go_back_x_y = (1080, 558), (1142, 575)
-        battle_option_go_back_ORC = self.pokeMMO.get_text_from_box_coordinate(
+        battle_option_go_back_ORC = self.pokeMMO.get_text_from_box_coords(
             battle_option_go_back_x_y[0], battle_option_go_back_x_y[1]
         )
         is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(

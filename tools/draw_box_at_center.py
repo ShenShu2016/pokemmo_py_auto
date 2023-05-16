@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # start_point, end_point = pokeMMO.draw_custom_box(
     #     image_color, box_width=125, box_height=25, offset_x=0, offset_y=100
     # )
-    # Draw a custom box and get the coordinates of the corners
+    # Draw a custom box and get the hp_coords of the corners
     # print(f"Top-left corner: {start_point}")
     # print(f"Bottom-right corner: {end_point}")
     pokeMMO.draw_box_and_get_text(

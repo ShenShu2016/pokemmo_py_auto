@@ -60,8 +60,8 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
 
     while True:
-        result = pokeMMO.get_text_from_box_coordinate((214, 482), (627, 583))
-        print("get_text_from_box_coordinate", result)
+        result = pokeMMO.get_text_from_box_coords((214, 482), (627, 583))
+        print("get_text_from_box_coords", result)
         # remove '\n'
         is_match, match_ratio = pokeMMO.word_recognizer.compare_with_target(
             result, target_words_dict["battle_option"]
@@ -70,8 +70,8 @@ if __name__ == "__main__":
         sleep(10)
 
     while True:
-        # result = pokeMMO.get_text_from_box_coordinate((214, 482), (627, 583))
-        # print("get_text_from_box_coordinate", result)
+        # result = pokeMMO.get_text_from_box_coords((214, 482), (627, 583))
+        # print("get_text_from_box_coords", result)
         # # remove '\n'
         # is_match, match_ratio = pokeMMO.word_recognizer.compare_with_target(
         #     result, target_words_dict["battle_option"]

@@ -127,8 +127,8 @@ class PokeMMO:
         while not self.stop_threads_flag:
             # Update every 30 seconds
             time.sleep(30)
-            my_address = self.get_text_from_box_coordinate((30, 0), (250, 25))
-            my_money = self.get_text_from_box_coordinate(
+            my_address = self.get_text_from_box_coords((30, 0), (250, 25))
+            my_money = self.get_text_from_box_coords(
                 (37, 30),
                 (130, 45),
                 config="--psm 6 -c tessedit_char_whitelist=0123456789",
@@ -170,14 +170,14 @@ class PokeMMO:
         self,
         box_width=200,
         box_height=200,
-        thickness=2,
         offset_x=0,
         offset_y=0,
         display=False,
+        img_BRG=None,
     ):
-        color = ((0, 0, 255),)
         """Draw a box on the image and get the text from the area inside the box."""
-        img_BRG = self.get_latest_img_BRG()
+        if img_BRG is None:
+            img_BRG = self.get_latest_img_BRG()
         height, width, _ = img_BRG.shape
         center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
 
@@ -187,16 +187,14 @@ class PokeMMO:
 
         # Draw the rectangle on the image
         if display:
-            cv2.rectangle(img_BRG, top_l, bottom_r, color, thickness)
+            cv2.rectangle(img_BRG, top_l, bottom_r, color=((0, 0, 255),), thickness=2)
             cv2.imshow("Match Template", img_BRG)
             cv2.waitKey()
 
         # Return the coordinates of the top-left and bottom-right corners
         return top_l, bottom_r
 
-    def get_text_from_box_coordinate(
-        self, top_l, bottom_r, config="--psm 6", lang="eng"
-    ):
+    def get_text_from_box_coords(self, top_l, bottom_r, config="--psm 6", lang="eng"):
         img_BRG = self.get_latest_img_BRG()
         # Extract the area from the image
         area = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
@@ -214,7 +212,6 @@ class PokeMMO:
         self,
         box_width=200,
         box_height=200,
-        thickness=2,
         offset_x=0,
         offset_y=0,
         config="--psm 6",
@@ -222,11 +219,11 @@ class PokeMMO:
     ):
         # Draw the box and get its coordinates
         top_l, bottom_r = self.get_box_coordinate_from_center(
-            box_width, box_height, thickness, offset_x, offset_y
+            box_width, box_height, offset_x, offset_y
         )
 
         # Get the text from the area inside the box
-        text = self.get_text_from_box_coordinate(top_l, bottom_r, config, lang)
+        text = self.get_text_from_box_coords(top_l, bottom_r, config, lang)
 
         # Return the text
         return text
@@ -239,10 +236,12 @@ class PokeMMO:
         threshold=1,
         max_matches=10,
         display=False,
+        img_BRG=None,
     ):
         """Find items in the PokeMMO game by matching a template image with the game screenshot."""
         # print(top_l, bottom_r)
-        img_BRG = self.get_latest_img_BRG()
+        if img_BRG is None:
+            img_BRG = self.get_latest_img_BRG()
         if top_l and bottom_r:
             img_BRG = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
 
@@ -265,22 +264,23 @@ class PokeMMO:
             pass
 
         h, w = temp_BRG.shape[:2]
-        match_coordinates = []
+        match_coords = []
         for index, pt in enumerate(zip(*result[::-1])):
-            match_coordinates.append((pt[0], pt[1], pt[0] + w, pt[1] + h))
+            match_coords.append((pt[0], pt[1], pt[0] + w, pt[1] + h))
 
         if display:
-            for pt in match_coordinates:
+            for pt in match_coords:
                 print(pt)
                 # Draw a rectangle on the original image
                 cv2.rectangle(img_BRG, pt[:2], pt[2:], (0, 0, 255), 2)
             cv2.imshow("Match Template", img_BRG)
             cv2.waitKey()
 
-        return match_coordinates
+        return match_coords
 
-    def get_hp_pct(self, top_l, bottom_r):
-        img_BRG = self.get_latest_img_BRG()
+    def get_hp_pct(self, top_l, bottom_r, img_BRG=None):
+        if img_BRG is None:
+            img_BRG = self.get_latest_img_BRG()
         hp_image = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
         total_hp_length = bottom_r[0] - top_l[0]
 
@@ -302,10 +302,8 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
     pokeMMO.start_ui()
 
-    my_address = pokeMMO.get_text_from_box_coordinate(
-        (30, 0), (250, 25)
-    )  # city& channel
-    my_money = pokeMMO.get_text_from_box_coordinate(
+    my_address = pokeMMO.get_text_from_box_coords((30, 0), (250, 25))  # city& channel
+    my_money = pokeMMO.get_text_from_box_coords(
         (37, 30),
         (130, 45),
         config="--psm 6 -c tessedit_char_whitelist=0123456789",
