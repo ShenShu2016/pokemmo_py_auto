@@ -23,9 +23,6 @@ class GameStatus:
         self.game_status_dict = {
             "real_status": 0,  # Unknown Game Status
         }
-        self.enemy_status_dict = {
-            "enemy_count": 0,
-        }
 
     def calculate_black_ratio(self):
         """Calculate the ratio of black area in the image."""
@@ -63,27 +60,27 @@ class GameStatus:
         return self.check_recent_status_or_return_unknown()
 
     def check_not_active_status(self):
-        if self.game_status_dict.get("important") == "not active":
-            return self.set_and_return_status(1)  # Not Active Game Status
+        if self.game_status_dict.get("important") == 404:
+            return self.set_and_return_status(404)  # Not Active Game Status
 
     def check_normal_status(self):
         if self.game_status_dict.get("check_normal")[0]:
-            return self.set_and_return_status(2)  # Normal Game Status
+            return self.set_and_return_status(1)  # Normal Game Status
 
     def check_battle_option_status(self):
         if self.game_status_dict.get("battle_option_ORC") == True:
-            return self.set_and_return_status(3)  # Battle Option Status
+            return self.set_and_return_status(21)  # Battle Option Status
 
     def check_battle_go_back_status(self):
         if self.game_status_dict.get("battle_option_go_back_ORC") == True:
-            return self.set_and_return_status(4)  # Battle Go Back Status
+            return self.set_and_return_status(22)  # Battle Go Back Status
 
     def check_battle_loading_status(self):
         if (
             self.game_status_dict.get("black_ratio") is not None
             and self.game_status_dict.get("black_ratio") > 0.65
         ):
-            return self.set_and_return_status(5)  # Battle Loading Status
+            return self.set_and_return_status(20)  # Battle Loading Status
 
     def set_and_return_status(self, status):
         self.game_status_dict["real_status"] = status
@@ -127,7 +124,7 @@ class GameStatus:
                     image_data[2] is not None and image_data[2] >= 0.2
                     for image_data in self.recent_images
                 ):
-                    self.game_status_dict["important"] = "not active"
+                    self.game_status_dict["important"] = "404"
             else:
                 self.recent_images.append((time.time(), filename, None))
 
@@ -187,62 +184,7 @@ class GameStatus:
             <= hp_coords[1][1] + tolerance
         )
 
-    def check_enemy(self):
-        current_time = time.time()
-        if self.game_status_dict["return_status"] == 2:
-            self.enemy_status_dict["enemy_count"] = 0
-            return
-        if (self.game_status_dict["return_status"] in [3, 4, 5]) and (
-            self.enemy_status_dict["enemy_count"] == 0
-        ):
-            hp_BRG_x_y_list = self.pokeMMO.find_items(
-                temp_BRG=self.pokeMMO.hp_BRG,
-                threshold=0.99,
-                max_matches=5,
-                top_left=(0, 70),
-                bottom_right=(1080, 170),
-            )
-            print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
-            if not hp_BRG_x_y_list:
-                self.enemy_status_dict["enemy_count"] = 0
-                print("No HP bars found.")
-                return
-
-            enemy_hp_coords = [
-                [(329, 97), (346, 110)],
-                [(589, 97), (606, 110)],
-                [(849, 97), (866, 110)],
-                [(329, 137), (345, 150)],
-                [(849, 137), (865, 150)],
-            ]
-            special_cases = [
-                {"coords": [(254, 78), (268, 89)], "enemy_count": 1},
-                {"coords": [(329, 137), (345, 150)], "enemy_count": 5},
-                {"coords": [(849, 137), (865, 150)], "enemy_count": 5},
-            ]
-            tolerance = 10
-            enemy_count = 0
-
-            for special_case in special_cases:
-                for found_hp in hp_BRG_x_y_list:
-                    if self.match_coords(special_case["coords"], tolerance, found_hp):
-                        self.enemy_status_dict["enemy_count"] = special_case[
-                            "enemy_count"
-                        ]
-                        return
-
-            for enemy_hp in enemy_hp_coords:
-                for found_hp in hp_BRG_x_y_list:
-                    if self.match_coords(enemy_hp, tolerance, found_hp):
-                        enemy_count += 1
-
-            if enemy_count in [1, 3, 5]:
-                self.enemy_status_dict["enemy_count"] = enemy_count
-            else:
-                self.enemy_status_dict["enemy_count"] = 0
-        print("enemy_count:", self.enemy_status_dict["enemy_count"])
-
-    def check_game_status(self):
+    def check_game_status(self) -> int:
         current_time = time.time()
         self.game_status_dict = {
             "real_status": 0,  # Unknown Game Status
@@ -255,36 +197,16 @@ class GameStatus:
 
         return_status = self.determine_game_status()
         self.game_status_dict["return_status"] = return_status
-        self.check_enemy()
-        self.check_enemy_status()
         self.recent_status_game_status_dict_list.append(
             (current_time, copy.deepcopy(self.game_status_dict))
         )
         # print the using time
         print("run time", time.time() - current_time)
-        print(self.game_status_dict, end=" ")
-        print(self.enemy_status_dict)
+        print(self.game_status_dict)
         return return_status
-
-    def check_enemy_status(self):
-        if (
-            self.game_status_dict.get("battle_option_ORC") == True
-            and self.enemy_status_dict["enemy_count"] == 1
-        ):
-            print("check_enemy_status")
-            enemy_hp_bar_1_x_y = (274, 151), (471, 155)
-            hp_percentage = self.pokeMMO.get_hp_percentage(
-                enemy_hp_bar_1_x_y[0], enemy_hp_bar_1_x_y[1]
-            )
-            print("enemy_1_hp_percentage", hp_percentage)
-            self.enemy_status_dict["enemy_1_hp_percentage"] = hp_percentage
-            return
 
 
 if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-    game_status = GameStatus(pokeMMO_instance=pokeMMO)
-    black_ratio = game_status.calculate_black_ratio()
-    print("calculate_black_ratio", black_ratio)

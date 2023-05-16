@@ -10,6 +10,7 @@ import numpy as np
 import pytesseract
 
 from constant import target_words_dict
+from enemy_status import EnemyStatus
 from game_status import GameStatus
 from pokemmoUI import PokemmoUI
 from utils.main.controller import Controller
@@ -56,11 +57,17 @@ class PokeMMO:
         self.most_recent_image_BRG = self.window_manager.get_current_image_BRG()
 
         self.game_status_lock = threading.Lock()
-        self.game_status = None
+        self.game_status = 0
+
+        self.enemy_status_lock = threading.Lock()
+        self.enemy_status = {}
 
         self.state_dict_lock = threading.Lock()
         self.state_dict = {}
+
         self.game_status_checker = GameStatus(self)
+        self.enemy_status_checker = EnemyStatus(self)
+
         self.controller = Controller(handle=self.handle)
         self.word_recognizer = Word_Recognizer()
         self.ui = PokemmoUI(self)
@@ -74,6 +81,7 @@ class PokeMMO:
         threading.Thread(target=self.update_images_BRG_list).start()
         threading.Thread(target=self.update_game_status).start()
         threading.Thread(target=self.update_state_dict).start()
+        threading.Thread(target=self.update_enemy_status).start()
 
     def stop_threads(self):
         self.stop_threads_flag = True
@@ -109,6 +117,11 @@ class PokeMMO:
         while not self.stop_threads_flag:
             self.game_status = self.game_status_checker.check_game_status()
             time.sleep(1)  # wait for 3 seconds
+
+    def update_enemy_status(self):
+        while not self.stop_threads_flag:
+            self.enemy_status = self.enemy_status_checker.check_enemy_status()
+            time.sleep(1)
 
     def update_state_dict(self):
         while not self.stop_threads_flag:

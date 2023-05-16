@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import ttk
 from typing import TYPE_CHECKING
 
+from constant import game_status_dict
+
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -41,11 +43,13 @@ class PokemmoUI:
         game_status = self.pokeMMO.get_game_status()
         state_dict = self.pokeMMO.get_state_dict()
 
-        self.status_label.configure(text=f"Game Status: {game_status}")
+        self.status_label.configure(
+            text=f"Game Status: {game_status_dict[game_status]}"
+        )
         self.state_dict_text.delete(1.0, tk.END)
         self.state_dict_text.insert(tk.END, self.format_state_dict(state_dict))
 
-        self.root.after(1000, self.update_ui)
+        self.root.after(500, self.update_ui)
 
     def format_state_dict(self, state_dict):
         formatted_text = ""
