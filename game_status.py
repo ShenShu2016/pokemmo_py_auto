@@ -21,7 +21,7 @@ class GameStatus:
         self.recent_images = deque(maxlen=5)
         self.last_image_save_time = 0
         self.game_status_dict = {
-            "real_status": "Unknown Game Status",
+            "real_status": 0,  # Unknown Game Status
         }
         self.enemy_status_dict = {
             "enemy_count": 0,
@@ -64,26 +64,26 @@ class GameStatus:
 
     def check_not_active_status(self):
         if self.game_status_dict.get("important") == "not active":
-            return self.set_and_return_status(("not_active," "Not Active Game Status"))
+            return self.set_and_return_status(1)  # Not Active Game Status
 
     def check_normal_status(self):
         if self.game_status_dict.get("check_normal")[0]:
-            return self.set_and_return_status(("normal", "Normal Game Status"))
+            return self.set_and_return_status(2)  # Normal Game Status
 
     def check_battle_option_status(self):
         if self.game_status_dict.get("battle_option_ORC") == True:
-            return self.set_and_return_status(("battle", "Battle Option Status"))
+            return self.set_and_return_status(3)  # Battle Option Status
 
     def check_battle_go_back_status(self):
         if self.game_status_dict.get("battle_option_go_back_ORC") == True:
-            return self.set_and_return_status(("battle", "Battle Go Back Status"))
+            return self.set_and_return_status(4)  # Battle Go Back Status
 
     def check_battle_loading_status(self):
         if (
             self.game_status_dict.get("black_ratio") is not None
             and self.game_status_dict.get("black_ratio") > 0.65
         ):
-            return self.set_and_return_status(("battle", "Battle Loading Status"))
+            return self.set_and_return_status(5)  # Battle Loading Status
 
     def set_and_return_status(self, status):
         self.game_status_dict["real_status"] = status
@@ -91,17 +91,17 @@ class GameStatus:
 
     def check_recent_status_or_return_unknown(self):
         timestamp = time.time()
-        self.game_status_dict["real_status"] = ("unknown", "Unknown Game Status")
+        self.game_status_dict["real_status"] = 0  # Unknown Game Status
 
         if self.recent_status_game_status_dict_list:
             for recent_timestamp, recent_status_dict in reversed(
                 self.recent_status_game_status_dict_list
             ):
                 recent_status = recent_status_dict.get("real_status")
-                if recent_status[0] != "unknown" and timestamp - recent_timestamp <= 10:
+                if recent_status != 0 and timestamp - recent_timestamp <= 10:
                     return recent_status
 
-        return ("unknown", "Unknown Game Status")
+        return 0  # Unknown Game Status
 
     def save_screenshot_check_status(self):
         if time.time() - self.last_image_save_time >= 15:
@@ -173,13 +173,26 @@ class GameStatus:
         self.game_status_dict["battle_option_go_back_ORC"] = is_match
         return is_match
 
+    def match_coords(self, hp_coords, tolerance, found_hp):
+        return (
+            hp_coords[0][0] - tolerance <= found_hp[0] <= hp_coords[0][0] + tolerance
+            and hp_coords[0][1] - tolerance
+            <= found_hp[1]
+            <= hp_coords[0][1] + tolerance
+            and hp_coords[1][0] - tolerance
+            <= found_hp[2]
+            <= hp_coords[1][0] + tolerance
+            and hp_coords[1][1] - tolerance
+            <= found_hp[3]
+            <= hp_coords[1][1] + tolerance
+        )
+
     def check_enemy(self):
         current_time = time.time()
-        # 情况1：战斗开始，敌人数量未知 多次，直到得到敌人数量
-        if self.game_status_dict["return_status"][0] == "normal":
+        if self.game_status_dict["return_status"] == 2:
             self.enemy_status_dict["enemy_count"] = 0
             return
-        if (self.game_status_dict["return_status"][0] == "battle") and (
+        if (self.game_status_dict["return_status"] in [3, 4, 5]) and (
             self.enemy_status_dict["enemy_count"] == 0
         ):
             hp_BRG_x_y_list = self.pokeMMO.find_items(
@@ -195,72 +208,36 @@ class GameStatus:
                 print("No HP bars found.")
                 return
 
-            # Coordinates for enemy HP bars
             enemy_hp_coords = [
-                [(329, 97), (346, 110)],  # 1st enemy
-                [(589, 97), (606, 110)],  # 2nd enemy
-                [(849, 97), (866, 110)],  # 3rd enemy
-                [(329, 137), (345, 150)],  # 4th enemy
-                [(849, 137), (865, 150)],  # 5th enemy
+                [(329, 97), (346, 110)],
+                [(589, 97), (606, 110)],
+                [(849, 97), (866, 110)],
+                [(329, 137), (345, 150)],
+                [(849, 137), (865, 150)],
             ]
-
-            # Special cases
             special_cases = [
                 {"coords": [(254, 78), (268, 89)], "enemy_count": 1},
                 {"coords": [(329, 137), (345, 150)], "enemy_count": 5},
                 {"coords": [(849, 137), (865, 150)], "enemy_count": 5},
             ]
-
-            tolerance = 10  # Define a suitable tolerance value
+            tolerance = 10
             enemy_count = 0
 
             for special_case in special_cases:
                 for found_hp in hp_BRG_x_y_list:
-                    if (
-                        special_case["coords"][0][0] - tolerance
-                        <= found_hp[0]
-                        <= special_case["coords"][0][0] + tolerance
-                        and special_case["coords"][0][1] - tolerance
-                        <= found_hp[1]
-                        <= special_case["coords"][0][1] + tolerance
-                        and special_case["coords"][1][0] - tolerance
-                        <= found_hp[2]
-                        <= special_case["coords"][1][0] + tolerance
-                        and special_case["coords"][1][1] - tolerance
-                        <= found_hp[3]
-                        <= special_case["coords"][1][1] + tolerance
-                    ):
+                    if self.match_coords(special_case["coords"], tolerance, found_hp):
                         self.enemy_status_dict["enemy_count"] = special_case[
                             "enemy_count"
                         ]
-                        return  # Exit the function if a special case has been found
+                        return
 
             for enemy_hp in enemy_hp_coords:
                 for found_hp in hp_BRG_x_y_list:
-                    # Check if the found HP bar is close enough to the expected coordinates
-                    if (
-                        enemy_hp[0][0] - tolerance
-                        <= found_hp[0]
-                        <= enemy_hp[0][0] + tolerance
-                        and enemy_hp[0][1] - tolerance
-                        <= found_hp[1]
-                        <= enemy_hp[0][1] + tolerance
-                        and enemy_hp[1][0] - tolerance
-                        <= found_hp[2]
-                        <= enemy_hp[1][0] + tolerance
-                        and enemy_hp[1][1] - tolerance
-                        <= found_hp[3]
-                        <= enemy_hp[1][1] + tolerance
-                    ):
+                    if self.match_coords(enemy_hp, tolerance, found_hp):
                         enemy_count += 1
 
-            # Update the game_status_dict with the number of enemies
-            if enemy_count == 1:
-                self.enemy_status_dict["enemy_count"] = 1
-            elif enemy_count == 3:
-                self.enemy_status_dict["enemy_count"] = 3
-            elif enemy_count == 5:
-                self.enemy_status_dict["enemy_count"] = 5
+            if enemy_count in [1, 3, 5]:
+                self.enemy_status_dict["enemy_count"] = enemy_count
             else:
                 self.enemy_status_dict["enemy_count"] = 0
         print("enemy_count:", self.enemy_status_dict["enemy_count"])
@@ -268,7 +245,7 @@ class GameStatus:
     def check_game_status(self):
         current_time = time.time()
         self.game_status_dict = {
-            "real_status": ("unknown", "Unknown Game Status"),
+            "real_status": 0,  # Unknown Game Status
         }
 
         if not self.check_normal():
