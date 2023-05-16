@@ -326,37 +326,4 @@ if __name__ == "__main__":
     # Initialize the PokeMMO class and get a screenshot
     pokeMMO = PokeMMO()
     pokeMMO.start_ui()
-
-    my_address = pokeMMO.get_text_from_box_coords((30, 0), (250, 25))  # city& channel
-    my_money = pokeMMO.get_text_from_box_coords(
-        (37, 30),
-        (130, 45),
-        config="--psm 6 -c tessedit_char_whitelist=0123456789",
-    )
-    my_name_ORC = pokeMMO.get_text_from_center(
-        box_width=125,
-        box_height=25,
-        offset_x=0,
-        offset_y=104,
-        config="--psm 7",
-    )  # Player Name and guild name
-    is_match, match_ratio = pokeMMO.word_recognizer.compare_with_target(
-        my_name_ORC,
-        target_words=target_words_dict["my_name_ORC"],
-        threshold=40,
-        mode="partial_ratio",
-    )
-    print(
-        f"my_name_ORC: {my_name_ORC}, is_match: {is_match}, match_ratio: {match_ratio}"
-    )
-
-    pokeMMO.find_items(
-        temp_BRG=pokeMMO.Pokemon_Summary_Exit_Button_BRG,
-    )
-    pokeMMO.game_status_checker.check_game_status()
-
-    # cv2.imshow("Match Template", img_BRG)
-    # cv2.waitKey()
-
-    # Close the image window
     cv2.destroyAllWindows()

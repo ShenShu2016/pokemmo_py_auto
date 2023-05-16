@@ -25,12 +25,53 @@ class GameStatus:
         }
 
     def determine_game_status(self):
+        def check_not_active_status():
+            if self.game_status_dict.get("important") == 404:
+                return set_and_return_status(404)  # Not Active Game Status
+
+        def check_normal_status():
+            if self.game_status_dict.get("check_normal")[0]:
+                return set_and_return_status(1)  # Normal Game Status
+
+        def check_battle_option_status():
+            if self.game_status_dict.get("battle_option_ORC") == True:
+                return set_and_return_status(21)  # Battle Option Status
+
+        def check_battle_go_back_status():
+            if self.game_status_dict.get("battle_option_go_back_ORC") == True:
+                return set_and_return_status(22)  # Battle Go Back Status
+
+        def check_battle_loading_status():
+            if (
+                self.game_status_dict.get("black_ratio") is not None
+                and self.game_status_dict.get("black_ratio") > 0.65
+            ):
+                return set_and_return_status(20)  # Battle Loading Status
+
+        def set_and_return_status(status):
+            self.game_status_dict["real_status"] = status
+            return status
+
+        def check_recent_status_or_return_unknown():
+            timestamp = time.time()
+            self.game_status_dict["real_status"] = 0  # Unknown Game Status
+
+            if self.recent_status_game_status_dict_list:
+                for recent_timestamp, recent_status_dict in reversed(
+                    self.recent_status_game_status_dict_list
+                ):
+                    recent_status = recent_status_dict.get("real_status")
+                    if recent_status != 0 and timestamp - recent_timestamp <= 10:
+                        return recent_status
+
+            return 0  # Unknown Game Status
+
         status_check_funcs = [
-            self.check_not_active_status,
-            self.check_normal_status,
-            self.check_battle_option_status,
-            self.check_battle_go_back_status,
-            self.check_battle_loading_status,
+            check_not_active_status,
+            check_normal_status,
+            check_battle_option_status,
+            check_battle_go_back_status,
+            check_battle_loading_status,
         ]
 
         for check_func in status_check_funcs:
@@ -38,50 +79,9 @@ class GameStatus:
             if status:
                 return status
 
-        return self.check_recent_status_or_return_unknown()
+        return check_recent_status_or_return_unknown()
 
-    def check_not_active_status(self):
-        if self.game_status_dict.get("important") == 404:
-            return self.set_and_return_status(404)  # Not Active Game Status
-
-    def check_normal_status(self):
-        if self.game_status_dict.get("check_normal")[0]:
-            return self.set_and_return_status(1)  # Normal Game Status
-
-    def check_battle_option_status(self):
-        if self.game_status_dict.get("battle_option_ORC") == True:
-            return self.set_and_return_status(21)  # Battle Option Status
-
-    def check_battle_go_back_status(self):
-        if self.game_status_dict.get("battle_option_go_back_ORC") == True:
-            return self.set_and_return_status(22)  # Battle Go Back Status
-
-    def check_battle_loading_status(self):
-        if (
-            self.game_status_dict.get("black_ratio") is not None
-            and self.game_status_dict.get("black_ratio") > 0.65
-        ):
-            return self.set_and_return_status(20)  # Battle Loading Status
-
-    def set_and_return_status(self, status):
-        self.game_status_dict["real_status"] = status
-        return status
-
-    def check_recent_status_or_return_unknown(self):
-        timestamp = time.time()
-        self.game_status_dict["real_status"] = 0  # Unknown Game Status
-
-        if self.recent_status_game_status_dict_list:
-            for recent_timestamp, recent_status_dict in reversed(
-                self.recent_status_game_status_dict_list
-            ):
-                recent_status = recent_status_dict.get("real_status")
-                if recent_status != 0 and timestamp - recent_timestamp <= 10:
-                    return recent_status
-
-        return 0  # Unknown Game Status
-
-    def save_screenshot_check_status(self):
+    def save_screenshot_check_status(self):  #! later need to be multi-thread
         if time.time() - self.last_image_save_time >= 15:
             print("Saving screenshot")
             self.last_image_save_time = time.time()
@@ -125,51 +125,37 @@ class GameStatus:
         return is_match
 
     def check_battle(self):
+        def check_battle_option():
+            battle_option_x_y = (229, 507), (399, 522)  # select your attack move
+            battle_option_ORC = self.pokeMMO.get_text_from_box_coords(
+                battle_option_x_y[0], battle_option_x_y[1], img_BRG=self.img_BRG
+            )
+            is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
+                battle_option_ORC, target_words_dict["battle_option_ORC"]
+            )
+            self.game_status_dict["battle_option_ORC"] = is_match
+            return is_match
+
+        def check_battle_go_back():
+            battle_option_go_back_x_y = (1080, 558), (1142, 575)
+            battle_option_go_back_ORC = self.pokeMMO.get_text_from_box_coords(
+                battle_option_go_back_x_y[0],
+                battle_option_go_back_x_y[1],
+                config="--psm 7",
+                img_BRG=self.img_BRG,
+            )
+            is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
+                battle_option_go_back_ORC,
+                target_words_dict["battle_option_go_back_ORC"],
+            )
+            self.game_status_dict["battle_option_go_back_ORC"] = is_match
+            return is_match
+
         black_ratio = self.pokeMMO.calculate_black_ratio(img_BRG=self.img_BRG)
         self.game_status_dict["black_ratio"] = black_ratio
         if black_ratio > 0.35:
-            if not self.check_battle_option():
-                self.check_battle_go_back()
-
-    def check_battle_option(self):
-        battle_option_x_y = (229, 507), (399, 522)  # select your attack move
-        battle_option_ORC = self.pokeMMO.get_text_from_box_coords(
-            battle_option_x_y[0], battle_option_x_y[1], img_BRG=self.img_BRG
-        )
-        is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
-            battle_option_ORC, target_words_dict["battle_option_ORC"]
-        )
-        self.game_status_dict["battle_option_ORC"] = is_match
-        return is_match
-
-    def check_battle_go_back(self):
-        battle_option_go_back_x_y = (1080, 558), (1142, 575)
-        battle_option_go_back_ORC = self.pokeMMO.get_text_from_box_coords(
-            battle_option_go_back_x_y[0],
-            battle_option_go_back_x_y[1],
-            config="--psm 7",
-            img_BRG=self.img_BRG,
-        )
-        is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
-            battle_option_go_back_ORC,
-            target_words_dict["battle_option_go_back_ORC"],
-        )
-        self.game_status_dict["battle_option_go_back_ORC"] = is_match
-        return is_match
-
-    def match_coords(self, hp_coords, tolerance, found_hp):
-        return (
-            hp_coords[0][0] - tolerance <= found_hp[0] <= hp_coords[0][0] + tolerance
-            and hp_coords[0][1] - tolerance
-            <= found_hp[1]
-            <= hp_coords[0][1] + tolerance
-            and hp_coords[1][0] - tolerance
-            <= found_hp[2]
-            <= hp_coords[1][0] + tolerance
-            and hp_coords[1][1] - tolerance
-            <= found_hp[3]
-            <= hp_coords[1][1] + tolerance
-        )
+            if not check_battle_option():
+                check_battle_go_back()
 
     def check_game_status(self) -> int:
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
