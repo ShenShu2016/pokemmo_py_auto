@@ -50,11 +50,11 @@ class PokeMMO:
         SetForegroundWindow = windll.user32.SetForegroundWindow
         SetForegroundWindow(self.handle)
 
-        self.images_BRG_list_lock = threading.Lock()
-        self.images_BRG_list = []
+        self.imgs_BRG_list_lock = threading.Lock()
+        self.imgs_BRG_list = []
 
-        self.most_recent_image_BRG_lock = threading.Lock()
-        self.most_recent_image_BRG = self.window_manager.get_current_image_BRG()
+        self.latest_img_BRG_lock = threading.Lock()
+        self.latest_img_BRG = self.window_manager.get_current_img_BRG()
 
         self.game_status_lock = threading.Lock()
         self.game_status = 0
@@ -78,7 +78,7 @@ class PokeMMO:
         self.start_threads()
 
     def start_threads(self):
-        threading.Thread(target=self.update_images_BRG_list).start()
+        threading.Thread(target=self.update_imgs_BRG_list).start()
         threading.Thread(target=self.update_game_status).start()
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
@@ -90,26 +90,26 @@ class PokeMMO:
         """Start the user interface."""
         self.ui.run()
 
-    def update_images_BRG_list(self):  # only image will be captured
+    def update_imgs_BRG_list(self):  # only image will be captured
         image_count = 0
         while not self.stop_threads_flag:
-            with self.images_BRG_list_lock:
+            with self.imgs_BRG_list_lock:
                 # Add the current image, timestamp, and name to the list
                 image_name = f"image_{image_count}"
-                current_image_BRG = self.window_manager.get_current_image_BRG()
-                self.images_BRG_list.append(
+                current_img_BRG = self.window_manager.get_current_img_BRG()
+                self.imgs_BRG_list.append(
                     (
                         datetime.datetime.now(),
-                        current_image_BRG,
+                        current_img_BRG,
                         image_name,
                     )
                 )
-                with self.most_recent_image_BRG_lock:
-                    self.most_recent_image_BRG = current_image_BRG
+                with self.latest_img_BRG_lock:
+                    self.latest_img_BRG = current_img_BRG
                 image_count += 1  # Increment the counter
                 # If the list size has exceeded 10, remove the oldest image
-                if len(self.images_BRG_list) > 10:
-                    self.images_BRG_list.pop(0)
+                if len(self.imgs_BRG_list) > 10:
+                    self.imgs_BRG_list.pop(0)
 
             time.sleep(0.2)  # wait for 2 seconds
 
@@ -153,18 +153,18 @@ class PokeMMO:
         with self.state_dict_lock:
             return self.state_dict
 
-    # Use these methods to safely access the image_BRG and game_status variables from other threads
-    def get_images_BRG_list(self):
-        with self.images_BRG_list_lock:
-            return self.images_BRG_list
+    # Use these methods to safely access the img_BRG and game_status variables from other threads
+    def get_imgs_BRG_list(self):
+        with self.imgs_BRG_list_lock:
+            return self.imgs_BRG_list
 
     def get_game_status(self):
         with self.game_status_lock:
             return self.game_status
 
-    def get_most_recent_image_BRG(self):
-        with self.most_recent_image_BRG_lock:
-            return self.most_recent_image_BRG
+    def get_latest_img_BRG(self):
+        with self.latest_img_BRG_lock:
+            return self.latest_img_BRG
 
     def get_box_coordinate_from_center(
         self,
@@ -177,29 +177,29 @@ class PokeMMO:
     ):
         color = ((0, 0, 255),)
         """Draw a box on the image and get the text from the area inside the box."""
-        image_BRG = self.get_most_recent_image_BRG()
-        height, width, _ = image_BRG.shape
+        img_BRG = self.get_latest_img_BRG()
+        height, width, _ = img_BRG.shape
         center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
 
         # Calculate the top-left and bottom-right points of the rectangle
-        top_left = (center_x - box_width // 2, center_y - box_height // 2)
-        bottom_right = (center_x + box_width // 2, center_y + box_height // 2)
+        top_l = (center_x - box_width // 2, center_y - box_height // 2)
+        bottom_r = (center_x + box_width // 2, center_y + box_height // 2)
 
         # Draw the rectangle on the image
         if display:
-            cv2.rectangle(image_BRG, top_left, bottom_right, color, thickness)
-            cv2.imshow("Match Template", image_BRG)
+            cv2.rectangle(img_BRG, top_l, bottom_r, color, thickness)
+            cv2.imshow("Match Template", img_BRG)
             cv2.waitKey()
 
         # Return the coordinates of the top-left and bottom-right corners
-        return top_left, bottom_right
+        return top_l, bottom_r
 
     def get_text_from_box_coordinate(
-        self, top_left, bottom_right, config="--psm 6", lang="eng"
+        self, top_l, bottom_r, config="--psm 6", lang="eng"
     ):
-        image_BRG = self.get_most_recent_image_BRG()
+        img_BRG = self.get_latest_img_BRG()
         # Extract the area from the image
-        area = image_BRG[top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]]
+        area = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
 
         # Convert the area to grayscale
         gray = cv2.cvtColor(area, cv2.COLOR_BGRA2GRAY)
@@ -221,12 +221,12 @@ class PokeMMO:
         lang="eng",
     ):
         # Draw the box and get its coordinates
-        top_left, bottom_right = self.get_box_coordinate_from_center(
+        top_l, bottom_r = self.get_box_coordinate_from_center(
             box_width, box_height, thickness, offset_x, offset_y
         )
 
         # Get the text from the area inside the box
-        text = self.get_text_from_box_coordinate(top_left, bottom_right, config, lang)
+        text = self.get_text_from_box_coordinate(top_l, bottom_r, config, lang)
 
         # Return the text
         return text
@@ -234,22 +234,20 @@ class PokeMMO:
     def find_items(
         self,
         temp_BRG=None,
-        top_left=None,
-        bottom_right=None,
+        top_l=None,
+        bottom_r=None,
         threshold=1,
         max_matches=10,
         display=False,
     ):
         """Find items in the PokeMMO game by matching a template image with the game screenshot."""
-        # print(top_left, bottom_right)
-        image_BRG = self.get_most_recent_image_BRG()
-        if top_left and bottom_right:
-            image_BRG = image_BRG[
-                top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]
-            ]
+        # print(top_l, bottom_r)
+        img_BRG = self.get_latest_img_BRG()
+        if top_l and bottom_r:
+            img_BRG = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
 
         # Perform template matching
-        result = cv2.matchTemplate(image_BRG, temp_BRG, cv2.TM_CCORR_NORMED)
+        result = cv2.matchTemplate(img_BRG, temp_BRG, cv2.TM_CCORR_NORMED)
 
         # Apply the threshold to the result
         _, result = cv2.threshold(result, threshold, 1.0, cv2.THRESH_BINARY)
@@ -275,34 +273,24 @@ class PokeMMO:
             for pt in match_coordinates:
                 print(pt)
                 # Draw a rectangle on the original image
-                cv2.rectangle(image_BRG, pt[:2], pt[2:], (0, 0, 255), 2)
-            cv2.imshow("Match Template", image_BRG)
+                cv2.rectangle(img_BRG, pt[:2], pt[2:], (0, 0, 255), 2)
+            cv2.imshow("Match Template", img_BRG)
             cv2.waitKey()
 
         return match_coordinates
 
-    def get_hp_percentage(self, top_left, bottom_right):
-        image_BRG = self.get_most_recent_image_BRG()
-        hp_image = image_BRG[
-            top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]
-        ]
-        total_hp_length = bottom_right[0] - top_left[0]
-        print(f"HP image shape: {hp_image.shape}")
-
-    def get_hp_percentage(self, top_left, bottom_right):
-        image_BRG = self.get_most_recent_image_BRG()
-        hp_image = image_BRG[
-            top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]
-        ]
-        total_hp_length = bottom_right[0] - top_left[0]
+    def get_hp_pct(self, top_l, bottom_r):
+        img_BRG = self.get_latest_img_BRG()
+        hp_image = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
+        total_hp_length = bottom_r[0] - top_l[0]
 
         for x in range(hp_image.shape[1]):
             for y in range(hp_image.shape[0]):
                 # Check if the pixel is close to white
                 if np.all(hp_image[y, x] >= [251, 251, 251]):
                     current_hp_length = x
-                    hp_percentage = (current_hp_length / total_hp_length) * 100
-                    return hp_percentage
+                    hp_pct = (current_hp_length / total_hp_length) * 100
+                    return hp_pct
         return 100  # Return 0 if no white pixel is found
 
 
@@ -344,7 +332,7 @@ if __name__ == "__main__":
     )
     pokeMMO.game_status_checker.check_game_status()
 
-    # cv2.imshow("Match Template", image_BRG)
+    # cv2.imshow("Match Template", img_BRG)
     # cv2.waitKey()
 
     # Close the image window

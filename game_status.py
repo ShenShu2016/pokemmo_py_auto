@@ -27,16 +27,16 @@ class GameStatus:
     def calculate_black_ratio(self):
         """Calculate the ratio of black area in the image."""
         # Get the current image
-        image_BRG = self.pokeMMO.get_most_recent_image_BRG()
+        img_BRG = self.pokeMMO.get_latest_img_BRG()
 
         # Define the value for black pixels in RGB
         black_value = [0, 0, 0]
 
         # Count the number of black pixels
-        black_pixels = np.sum(np.all(image_BRG == black_value, axis=-1))
+        black_pixels = np.sum(np.all(img_BRG == black_value, axis=-1))
 
         # Get the total number of pixels in the image
-        total_pixels = image_BRG.shape[0] * image_BRG.shape[1]
+        total_pixels = img_BRG.shape[0] * img_BRG.shape[1]
 
         # Calculate and return the ratio of black pixels
         black_ratio = black_pixels / total_pixels
@@ -104,7 +104,7 @@ class GameStatus:
         if time.time() - self.last_image_save_time >= 15:
             print("Saving screenshot")
             self.last_image_save_time = time.time()
-            image = self.pokeMMO.get_most_recent_image_BRG()
+            image = self.pokeMMO.get_latest_img_BRG()
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             timestamp_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))

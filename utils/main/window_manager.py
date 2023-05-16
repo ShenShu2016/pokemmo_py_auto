@@ -51,7 +51,7 @@ class Window_Manager:
                 return True
         return True
 
-    def get_current_image_BRG(self):
+    def get_current_img_BRG(self):
         """Capture a screenshot of the PokeMMO game."""
         self.GetClientRect = windll.user32.GetClientRect
         self.GetDC = windll.user32.GetDC
@@ -80,5 +80,5 @@ class Window_Manager:
         self.DeleteObject(cdc)
         self.ReleaseDC(self.handle, dc)
         image_normal = np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
-        image_BRG = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
-        return image_BRG  # return image_BRG
+        img_BRG = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
+        return img_BRG  # return img_BRG

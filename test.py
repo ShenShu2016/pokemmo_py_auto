@@ -8,10 +8,8 @@ if __name__ == "__main__":
     print("wo lai la ")
     while True:
         enemy_hp_bar_x_y = (274, 151), (471, 155)
-        hp_percentage = pokeMMO.get_hp_percentage(
-            enemy_hp_bar_x_y[0], enemy_hp_bar_x_y[1]
-        )
-        print(f"The current HP percentage is {hp_percentage}%")
+        hp_pct = pokeMMO.get_hp_pct(enemy_hp_bar_x_y[0], enemy_hp_bar_x_y[1])
+        print(f"The current HP pct is {hp_pct}%")
         sleep(1)
     pokeMMO.start_ui()
 

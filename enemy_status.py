@@ -30,7 +30,7 @@ class EnemyStatus:
 
     def check_enemy_number(self):
         if self.pokeMMO.get_game_status() == 1:
-            self.enemy_status_dict["enemy_count"] = 0
+            self.enemy_status_dict = {"enemy_count": 0}
             return
         if (self.pokeMMO.get_game_status() in [20, 21, 22, 23]) and (
             self.enemy_status_dict["enemy_count"] == 0
@@ -39,8 +39,8 @@ class EnemyStatus:
                 temp_BRG=self.pokeMMO.hp_BRG,
                 threshold=0.99,
                 max_matches=5,
-                top_left=(0, 70),
-                bottom_right=(1080, 170),
+                top_l=(0, 70),
+                bottom_r=(1080, 170),
             )
             print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
             if not hp_BRG_x_y_list:
@@ -87,13 +87,13 @@ class EnemyStatus:
             self.enemy_status_dict["enemy_count"] == 1
             and self.pokeMMO.get_game_status() == 21  # battle_option
         ):
-            print("check_enemy_hp")
+            # print("check_enemy_hp")
             enemy_hp_bar_1_x_y = (274, 151), (471, 155)
-            hp_percentage = self.pokeMMO.get_hp_percentage(
+            hp_pct = self.pokeMMO.get_hp_pct(
                 enemy_hp_bar_1_x_y[0], enemy_hp_bar_1_x_y[1]
             )
-            print("enemy_1_hp_percentage", hp_percentage)
-            self.enemy_status_dict["enemy_1_hp_percentage"] = hp_percentage
+            # print("enemy_1_hp_pct", hp_pct)
+            self.enemy_status_dict["enemy_1_hp_pct"] = hp_pct
             return
 
     def check_enemy_status(self):
