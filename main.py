@@ -3,8 +3,7 @@ import json
 import logging
 import threading
 import time
-from ctypes import byref, c_ubyte, windll
-from ctypes.wintypes import RECT
+from ctypes import windll
 
 import cv2
 import numpy as np
@@ -27,7 +26,8 @@ class PokeMMO:
 
     def __init__(self):
         """Initialize the PokeMMO class."""
-        self.window_name = Window_Manager().get_window_name()
+        self.window_manager = Window_Manager()
+        self.window_name = self.window_manager.get_window_name()
         self.handle = windll.user32.FindWindowW(None, self.window_name)
 
         with open("configure.json", "r") as f:
@@ -46,17 +46,6 @@ class PokeMMO:
                     f"Successfully initialized variable: {var_name} with path: {path}"
                 )
 
-        self.GetDC = windll.user32.GetDC
-        self.CreateCompatibleDC = windll.gdi32.CreateCompatibleDC
-        self.GetClientRect = windll.user32.GetClientRect
-        self.CreateCompatibleBitmap = windll.gdi32.CreateCompatibleBitmap
-        self.SelectObject = windll.gdi32.SelectObject
-        self.BitBlt = windll.gdi32.BitBlt
-        self.SRCCOPY = 0x00CC0020
-        self.GetBitmapBits = windll.gdi32.GetBitmapBits
-        self.DeleteObject = windll.gdi32.DeleteObject
-        self.ReleaseDC = windll.user32.ReleaseDC
-
         SetForegroundWindow = windll.user32.SetForegroundWindow
         SetForegroundWindow(self.handle)
 
@@ -64,10 +53,10 @@ class PokeMMO:
         self.images_BRG_list = []
 
         self.most_recent_image_BRG_lock = threading.Lock()
-        self.most_recent_image_BRG = self.get_current_image_BRG()
+        self.most_recent_image_BRG = self.window_manager.get_current_image_BRG()
 
         self.game_status_lock = threading.Lock()
-        self.game_status = None  # "battle", "map", "dialog", "menu", "unknown"
+        self.game_status = None
 
         self.state_dict_lock = threading.Lock()
         self.state_dict = {}
@@ -99,7 +88,7 @@ class PokeMMO:
             with self.images_BRG_list_lock:
                 # Add the current image, timestamp, and name to the list
                 image_name = f"image_{image_count}"
-                current_image_BRG = self.get_current_image_BRG()
+                current_image_BRG = self.window_manager.get_current_image_BRG()
                 self.images_BRG_list.append(
                     (
                         datetime.datetime.now(),
@@ -164,41 +153,16 @@ class PokeMMO:
         with self.most_recent_image_BRG_lock:
             return self.most_recent_image_BRG
 
-    def get_current_image_BRG(self):
-        """Capture a screenshot of the PokeMMO game."""
-        r = RECT()
-        self.GetClientRect(self.handle, byref(r))
-        width, height = r.right, r.bottom
-        # print(f"width {width}, height {height}")
-        # 开始截图
-        dc = self.GetDC(self.handle)
-        cdc = self.CreateCompatibleDC(dc)
-        bitmap = self.CreateCompatibleBitmap(dc, width, height)
-        self.SelectObject(cdc, bitmap)
-        self.BitBlt(cdc, 0, 0, width, height, dc, 0, 0, self.SRCCOPY)
-        # 截图是BGRA排列，因此总元素个数需要乘以4
-        total_bytes = width * height * 4
-        buffer = bytearray(total_bytes)
-        byte_array = c_ubyte * total_bytes
-        self.GetBitmapBits(bitmap, total_bytes, byte_array.from_buffer(buffer))
-        self.DeleteObject(bitmap)
-        self.DeleteObject(cdc)
-        self.ReleaseDC(self.handle, dc)
-        # 返回截图数据为numpy.ndarray
-        image_normal = np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
-        image_BRG = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
-        return image_BRG  # return image_BRG
-
     def get_box_coordinate_from_center(
         self,
         box_width=200,
         box_height=200,
-        color=(0, 0, 255),
         thickness=2,
         offset_x=0,
         offset_y=0,
         display=False,
     ):
+        color = ((0, 0, 255),)
         """Draw a box on the image and get the text from the area inside the box."""
         image_BRG = self.get_most_recent_image_BRG()
         height, width, _ = image_BRG.shape
@@ -237,7 +201,6 @@ class PokeMMO:
         self,
         box_width=200,
         box_height=200,
-        color=(0, 0, 255),
         thickness=2,
         offset_x=0,
         offset_y=0,
@@ -246,7 +209,7 @@ class PokeMMO:
     ):
         # Draw the box and get its coordinates
         top_left, bottom_right = self.get_box_coordinate_from_center(
-            box_width, box_height, color, thickness, offset_x, offset_y
+            box_width, box_height, thickness, offset_x, offset_y
         )
 
         # Get the text from the area inside the box

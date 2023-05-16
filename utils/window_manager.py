@@ -1,6 +1,8 @@
-from ctypes import WINFUNCTYPE, create_unicode_buffer, windll
-from ctypes.wintypes import BOOL, HWND, LPARAM
+from ctypes import WINFUNCTYPE, byref, c_ubyte, create_unicode_buffer, windll
+from ctypes.wintypes import BOOL, HWND, LPARAM, RECT
 
+import cv2
+import numpy as np
 from unidecode import unidecode
 
 
@@ -12,6 +14,17 @@ class Window_Manager:
         self.GetWindowText = windll.user32.GetWindowTextW
         self.GetWindowTextLength = windll.user32.GetWindowTextLengthW
         self.IsWindowVisible = windll.user32.IsWindowVisible
+        self.GetDC = windll.user32.GetDC
+        self.CreateCompatibleDC = windll.gdi32.CreateCompatibleDC
+        self.GetClientRect = windll.user32.GetClientRect
+        self.CreateCompatibleBitmap = windll.gdi32.CreateCompatibleBitmap
+        self.SelectObject = windll.gdi32.SelectObject
+        self.BitBlt = windll.gdi32.BitBlt
+        self.SRCCOPY = 0x00CC0020
+        self.GetBitmapBits = windll.gdi32.GetBitmapBits
+        self.DeleteObject = windll.gdi32.DeleteObject
+        self.ReleaseDC = windll.user32.ReleaseDC
+        self.handle = None
 
     def get_window_name(self):
         """Get the window name of the PokeMMO game."""
@@ -21,6 +34,8 @@ class Window_Manager:
 
         if self.window_name is None:
             raise Exception("Failed to find window name for PokeMMO")
+
+        self.handle = windll.user32.FindWindowW(None, self.window_name)
 
         print(f"window name: {self.window_name}")
         return self.window_name
@@ -35,3 +50,35 @@ class Window_Manager:
                 self.window_name = buff.value
                 return True
         return True
+
+    def get_current_image_BRG(self):
+        """Capture a screenshot of the PokeMMO game."""
+        self.GetClientRect = windll.user32.GetClientRect
+        self.GetDC = windll.user32.GetDC
+        self.CreateCompatibleDC = windll.gdi32.CreateCompatibleDC
+        self.CreateCompatibleBitmap = windll.gdi32.CreateCompatibleBitmap
+        self.SelectObject = windll.gdi32.SelectObject
+        self.BitBlt = windll.gdi32.BitBlt
+        self.GetBitmapBits = windll.gdi32.GetBitmapBits
+        self.DeleteObject = windll.gdi32.DeleteObject
+        self.ReleaseDC = windll.user32.ReleaseDC
+        self.SRCCOPY = 0xCC0020
+
+        r = RECT()
+        self.GetClientRect(self.handle, byref(r))
+        width, height = r.right, r.bottom
+        dc = self.GetDC(self.handle)
+        cdc = self.CreateCompatibleDC(dc)
+        bitmap = self.CreateCompatibleBitmap(dc, width, height)
+        self.SelectObject(cdc, bitmap)
+        self.BitBlt(cdc, 0, 0, width, height, dc, 0, 0, self.SRCCOPY)
+        total_bytes = width * height * 4
+        buffer = bytearray(total_bytes)
+        byte_array = c_ubyte * total_bytes
+        self.GetBitmapBits(bitmap, total_bytes, byte_array.from_buffer(buffer))
+        self.DeleteObject(bitmap)
+        self.DeleteObject(cdc)
+        self.ReleaseDC(self.handle, dc)
+        image_normal = np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
+        image_BRG = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
+        return image_BRG  # return image_BRG
