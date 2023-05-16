@@ -41,6 +41,7 @@ class EnemyStatus:
                 max_matches=5,
                 top_l=(0, 70),
                 bottom_r=(1080, 170),
+                img_BRG=self.img_BRG,
             )
             print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
             if not hp_BRG_x_y_list:
@@ -90,13 +91,14 @@ class EnemyStatus:
             # print("check_enemy_hp")
             enemy_hp_bar_1_x_y = (274, 151), (471, 155)
             hp_pct = self.pokeMMO.get_hp_pct(
-                enemy_hp_bar_1_x_y[0], enemy_hp_bar_1_x_y[1]
+                enemy_hp_bar_1_x_y[0], enemy_hp_bar_1_x_y[1], self.img_BRG
             )
             # print("enemy_1_hp_pct", hp_pct)
             self.enemy_status_dict["enemy_1_hp_pct"] = hp_pct
             return
 
     def check_enemy_status(self):
+        self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         self.check_enemy_number()
         self.check_enemy_hp()
         print("enemy_status_dict:", self.enemy_status_dict)

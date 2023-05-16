@@ -6,7 +6,6 @@ from collections import deque
 from typing import TYPE_CHECKING
 
 import cv2
-import numpy as np
 
 from constant import target_words_dict
 
@@ -20,28 +19,10 @@ class GameStatus:
         self.recent_status_game_status_dict_list = deque(maxlen=100)
         self.recent_images = deque(maxlen=5)
         self.last_image_save_time = 0
+        self.img_BRG = None
         self.game_status_dict = {
             "real_status": 0,  # Unknown Game Status
         }
-
-    def calculate_black_ratio(self):
-        """Calculate the ratio of black area in the image."""
-        # Get the current image
-        img_BRG = self.pokeMMO.get_latest_img_BRG()
-
-        # Define the value for black pixels in RGB
-        black_value = [0, 0, 0]
-
-        # Count the number of black pixels
-        black_pixels = np.sum(np.all(img_BRG == black_value, axis=-1))
-
-        # Get the total number of pixels in the image
-        total_pixels = img_BRG.shape[0] * img_BRG.shape[1]
-
-        # Calculate and return the ratio of black pixels
-        black_ratio = black_pixels / total_pixels
-        self.game_status_dict["black_ratio"] = black_ratio
-        return black_ratio
 
     def determine_game_status(self):
         status_check_funcs = [
@@ -104,8 +85,7 @@ class GameStatus:
         if time.time() - self.last_image_save_time >= 15:
             print("Saving screenshot")
             self.last_image_save_time = time.time()
-            image = self.pokeMMO.get_latest_img_BRG()
-            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            gray_image = cv2.cvtColor(self.img_BRG, cv2.COLOR_BGR2GRAY)
 
             timestamp_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
             filename = f"screenshot\image_{timestamp_str}.png"
@@ -129,8 +109,12 @@ class GameStatus:
                 self.recent_images.append((time.time(), filename, None))
 
     def check_normal(self):
-        my_name_ORC = self.pokeMMO.get_text_from_center(
-            box_width=125, box_height=25, offset_x=0, offset_y=104, config="--psm 7"
+        my_name_x_y = (624, 270), (738, 291)
+        my_name_ORC = self.pokeMMO.get_text_from_box_coords(
+            top_l=my_name_x_y[0],
+            bottom_r=my_name_x_y[1],
+            config="--psm 7",
+            img_BRG=self.img_BRG,
         )
         is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
             my_name_ORC,
@@ -141,16 +125,16 @@ class GameStatus:
         return is_match
 
     def check_battle(self):
-        black_ratio = self.calculate_black_ratio()
+        black_ratio = self.pokeMMO.calculate_black_ratio(img_BRG=self.img_BRG)
         self.game_status_dict["black_ratio"] = black_ratio
         if black_ratio > 0.35:
             if not self.check_battle_option():
                 self.check_battle_go_back()
 
     def check_battle_option(self):
-        battle_option_x_y = (214, 482), (627, 583)
+        battle_option_x_y = (229, 507), (399, 522)  # select your attack move
         battle_option_ORC = self.pokeMMO.get_text_from_box_coords(
-            battle_option_x_y[0], battle_option_x_y[1]
+            battle_option_x_y[0], battle_option_x_y[1], img_BRG=self.img_BRG
         )
         is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
             battle_option_ORC, target_words_dict["battle_option_ORC"]
@@ -161,7 +145,10 @@ class GameStatus:
     def check_battle_go_back(self):
         battle_option_go_back_x_y = (1080, 558), (1142, 575)
         battle_option_go_back_ORC = self.pokeMMO.get_text_from_box_coords(
-            battle_option_go_back_x_y[0], battle_option_go_back_x_y[1]
+            battle_option_go_back_x_y[0],
+            battle_option_go_back_x_y[1],
+            config="--psm 7",
+            img_BRG=self.img_BRG,
         )
         is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
             battle_option_go_back_ORC,
@@ -185,6 +172,7 @@ class GameStatus:
         )
 
     def check_game_status(self) -> int:
+        self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         current_time = time.time()
         self.game_status_dict = {
             "real_status": 0,  # Unknown Game Status

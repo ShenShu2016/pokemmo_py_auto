@@ -194,8 +194,11 @@ class PokeMMO:
         # Return the coordinates of the top-left and bottom-right corners
         return top_l, bottom_r
 
-    def get_text_from_box_coords(self, top_l, bottom_r, config="--psm 6", lang="eng"):
-        img_BRG = self.get_latest_img_BRG()
+    def get_text_from_box_coords(
+        self, top_l, bottom_r, config="--psm 6", lang="eng", img_BRG=None
+    ):
+        if img_BRG is None:
+            img_BRG = self.get_latest_img_BRG()
         # Extract the area from the image
         area = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
 
@@ -216,6 +219,7 @@ class PokeMMO:
         offset_y=0,
         config="--psm 6",
         lang="eng",
+        img_BRG=None,
     ):
         # Draw the box and get its coordinates
         top_l, bottom_r = self.get_box_coordinate_from_center(
@@ -223,7 +227,9 @@ class PokeMMO:
         )
 
         # Get the text from the area inside the box
-        text = self.get_text_from_box_coords(top_l, bottom_r, config, lang)
+        text = self.get_text_from_box_coords(
+            top_l, bottom_r, config, lang, img_BRG=img_BRG
+        )
 
         # Return the text
         return text
@@ -277,6 +283,25 @@ class PokeMMO:
             cv2.waitKey()
 
         return match_coords
+
+    def calculate_black_ratio(self, img_BRG=None):
+        """Calculate the ratio of black area in the image."""
+        # Get the current image
+        if img_BRG is None:
+            img_BRG = self.get_latest_img_BRG()
+
+        # Define the value for black pixels in RGB
+        black_value = [0, 0, 0]
+
+        # Count the number of black pixels
+        black_pixels = np.sum(np.all(img_BRG == black_value, axis=-1))
+
+        # Get the total number of pixels in the image
+        total_pixels = img_BRG.shape[0] * img_BRG.shape[1]
+
+        # Calculate and return the ratio of black pixels
+        black_ratio = black_pixels / total_pixels
+        return black_ratio
 
     def get_hp_pct(self, top_l, bottom_r, img_BRG=None):
         if img_BRG is None:
