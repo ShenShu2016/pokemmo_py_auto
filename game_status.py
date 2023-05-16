@@ -256,6 +256,7 @@ class GameStatus:
         return_status = self.determine_game_status()
         self.game_status_dict["return_status"] = return_status
         self.check_enemy()
+        self.check_enemy_status()
         self.recent_status_game_status_dict_list.append(
             (current_time, copy.deepcopy(self.game_status_dict))
         )
@@ -264,6 +265,20 @@ class GameStatus:
         print(self.game_status_dict, end=" ")
         print(self.enemy_status_dict)
         return return_status
+
+    def check_enemy_status(self):
+        if (
+            self.game_status_dict.get("battle_option_ORC") == True
+            and self.enemy_status_dict["enemy_count"] == 1
+        ):
+            print("check_enemy_status")
+            enemy_hp_bar_1_x_y = (274, 151), (471, 155)
+            hp_percentage = self.pokeMMO.get_hp_percentage(
+                enemy_hp_bar_1_x_y[0], enemy_hp_bar_1_x_y[1]
+            )
+            print("enemy_1_hp_percentage", hp_percentage)
+            self.enemy_status_dict["enemy_1_hp_percentage"] = hp_percentage
+            return
 
 
 if __name__ == "__main__":

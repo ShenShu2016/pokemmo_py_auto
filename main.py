@@ -268,6 +268,30 @@ class PokeMMO:
 
         return match_coordinates
 
+    def get_hp_percentage(self, top_left, bottom_right):
+        image_BRG = self.get_most_recent_image_BRG()
+        hp_image = image_BRG[
+            top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]
+        ]
+        total_hp_length = bottom_right[0] - top_left[0]
+        print(f"HP image shape: {hp_image.shape}")
+
+    def get_hp_percentage(self, top_left, bottom_right):
+        image_BRG = self.get_most_recent_image_BRG()
+        hp_image = image_BRG[
+            top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]
+        ]
+        total_hp_length = bottom_right[0] - top_left[0]
+
+        for x in range(hp_image.shape[1]):
+            for y in range(hp_image.shape[0]):
+                # Check if the pixel is close to white
+                if np.all(hp_image[y, x] >= [251, 251, 251]):
+                    current_hp_length = x
+                    hp_percentage = (current_hp_length / total_hp_length) * 100
+                    return hp_percentage
+        return 100  # Return 0 if no white pixel is found
+
 
 if __name__ == "__main__":
     # Make the process DPI-aware
