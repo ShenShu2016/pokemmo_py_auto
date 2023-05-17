@@ -8,6 +8,17 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 
+def calculate_catch_rate(
+    max_hp=65, current_hp=1, catch_rate=1, ball_rate=1, pokemon_condition=1
+):
+    numerator = (
+        (3 * max_hp - 2 * current_hp) * catch_rate * ball_rate * pokemon_condition
+    )
+    denominator = 3 * max_hp * 255
+    final_catch_rate = numerator / denominator
+    return final_catch_rate
+
+
 class RoleController:
     def __init__(self, pokeMMO: PokeMMO):
         pass

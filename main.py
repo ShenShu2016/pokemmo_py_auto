@@ -7,9 +7,9 @@ from ctypes import windll
 
 import cv2
 import numpy as np
+import pandas as pd
 import pytesseract
 
-from constant import target_words_dict
 from enemy_status import EnemyStatus
 from game_status import GameStatus
 from pokemmoUI import PokemmoUI
@@ -46,7 +46,7 @@ class PokeMMO:
                 print(
                     f"Successfully initialized variable: {var_name} with path: {path}"
                 )
-
+        self.pokedex = pd.read_csv("data\clean_pokedex.csv")
         SetForegroundWindow = windll.user32.SetForegroundWindow
         SetForegroundWindow(self.handle)
 
@@ -204,7 +204,6 @@ class PokeMMO:
 
         # Convert the area to grayscale
         gray = cv2.cvtColor(area, cv2.COLOR_BGRA2GRAY)
-
         # Recognize the text in the area
         text = pytesseract.image_to_string(gray, config=config, lang=lang)
         # print(f"Text: {text}")
@@ -322,7 +321,7 @@ class PokeMMO:
                 if np.all(hp_image[y, x] >= [251, 251, 251]):
                     current_hp_length = x
                     hp_pct = (current_hp_length / total_hp_length) * 100
-                    return hp_pct
+                    return round(hp_pct, 1)
         return 100  # Return 0 if no white pixel is found
 
 
@@ -331,6 +330,6 @@ if __name__ == "__main__":
     windll.user32.SetProcessDPIAware()
     # Initialize the PokeMMO class and get a screenshot
     pokeMMO = PokeMMO()
-    # pokeMMO.start_ui()
+    pokeMMO.start_ui()
 
     cv2.destroyAllWindows()

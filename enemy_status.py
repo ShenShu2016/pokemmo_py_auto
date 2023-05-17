@@ -80,17 +80,17 @@ class EnemyStatus:
         # print("enemy_count:", self.enemy_status_dict["enemy_count"])
 
     def check_enemy_hp(self):
-        # Define the enemy hp bar coordinates
-        enemy_hp_bar_coords = {
-            1: [(274, 151), (471, 155)],  # Enemy 1 HP coordinates
-            2: [(349, 101), (502, 105)],  # Enemy 2 HP coordinates
-            3: [(609, 101), (757, 105)],  # Enemy 3 HP coordinates
-            4: [(870, 101), (1020, 105)],  # Enemy 4 HP coordinates
-            5: [(349, 141), (502, 145)],  # Enemy 5 HP coordinates
-            6: [(869, 141), (1020, 145)],  # Enemy 6 HP coordinates
-        }
-
         if self.pokeMMO.get_game_status() == 21:  # battle_option
+            # Define the enemy hp bar coordinates
+            enemy_hp_bar_coords = {
+                1: [(274, 151), (471, 155)],  # Enemy 1 HP coordinates
+                2: [(349, 101), (502, 105)],  # Enemy 2 HP coordinates
+                3: [(609, 101), (757, 105)],  # Enemy 3 HP coordinates
+                4: [(870, 101), (1020, 105)],  # Enemy 4 HP coordinates
+                5: [(349, 141), (503, 145)],  # Enemy 5 HP coordinates
+                6: [(869, 141), (1020, 145)],  # Enemy 6 HP coordinates
+            }
+
             enemy_count = self.enemy_status_dict["enemy_count"]
 
             if enemy_count in [3, 5]:
@@ -108,19 +108,17 @@ class EnemyStatus:
                 self.enemy_status_dict["enemy_1_hp_pct"] = hp_pct
 
     def check_enemy_name_lv(self):
-        # Define the enemy name coordinates
-        enemy_name_coords = {
-            1: [(251, 129), (492, 147)],  # Enemy 1 Name coordinates
-            2: [(316, 79), (518, 98)],  # Enemy 2 Name coordinates
-            3: [(576, 79), (780, 96)],  # Enemy 3 Name coordinates
-            4: [(836, 79), (1038, 96)],  # Enemy 4 Name coordinates
-            5: [(316, 117), (519, 136)],  # Enemy 5 Name coordinates
-            6: [(835, 117), (1038, 136)],  # Enemy 6 Name coordinates
-        }
-
         enemy_count = self.enemy_status_dict["enemy_count"]
-
         if enemy_count > 0:
+            enemy_name_coords = {
+                1: [(251, 129), (492, 147)],
+                2: [(316, 79), (516, 98)],
+                3: [(576, 79), (780, 96)],
+                4: [(836, 79), (1037, 96)],
+                5: [(316, 117), (517, 136)],
+                6: [(835, 117), (1037, 136)],
+            }
+
             for i in range(1, enemy_count + 1):
                 if (
                     f"enemy_{i}_hp_pct" in self.enemy_status_dict
@@ -132,15 +130,35 @@ class EnemyStatus:
                         bottom_r=enemy_name_coords[i][1],
                         img_BRG=self.img_BRG,
                         threshold=0.99,
-                        max_matches=2,  #! should be 1
+                        max_matches=1,
                     )
-                    name_text = self.pokeMMO.get_text_from_box_coords(
+                    if not sex_coords:
+                        sex_coords = self.pokeMMO.find_items(
+                            temp_BRG=self.pokeMMO.enemy_female_BRG,
+                            top_l=enemy_name_coords[i][0],
+                            bottom_r=enemy_name_coords[i][1],
+                            img_BRG=self.img_BRG,
+                            threshold=0.99,
+                            max_matches=1,
+                        )
+                    if sex_coords:
+                        enemy_name_coords[i] = (
+                            enemy_name_coords[i][0],
+                            (sex_coords[0][0], enemy_name_coords[i][1][1]),
+                        )
+                    name_Lv_ORC = self.pokeMMO.get_text_from_box_coords(
                         top_l=enemy_name_coords[i][0],
                         bottom_r=enemy_name_coords[i][1],
                         img_BRG=self.img_BRG,
+                        config="--psm 7 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",  #
                     )
-                    self.enemy_status_dict[f"enemy_{i}_name"] = name_text
-        return
+                    if "Lv" in name_Lv_ORC:
+                        self.enemy_status_dict[f"enemy_{i}_name"] = name_Lv_ORC
+                        # go self.pokedex to get the pokemon info
+                        name_ORC = name_Lv_ORC.split("Lv")[0].strip()
+                        lv_orc = name_Lv_ORC.split("Lv")[1].strip()
+                        print("name_ORC:", name_ORC)
+                        print("lv_orc:", lv_orc)
 
     def check_enemy_status(self):
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
