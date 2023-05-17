@@ -272,7 +272,14 @@ class PokeMMO:
         h, w = temp_BRG.shape[:2]
         match_coords = []
         for index, pt in enumerate(zip(*result[::-1])):
-            match_coords.append((pt[0], pt[1], pt[0] + w, pt[1] + h))
+            match_coords.append(
+                (
+                    pt[0] + top_l[0],
+                    pt[1] + top_l[1],
+                    pt[0] + w + top_l[0],
+                    pt[1] + h + top_l[1],
+                )
+            )
 
         if display:
             for pt in match_coords:
@@ -322,8 +329,8 @@ class PokeMMO:
 if __name__ == "__main__":
     # Make the process DPI-aware
     windll.user32.SetProcessDPIAware()
-
     # Initialize the PokeMMO class and get a screenshot
     pokeMMO = PokeMMO()
-    pokeMMO.start_ui()
+    # pokeMMO.start_ui()
+
     cv2.destroyAllWindows()

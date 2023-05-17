@@ -6,8 +6,6 @@ from pywinauto.application import Application
 
 
 class Controller:
-    ARROW_KEYS = {"up": "{UP}", "down": "{DOWN}", "left": "{LEFT}", "right": "{RIGHT}"}
-
     def __init__(self, handle: HWND):
         self.app = Application().connect(handle=handle)
         self.window = self.app.windows()[0]
@@ -34,11 +32,11 @@ class Controller:
 
     def key_press(self, key: str, delay: float = 0.05):
         self.window.set_focus()
-        if key in self.ARROW_KEYS:
-            key = self.ARROW_KEYS[key]
+
         keyboard.send_keys("{" + key + " down}")
         time.sleep(delay)
         keyboard.send_keys("{" + key + " up}")
+        time.sleep(0.07)
 
 
 if __name__ == "__main__":

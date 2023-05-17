@@ -4,7 +4,11 @@
     "5_pokemon_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\5_pokemon.png",
     "battle_black_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\battle_black.png",
     "battle_option_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\battle_option.png",
+    "confirm release_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\confirm release.png",
+    "enemy_female_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\enemy_female.png",
     "enemy_hp_bar_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\enemy_hp_bar.png",
+    "enemy_hp_white_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\enemy_hp_white.png",
+    "enemy_male_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\enemy_male.png",
     "evening_face_down_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\evening_face_down.png",
     "evening_face_left_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\evening_face_left.png",
     "evening_face_right_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\evening_face_right.png",
@@ -14,8 +18,10 @@
     "face_left_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\face_left.png",
     "face_right_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\face_right.png",
     "face_up_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\face_up.png",
+    "full_hp_green_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\full_hp_green.png",
     "great_ball_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\great_ball.png",
     "hp_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\hp.png",
+    "iv31_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\iv31.png",
     "master_ball_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\master_ball.png",
     "nest_ball_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\nest_ball.png",
     "night_face_down_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\night_face_down.png",
@@ -28,5 +34,7 @@
     "poke_ball_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\poke_ball.png",
     "shiny_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\shiny.png",
     "ultra_ball_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\ultra_ball.png",
-    "WeChat Screenshot_20230512204916_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\WeChat Screenshot_20230512204916.png"
+    "WeChat Screenshot_20230512204916_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\WeChat Screenshot_20230512204916.png",
+    "WeChat Screenshot_20230516165531_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\WeChat Screenshot_20230516165531.png",
+    "WeChat Screenshot_20230516170149_path": "C:\\Users\\Shen\\Documents\\GitHub\\pokemmo_py_auto\\data\\WeChat Screenshot_20230516170149.png"
 }
