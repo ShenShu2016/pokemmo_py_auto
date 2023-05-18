@@ -6,6 +6,14 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import PokeMMO
 
+import subprocess
+
+
+def play_mp3(
+    file_path=r"C:\Users\Shen\Documents\GitHub\pokemmo_py_auto\data\unravel.mp3",
+):
+    subprocess.call(["wmplayer", file_path])
+
 
 class EnemyStatus:
     def __init__(self, pokeMMO_instance: PokeMMO):
@@ -152,6 +160,22 @@ class EnemyStatus:
                         img_BRG=self.img_BRG,
                         config="--psm 7 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",  #
                     )
+                    if self.pokeMMO.word_recognizer.compare_with_target(
+                        recognized_ORC=name_Lv_ORC.lower(), target_words=["shiny"]
+                    )[0]:
+                        play_mp3()
+                    elif (
+                        self.pokeMMO.word_recognizer.compare_with_target(
+                            recognized_ORC=name_Lv_ORC.lower(), target_words=["shiny"]
+                        )[0]
+                        and self.enemy_status_dict["enemy_count"] > 1
+                    ):
+                        play_mp3()
+                        # close all python
+                        import os
+
+                        os.system("taskkill /f /im python.exe")
+
                     if "Lv" in name_Lv_ORC:
                         self.enemy_status_dict[f"enemy_{i}_name"] = name_Lv_ORC
                         # go self.pokedex to get the pokemon info
@@ -159,6 +183,13 @@ class EnemyStatus:
                         lv_orc = name_Lv_ORC.split("Lv")[1].strip()
                         print("name_ORC:", name_ORC)
                         print("lv_orc:", lv_orc)
+                        info = self.pokeMMO.pokedex.loc[
+                            self.pokeMMO.pokedex["Pokemon"] == name_ORC
+                        ]
+                        if info.empty == False:
+                            print(name_ORC, "info:\n", info)
+                        else:
+                            print(f"{name_ORC} info not found")
 
     def check_enemy_status(self):
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()

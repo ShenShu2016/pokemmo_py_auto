@@ -13,40 +13,38 @@ class Word_Recognizer:
         }
 
     def compare_with_target(
-        self, recognized_text, target_words, mode="token_set_ratio", threshold=80
+        self, recognized_ORC, target_words, mode="token_set_ratio", threshold=80
     ):
         if mode not in self.ratio_functions:
             raise ValueError(
                 f"Invalid mode: {mode}. Must be one of {list(self.ratio_functions.keys())}."
             )
 
-        recognized_text = recognized_text.replace("\n", " ")
+        recognized_ORC = recognized_ORC.replace("\n", " ")
 
         target_text = " ".join(target_words)
 
-        # print("recognized_text", recognized_text)
+        # print("recognized_ORC", recognized_ORC)
         # print("target_text", target_text)
 
         ratio_function = self.ratio_functions[mode]
-        match_ratio = ratio_function(recognized_text, target_text)
+        match_ratio = ratio_function(recognized_ORC, target_text)
 
         is_match = match_ratio >= threshold
 
         return is_match, match_ratio
 
-    def compare_with_target_all_types(
-        self, recognized_text, target_words, threshold=80
-    ):
-        recognized_text = recognized_text.replace("\n", " ")
+    def compare_with_target_all_types(self, recognized_ORC, target_words, threshold=80):
+        recognized_ORC = recognized_ORC.replace("\n", " ")
 
         target_text = " ".join(target_words)
 
-        # print("recognized_text", recognized_text)
+        # print("recognized_ORC", recognized_ORC)
         # print("target_text", target_text)
 
         match_results = {}
         for mode, ratio_function in self.ratio_functions.items():
-            match_ratio = ratio_function(recognized_text, target_text)
+            match_ratio = ratio_function(recognized_ORC, target_text)
             is_match = match_ratio >= threshold
             match_results[mode] = (is_match, match_ratio)
 

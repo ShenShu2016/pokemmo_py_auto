@@ -47,6 +47,7 @@ class PokeMMO:
                     f"Successfully initialized variable: {var_name} with path: {path}"
                 )
         self.pokedex = pd.read_csv("data\clean_pokedex.csv")
+        print(self.pokedex.head())
         SetForegroundWindow = windll.user32.SetForegroundWindow
         SetForegroundWindow(self.handle)
 
