@@ -13,6 +13,7 @@ import pytesseract
 from enemy_status import EnemyStatus
 from game_status import GameStatus
 from pokemmoUI import PokemmoUI
+from role_controller import RoleController
 from utils.main.controller import Controller
 from utils.main.window_manager import Window_Manager
 from utils.main.word_recognizer import Word_Recognizer
@@ -70,6 +71,7 @@ class PokeMMO:
         self.enemy_status_checker = EnemyStatus(self)
 
         self.controller = Controller(handle=self.handle)
+        self.roleController = RoleController(self)
         self.word_recognizer = Word_Recognizer()
         self.ui = PokemmoUI(self)
 
@@ -116,13 +118,17 @@ class PokeMMO:
 
     def update_game_status(self):
         while not self.stop_threads_flag:
-            self.game_status = self.game_status_checker.check_game_status()
-            time.sleep(1)  # wait for 3 seconds
+            new_game_state = self.game_status_checker.check_game_status()
+            with self.game_status_lock:
+                self.game_status = new_game_state
+                time.sleep(1)  # wait for 3 seconds
 
     def update_enemy_status(self):
         while not self.stop_threads_flag:
-            self.enemy_status = self.enemy_status_checker.check_enemy_status()
-            time.sleep(1)
+            new_enemy_status = self.enemy_status_checker.check_enemy_status()
+            with self.enemy_status_lock:
+                self.enemy_status = new_enemy_status
+                time.sleep(1)
 
     def update_state_dict(self):
         while not self.stop_threads_flag:
@@ -162,6 +168,10 @@ class PokeMMO:
     def get_game_status(self):
         with self.game_status_lock:
             return self.game_status
+
+    def get_enemy_status(self):
+        with self.enemy_status_lock:
+            return self.enemy_status
 
     def get_latest_img_BRG(self):
         with self.latest_img_BRG_lock:
@@ -308,7 +318,7 @@ class PokeMMO:
 
         # Calculate and return the ratio of black pixels
         black_ratio = black_pixels / total_pixels
-        return black_ratio
+        return round(black_ratio, 2)
 
     def get_hp_pct(self, top_l, bottom_r, img_BRG=None):
         if img_BRG is None:

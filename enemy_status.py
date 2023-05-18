@@ -8,21 +8,23 @@ if TYPE_CHECKING:
 
 import subprocess
 
+# Constants
+MP3_FILE_PATH = r"C:\Users\Shen\Documents\GitHub\pokemmo_py_auto\data\unravel.mp3"
+DEBUG = True
+BATTLE_OPTION_STATUS = 21
+ENEMY_FOUND_STATUSES = [20, 21, 22, 23]
 
-def play_mp3(
-    file_path=r"C:\Users\Shen\Documents\GitHub\pokemmo_py_auto\data\unravel.mp3",
-):
-    subprocess.call(["wmplayer", file_path])
+
+def _play_mp3(file_path=MP3_FILE_PATH):
+    subprocess.run(["wmplayer", file_path])
 
 
 class EnemyStatus:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
-        self.enemy_status_dict = {
-            "enemy_count": 0,
-        }
+        self.enemy_status_dict = {"enemy_count": 0}
 
-    def match_coords(self, hp_coords, tolerance, found_hp):
+    def _match_coords(self, hp_coords, tolerance, found_hp):
         return (
             hp_coords[0][0] - tolerance <= found_hp[0] <= hp_coords[0][0] + tolerance
             and hp_coords[0][1] - tolerance
@@ -36,7 +38,7 @@ class EnemyStatus:
             <= hp_coords[1][1] + tolerance
         )
 
-    def check_enemy_number(self):
+    def _check_enemy_number(self):
         if self.pokeMMO.get_game_status() == 1:
             self.enemy_status_dict = {"enemy_count": 0}
             return
@@ -51,10 +53,10 @@ class EnemyStatus:
                 bottom_r=(1080, 170),
                 img_BRG=self.img_BRG,
             )
-            print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
+            # print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
             if not hp_BRG_x_y_list:
                 self.enemy_status_dict["enemy_count"] = 0
-                print("No HP bars found.")
+                # print("No HP bars found.")
                 return
 
             enemy_hp_coords = [
@@ -74,7 +76,7 @@ class EnemyStatus:
 
             for special_case in special_cases:
                 for found_hp in hp_BRG_x_y_list:
-                    if self.match_coords(special_case["coords"], tolerance, found_hp):
+                    if self._match_coords(special_case["coords"], tolerance, found_hp):
                         self.enemy_status_dict["enemy_count"] = special_case[
                             "enemy_count"
                         ]
@@ -82,12 +84,12 @@ class EnemyStatus:
 
             for enemy_hp in enemy_hp_coords:
                 for found_hp in hp_BRG_x_y_list:
-                    if self.match_coords(enemy_hp, tolerance, found_hp):
+                    if self._match_coords(enemy_hp, tolerance, found_hp):
                         enemy_count += 1
                 self.enemy_status_dict["enemy_count"] = enemy_count
         # print("enemy_count:", self.enemy_status_dict["enemy_count"])
 
-    def check_enemy_hp(self):
+    def _check_enemy_hp(self):
         if self.pokeMMO.get_game_status() == 21:  # battle_option
             # Define the enemy hp bar coordinates
             enemy_hp_bar_coords = {
@@ -115,7 +117,7 @@ class EnemyStatus:
                 )
                 self.enemy_status_dict["enemy_1_hp_pct"] = hp_pct
 
-    def check_enemy_name_lv(self):
+    def _check_enemy_name_lv(self):
         enemy_count = self.enemy_status_dict["enemy_count"]
         if enemy_count > 0:
             enemy_name_coords = {
@@ -130,6 +132,7 @@ class EnemyStatus:
             for i in range(1, enemy_count + 1):
                 if (
                     f"enemy_{i}_hp_pct" in self.enemy_status_dict
+                    and f"enemy_{i}_name_Lv" not in self.enemy_status_dict
                     and self.enemy_status_dict[f"enemy_{i}_hp_pct"] is not None
                 ):
                     sex_coords = self.pokeMMO.find_items(
@@ -163,21 +166,21 @@ class EnemyStatus:
                     if self.pokeMMO.word_recognizer.compare_with_target(
                         recognized_ORC=name_Lv_ORC.lower(), target_words=["shiny"]
                     )[0]:
-                        play_mp3()
+                        _play_mp3()
                     elif (
                         self.pokeMMO.word_recognizer.compare_with_target(
                             recognized_ORC=name_Lv_ORC.lower(), target_words=["shiny"]
                         )[0]
                         and self.enemy_status_dict["enemy_count"] > 1
                     ):
-                        play_mp3()
+                        _play_mp3()
                         # close all python
                         import os
 
                         os.system("taskkill /f /im python.exe")
 
                     if "Lv" in name_Lv_ORC:
-                        self.enemy_status_dict[f"enemy_{i}_name"] = name_Lv_ORC
+                        self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_ORC
                         # go self.pokedex to get the pokemon info
                         name_ORC = name_Lv_ORC.split("Lv")[0].strip()
                         lv_orc = name_Lv_ORC.split("Lv")[1].strip()
@@ -186,14 +189,19 @@ class EnemyStatus:
                         info = self.pokeMMO.pokedex.loc[
                             self.pokeMMO.pokedex["Pokemon"] == name_ORC
                         ]
-                        if info.empty == False:
-                            print(name_ORC, "info:\n", info)
+                        if info.empty == False and enemy_count == 1:
+                            info_dict = info.to_dict(orient="records")
+                            # Print the dictionary
+                            self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+                            print(info_dict[0])
+                            pass
                         else:
                             print(f"{name_ORC} info not found")
 
     def check_enemy_status(self):
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
-        self.check_enemy_number()
-        self.check_enemy_hp()
-        self.check_enemy_name_lv()
-        print("enemy_status_dict:", self.enemy_status_dict)
+        self._check_enemy_number()
+        self._check_enemy_hp()
+        self._check_enemy_name_lv()
+        print("enemy_status_dict", self.enemy_status_dict)
+        return self.enemy_status_dict

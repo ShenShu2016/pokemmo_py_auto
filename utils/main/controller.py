@@ -1,5 +1,6 @@
 import time
 from ctypes.wintypes import HWND
+from time import sleep
 
 from pywinauto import Application, keyboard
 from pywinauto.application import Application
@@ -10,16 +11,18 @@ class Controller:
         self.app = Application().connect(handle=handle)
         self.window = self.app.windows()[0]
 
-    def move_to(self, x, y):
+    def move_to(self, x, y, tolerance=0):
         """Move the mouse to a specific position on the window."""
         self.window.set_focus()
-        self.window.click_input(button="move", coords=(x, y))
+        self.window.click_input(button="move", coords=(x + tolerance, y + tolerance))
+        sleep(0.05)
 
-    def click(self, x=None, y=None):
+    def click(self, x=None, y=None, tolerance=0):
         """Click at the current mouse position or at a specific position if provided."""
         self.window.set_focus()
         if x is not None and y is not None:
-            self.window.click_input(coords=(x, y))
+            self.window.click_input(coords=(x + tolerance, y + tolerance))
+            sleep(0.02)
         else:
             self.window.click_input()
 
@@ -30,13 +33,13 @@ class Controller:
             button="left", press_coords=(x1, y1), release_coords=(x2, y2)
         )
 
-    def key_press(self, key: str, delay: float = 0.05):
+    def key_press(self, key: str, delay: float = 0.2):
         self.window.set_focus()
 
         keyboard.send_keys("{" + key + " down}")
         time.sleep(delay)
         keyboard.send_keys("{" + key + " up}")
-        time.sleep(0.07)
+        time.sleep(0.05)
 
 
 if __name__ == "__main__":

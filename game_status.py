@@ -41,6 +41,13 @@ class GameStatus:
             if self.game_status_dict.get("battle_option_go_back_ORC") == True:
                 return set_and_return_status(22)  # Battle Go Back Status
 
+        def check_battle_end_pokemon_caught_status():
+            if (
+                self.game_status_dict.get("battle_end_pokemon_caught") is not None
+                and self.game_status_dict.get("battle_end_pokemon_caught")[0] == True
+            ):
+                return set_and_return_status(23)
+
         def check_battle_loading_status():
             if (
                 self.game_status_dict.get("black_ratio") is not None
@@ -72,6 +79,7 @@ class GameStatus:
             check_battle_option_status,
             check_battle_go_back_status,
             check_battle_loading_status,
+            check_battle_end_pokemon_caught_status,
         ]
 
         for check_func in status_check_funcs:
@@ -97,7 +105,7 @@ class GameStatus:
 
                 result = cv2.matchTemplate(last_image, gray_image, cv2.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                self.game_status_dict["image_match_ratio"] = max_val
+                self.game_status_dict["image_match_ratio"] = round(max_val, 2)
                 self.recent_images.append((time.time(), filename, max_val))
 
                 if all(
@@ -151,11 +159,28 @@ class GameStatus:
             self.game_status_dict["battle_option_go_back_ORC"] = is_match
             return is_match
 
+        def check_battle_end_pokemon_caught():
+            pokemon_summary_coords_list = self.pokeMMO.find_items(
+                img_BRG=self.img_BRG,
+                bottom_r=(1360, 487),
+                top_l=(316, 7),
+                temp_BRG=self.pokeMMO.pokemon_summary_BRG,
+                threshold=0.99,
+                max_matches=2,
+            )
+
+            self.game_status_dict["battle_end_pokemon_caught"] = (
+                len(pokemon_summary_coords_list) > 0,
+                pokemon_summary_coords_list,
+            )
+
         black_ratio = self.pokeMMO.calculate_black_ratio(img_BRG=self.img_BRG)
         self.game_status_dict["black_ratio"] = black_ratio
         if black_ratio > 0.35:
             if not check_battle_option():
                 check_battle_go_back()
+        if black_ratio <= 0.35:
+            check_battle_end_pokemon_caught()
 
     def check_game_status(self) -> int:
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
@@ -175,8 +200,11 @@ class GameStatus:
             (current_time, copy.deepcopy(self.game_status_dict))
         )
         # print the using time
-        print("run time", time.time() - current_time)
-        print(self.game_status_dict)
+        print(
+            "                                                                                                     run time",
+            round(time.time() - current_time, 2),
+        )
+        print("game_status_dict", self.game_status_dict)
         return return_status
 
 

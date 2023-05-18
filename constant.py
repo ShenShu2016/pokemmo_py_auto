@@ -20,6 +20,7 @@ game_status_dict = {
     1: "Normal Game Status",
     21: "Battle Option Status",
     22: "Battle Go Back Status",
+    23: "Battle End Pokemon Caught Status",
     20: "Battle Loading Status",
 }
 enemy_hp_positions = {
