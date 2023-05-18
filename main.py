@@ -59,7 +59,7 @@ class PokeMMO:
         self.latest_img_BRG = self.window_manager.get_current_img_BRG()
 
         self.game_status_lock = threading.Lock()
-        self.game_status = 0
+        self.game_status = {"return_status": 0}
 
         self.enemy_status_lock = threading.Lock()
         self.enemy_status = {}
@@ -114,21 +114,21 @@ class PokeMMO:
                 if len(self.imgs_BRG_list) > 10:
                     self.imgs_BRG_list.pop(0)
 
-            time.sleep(0.2)  # wait for 2 seconds
+            time.sleep(0.1)  # wait for 2 seconds
 
     def update_game_status(self):
         while not self.stop_threads_flag:
             new_game_state = self.game_status_checker.check_game_status()
             with self.game_status_lock:
                 self.game_status = new_game_state
-                time.sleep(1)  # wait for 3 seconds
+                time.sleep(0.1)  # wait for 3 seconds
 
     def update_enemy_status(self):
         while not self.stop_threads_flag:
             new_enemy_status = self.enemy_status_checker.check_enemy_status()
             with self.enemy_status_lock:
                 self.enemy_status = new_enemy_status
-                time.sleep(1)
+                time.sleep(0.1)
 
     def update_state_dict(self):
         while not self.stop_threads_flag:

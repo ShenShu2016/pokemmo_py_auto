@@ -44,7 +44,7 @@ class PokemmoUI:
         state_dict = self.pokeMMO.get_state_dict()
 
         self.status_label.configure(
-            text=f"Game Status: {game_status_dict[game_status]}"
+            text=f"Game Status: {game_status_dict[game_status['return_status']]}"
         )
         self.state_dict_text.delete(1.0, tk.END)
         self.state_dict_text.insert(tk.END, self.format_state_dict(state_dict))

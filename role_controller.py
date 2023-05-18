@@ -109,10 +109,11 @@ class RoleController:
 
     def close_pokemon_summary(self, game_status):
         for i in game_status["battle_end_pokemon_caught"][1]:  # [(814, 262, 936, 277)]
-            exit_button_x = (i[0] + i[2]) / 2 + 61
-            exit_button_y = (i[1] + i[3]) / 2 + 7
+            exit_button_x = (i[0] + i[2]) / 2 + 103
+            exit_button_y = (i[1] + i[3]) / 2 + 0
             print(exit_button_x, exit_button_y)
-            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=2)
+
+            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=0)
             self.my_recent_actions_list.append(("close_pokemon_summary", time.time()))
             self.logger.info(
                 "Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y)
@@ -127,10 +128,8 @@ if __name__ == "__main__":
     round = 0
 
     while True:
-        while pokeMMO.get_game_status() < 20:
+        while pokeMMO.get_game_status()["return_status"] < 20:
             round = 0
-            pokeMMO.roleController.move_left_right(0.8)
-            pokeMMO.roleController.move_left_right(0.8)
             pokeMMO.roleController.move_left_right(0.8)
 
         # start battle 有可能进医院黑屏了，有可能就是进入战斗了
@@ -142,11 +141,12 @@ if __name__ == "__main__":
             print("进入战斗")
             game_status = pokeMMO.get_game_status()
             enemy_status = pokeMMO.get_enemy_status()
-            print("game_status", game_status)
-            print("enemy_status", enemy_status)
+            # print("game_status", game_status)
+            # print("enemy_status", enemy_status)
             print("enemy_status.get(enemy_1_info)", enemy_status.get("enemy_1_info"))
             if (
-                game_status == 21 and enemy_status.get("enemy_1_info") is not None
+                game_status["return_status"] == 21
+                and enemy_status.get("enemy_1_info") is not None
             ):  # 当血量不够低的时候，就用技能1
                 print("当血量不够低的时候，就用技能1")
                 if (
@@ -173,8 +173,10 @@ if __name__ == "__main__":
                     pokeMMO.roleController.throw_pokeball()
                     round += 1
 
-            if game_status == 23:
+            if game_status["return_status"] == 23:
                 pokeMMO.roleController.close_pokemon_summary(game_status)
                 round = 0
                 break
-            sleep(1)
+            if game_status["black_ratio"] <= 0.35:
+                break
+            sleep(0.1)

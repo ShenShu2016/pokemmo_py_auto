@@ -14,14 +14,16 @@ class Controller:
     def move_to(self, x, y, tolerance=0):
         """Move the mouse to a specific position on the window."""
         self.window.set_focus()
-        self.window.click_input(button="move", coords=(x + tolerance, y + tolerance))
+        self.window.click_input(
+            button="move", coords=(int(x) + tolerance, int(y) + tolerance)
+        )
         sleep(0.05)
 
     def click(self, x=None, y=None, tolerance=0):
         """Click at the current mouse position or at a specific position if provided."""
         self.window.set_focus()
         if x is not None and y is not None:
-            self.window.click_input(coords=(x + tolerance, y + tolerance))
+            self.window.click_input(coords=(int(x) + tolerance, int(y) + tolerance))
             sleep(0.02)
         else:
             self.window.click_input()

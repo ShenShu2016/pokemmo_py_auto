@@ -39,10 +39,10 @@ class EnemyStatus:
         )
 
     def _check_enemy_number(self):
-        if self.pokeMMO.get_game_status() == 1:
+        if self.pokeMMO.get_game_status()["return_status"] == 1:
             self.enemy_status_dict = {"enemy_count": 0}
             return
-        if (self.pokeMMO.get_game_status() in [20, 21, 22, 23]) and (
+        if (self.pokeMMO.get_game_status()["return_status"] in [20, 21, 22, 23]) and (
             self.enemy_status_dict["enemy_count"] == 0
         ):
             hp_BRG_x_y_list = self.pokeMMO.find_items(
@@ -90,7 +90,7 @@ class EnemyStatus:
         # print("enemy_count:", self.enemy_status_dict["enemy_count"])
 
     def _check_enemy_hp(self):
-        if self.pokeMMO.get_game_status() == 21:  # battle_option
+        if self.pokeMMO.get_game_status()["return_status"] == 21:  # battle_option
             # Define the enemy hp bar coordinates
             enemy_hp_bar_coords = {
                 1: [(274, 151), (471, 155)],  # Enemy 1 HP coordinates

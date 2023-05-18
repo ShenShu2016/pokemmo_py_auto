@@ -162,9 +162,9 @@ class GameStatus:
         def check_battle_end_pokemon_caught():
             pokemon_summary_coords_list = self.pokeMMO.find_items(
                 img_BRG=self.img_BRG,
-                bottom_r=(1360, 487),
+                bottom_r=(1360, 487),  # ,(479, 12)
                 top_l=(316, 7),
-                temp_BRG=self.pokeMMO.pokemon_summary_BRG,
+                temp_BRG=self.pokeMMO.pokemon_summary_BRG,  # self.pokeMMO.Pokemon_Summary_Exit_Button_BRG,
                 threshold=0.99,
                 max_matches=2,
             )
@@ -205,7 +205,7 @@ class GameStatus:
             round(time.time() - current_time, 2),
         )
         print("game_status_dict", self.game_status_dict)
-        return return_status
+        return self.game_status_dict
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ def battle_and_catch(pokeMMO: PokeMMO):
 
         if stage == "walking":
             while stage == "walking":
-                if pokeMMO.get_game_status() == "BATTLE":
+                if pokeMMO.get_game_status()["return_status"] == "BATTLE":
                     stage = "battle"
                     break
 
