@@ -200,11 +200,11 @@ class GameStatus:
             (current_time, copy.deepcopy(self.game_status_dict))
         )
         # print the using time
-        print(
-            "                                                                                                     run time",
-            round(time.time() - current_time, 2),
-        )
-        print("game_status_dict", self.game_status_dict)
+        # print(
+        #     "                                                                                                     run time",
+        #     round(time.time() - current_time, 2),
+        # )
+        # print("game_status_dict", self.game_status_dict)
         return self.game_status_dict
 
 
