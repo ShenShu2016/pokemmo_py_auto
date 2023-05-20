@@ -27,10 +27,14 @@ class RoleController:
         self.my_recent_actions_list = deque(maxlen=1000)
         self.sweet_scent = 0
         self.false_swipe = 0
+        self.press_down_count = 5
 
     def move_left_right(self, delay: float):
         keys = ["a", "d"]
         random.shuffle(keys)
+        if self.press_down_count > 0:
+            keys = ["s", "s"]
+            self.press_down_count -= 1
 
         self.pokeMMO.controller.key_press(keys[0], delay + random.uniform(0, delay))
 
@@ -104,13 +108,13 @@ class RoleController:
 
     def restart_from_hospital(self):
         self.pokeMMO.controller.key_press("8")
-        sleep(5)
+        sleep(4.5)
         for i in range(0, 8):
             self.pokeMMO.controller.key_press("z", 0.15)
             sleep(0.2)
         self.pokeMMO.controller.key_press("s", 5)
-        self.pokeMMO.controller.key_press("d", 0.75)
-        self.pokeMMO.controller.key_press("s", 2)
+        # self.pokeMMO.controller.key_press("d", 0.75)
+        # self.pokeMMO.controller.key_press("s", 2)
 
         self.pokeMMO.controller.key_press("z", 1)
         self.pokeMMO.controller.key_press("z", 1)
@@ -140,7 +144,7 @@ if __name__ == "__main__":
 
         while pokeMMO.get_game_status()["return_status"] < 20:
             if (
-                pokeMMO.roleController.false_swipe == 0
+                pokeMMO.roleController.false_swipe <= 0
                 and pokeMMO.roleController.sweet_scent == 0
             ):
                 pokeMMO.roleController.restart_from_hospital()
