@@ -49,6 +49,7 @@ class RoleController:
         self.pokeMMO.controller.key_press("z", 0.2)
         self.false_swipe -= 1
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
+        sleep(5)
         print("Using False Swipe")
 
     def fight_skill_2_from_s21(self):  # Spore

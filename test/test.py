@@ -1,51 +1,33 @@
-import psutil
+# -*- coding: utf-8 -*-
+# import ctypes
 
+# # 定义内存地址
+# address = 0xEAF15EDA
 
-def get_pid(name):
-    for proc in psutil.process_iter(["pid", "name"]):
-        if proc.info["name"] == name:
-            return proc.info["pid"]
-    return None
+# # 读取内存数据
+# data = (ctypes.c_ushort * 1)()
+# ctypes.memmove(data, address, 2)
 
+# # 获取数据值并以十六进制字符串形式表示
+# data_value = data[0]
+# data_hex = format(data_value, "04X")
 
-# Usage:
-pid = get_pid("javaw.exe")
-print(pid)
+# print(data_hex)
 
 
 import ctypes
 
-# The array of bytes to search for
-aob = bytes([0x45, 0x0F, 0xBE, 0x4A, 0x10, 0x45])
+print(("jsdklfjsdlfk"))
 
-# Open the process
-PROCESS_ALL_ACCESS = 0x000F0000 | 0x00100000 | 0xFFF
-process_handle = ctypes.windll.kernel32.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
 
-# The range of addresses to search
-start_address = 0x00000000
-end_address = 0x7FFFFFFF
+def read_memory(address):
+    # Cast the address to a pointer
+    ptr = ctypes.cast(address, ctypes.POINTER(ctypes.c_int))
 
-# The size of the memory to read at once
-chunk_size = 4096
+    # Dereference the pointer
+    return ptr.contents.value
 
-# The buffer to read the memory into
-buffer = (ctypes.c_ubyte * chunk_size)()
 
-# The number of bytes read
-bytes_read = ctypes.c_ulong(0)
-
-# Loop over the memory
-for address in range(start_address, end_address, chunk_size):
-    # Read the memory
-    ctypes.windll.kernel32.ReadProcessMemory(
-        process_handle, address, buffer, chunk_size, ctypes.byref(bytes_read)
-    )
-
-    # Search for the array of bytes
-    for i in range(chunk_size - len(aob)):
-        if bytes(buffer[i : i + len(aob)]) == aob:
-            print("Found array of bytes at address: 0x%X" % (address + i))
-
-# Close the process handle
-ctypes.windll.kernel32.CloseHandle(process_handle)
+address = 0x222F10381F1  # the address you want to read
+print(read_memory(address))
+print(("jsdklfjsdlfk"))
