@@ -138,9 +138,9 @@ if __name__ == "__main__":
 
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
-    round = 0
 
     while True:
+        round = 0
         sleep(0.5)
 
         while pokeMMO.get_game_status()["return_status"] < 20:

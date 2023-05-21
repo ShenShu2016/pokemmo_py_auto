@@ -203,5 +203,5 @@ class EnemyStatus:
         self._check_enemy_number()
         self._check_enemy_hp()
         self._check_enemy_name_lv()
-        # print("enemy_status_dict", self.enemy_status_dict)
+        print("enemy_status_dict", self.enemy_status_dict)
         return self.enemy_status_dict

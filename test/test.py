@@ -1,33 +1,31 @@
-# -*- coding: utf-8 -*-
-# import ctypes
-
-# # 定义内存地址
-# address = 0xEAF15EDA
-
-# # 读取内存数据
-# data = (ctypes.c_ushort * 1)()
-# ctypes.memmove(data, address, 2)
-
-# # 获取数据值并以十六进制字符串形式表示
-# data_value = data[0]
-# data_hex = format(data_value, "04X")
-
-# print(data_hex)
-
-
 import ctypes
 
-print(("jsdklfjsdlfk"))
+
+class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ("BaseAddress", ctypes.c_void_p),
+        ("AllocationBase", ctypes.c_void_p),
+        ("AllocationProtect", ctypes.c_ulong),
+        ("RegionSize", ctypes.c_size_t),
+        ("State", ctypes.c_ulong),
+        ("Protect", ctypes.c_ulong),
+        ("Type", ctypes.c_ulong),
+    ]
 
 
-def read_memory(address):
-    # Cast the address to a pointer
-    ptr = ctypes.cast(address, ctypes.POINTER(ctypes.c_int))
+def read_memory(address, size):
+    kernel32 = ctypes.windll.kernel32
+    buffer = ctypes.create_string_buffer(size)
+    mbi = MEMORY_BASIC_INFORMATION()
+    if kernel32.VirtualQuery(
+        ctypes.c_void_p(address), ctypes.byref(mbi), ctypes.sizeof(mbi)
+    ):
+        if kernel32.ReadProcessMemory(
+            kernel32.GetCurrentProcess(), ctypes.c_void_p(address), buffer, size, 0
+        ):
+            return buffer.raw
 
-    # Dereference the pointer
-    return ptr.contents.value
 
-
-address = 0x222F10381F1  # the address you want to read
-print(read_memory(address))
-print(("jsdklfjsdlfk"))
+address = 0xF2A133E1
+size = 2
+print(read_memory(address, size))

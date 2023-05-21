@@ -2,8 +2,8 @@ import json
 import os
 
 # Define the directory to scan and the configuration file
-directory = r"C:\Users\Shen\Documents\GitHub\pokemmo_py_auto\data"
-config_file = r"C:\Users\Shen\Documents\GitHub\pokemmo_py_auto\configure.json"
+directory = r"C:\Users\SS\Documents\GitHub\pokemmo_py_auto\data"
+config_file = r"C:\Users\SS\Documents\GitHub\pokemmo_py_auto\configure.json"
 
 # Get a list of all files in the directory
 files = os.listdir(directory)

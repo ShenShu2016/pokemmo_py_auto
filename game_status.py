@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import time
 from collections import deque
 from typing import TYPE_CHECKING
@@ -96,7 +97,11 @@ class GameStatus:
             gray_image = cv2.cvtColor(self.img_BRG, cv2.COLOR_BGR2GRAY)
 
             timestamp_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-            filename = f"screenshot\image_{timestamp_str}.png"
+            folder_path = "screenshot"
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+
+            filename = os.path.join(folder_path, f"image_{timestamp_str}.png")
             cv2.imwrite(filename, gray_image)
 
             if self.recent_images:
@@ -204,7 +209,7 @@ class GameStatus:
         #     "                                                                                                     run time",
         #     round(time.time() - current_time, 2),
         # )
-        # print("game_status_dict", self.game_status_dict)
+        print("game_status_dict", self.game_status_dict)
         return self.game_status_dict
 
 
