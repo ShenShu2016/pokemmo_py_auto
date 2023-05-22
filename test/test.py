@@ -1,31 +1,20 @@
-import ctypes
+from subprocess import check_output
 
+# 汇编指令
+assembly_code = """
+push eax
+lea eax, [r9+10]
+mov [0x12345678], eax
+pop eax
+"""
 
-class MEMORY_BASIC_INFORMATION(ctypes.Structure):
-    _fields_ = [
-        ("BaseAddress", ctypes.c_void_p),
-        ("AllocationBase", ctypes.c_void_p),
-        ("AllocationProtect", ctypes.c_ulong),
-        ("RegionSize", ctypes.c_size_t),
-        ("State", ctypes.c_ulong),
-        ("Protect", ctypes.c_ulong),
-        ("Type", ctypes.c_ulong),
-    ]
+# 调用 NASM 进行汇编
+machine_code = check_output(
+    ["nasm", "-f", "bin"], input=assembly_code, encoding="ascii"
+)
 
+# 将字符串转换为字节码
+machine_code = bytes.fromhex(machine_code.strip())
 
-def read_memory(address, size):
-    kernel32 = ctypes.windll.kernel32
-    buffer = ctypes.create_string_buffer(size)
-    mbi = MEMORY_BASIC_INFORMATION()
-    if kernel32.VirtualQuery(
-        ctypes.c_void_p(address), ctypes.byref(mbi), ctypes.sizeof(mbi)
-    ):
-        if kernel32.ReadProcessMemory(
-            kernel32.GetCurrentProcess(), ctypes.c_void_p(address), buffer, size, 0
-        ):
-            return buffer.raw
-
-
-address = 0xF2A133E1
-size = 2
-print(read_memory(address, size))
+# 打印机器码
+print(machine_code)
