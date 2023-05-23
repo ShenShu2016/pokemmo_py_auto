@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 import subprocess
 
 # Constants
-MP3_FILE_PATH = r"C:\Users\Shen\Documents\GitHub\pokemmo_py_auto\data\unravel.mp3"
+MP3_FILE_PATH = "unravel.mp3"
 DEBUG = True
 BATTLE_OPTION_STATUS = 21
 ENEMY_FOUND_STATUSES = [20, 21, 22, 23]

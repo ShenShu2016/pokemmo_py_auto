@@ -37,17 +37,17 @@ class PokeMMO:
         pytesseract.pytesseract.tesseract_cmd = self.config["tesseract"]
 
         # Load the template images
+        loaded_asserts_itmem_count = 0
         for key, path in self.config.items():
             if path.endswith(".png"):
+                loaded_asserts_itmem_count += 1
                 # Create variable name
                 var_name = key.replace("_path", "_BRG")
                 # Load image and set it as instance variable
                 setattr(self, var_name, cv2.imread(path, cv2.IMREAD_COLOR))
+        logger.info(f"Loaded {loaded_asserts_itmem_count} asserts.")
 
-                print(
-                    f"Successfully initialized variable: {var_name} with path: {path}"
-                )
-        self.pokedex = pd.read_csv("data\clean_pokedex.csv")
+        self.pokedex = pd.read_csv("asserts\clean_pokedex.csv")
         print(self.pokedex.head())
         SetForegroundWindow = windll.user32.SetForegroundWindow
         SetForegroundWindow(self.handle)
