@@ -176,21 +176,23 @@ class MemoryInjector:
         # print(data)
         value = int.from_bytes(data, byteorder="little")
         # print(value)
-        x_address = value - 4
-        data = self.pm.read_bytes(x_address, 10)
+        x_address = value - 4 - 80
+        # print('x_address',x_address,hex(x_address))
+        data = self.pm.read_bytes(x_address, 10 + 80)
         # print("x_y_map_direction", data)
-        self.x_coords = self.print_and_convert_bytes(data, 0, 2)
-        self.y_coords = self.print_and_convert_bytes(data, 2, 4)
-        self.map_number = self.print_and_convert_bytes(data, 4, 6)
-        self.face_dir = hex(data[9])[-1]
+        self.x_coords = self.print_and_convert_bytes(data, 0 + 80, 2 + 80)
+        self.y_coords = self.print_and_convert_bytes(data, 2 + 80, 4 + 80)
+        self.map_number = self.print_and_convert_bytes(data, 4 + 80, 5 + 80)
+        self.face_dir = hex(data[9 + 80])[-1]
+        self.transport = self.print_and_convert_bytes(data, 0, 2)
         data_dict = {
             "x_coords": self.x_coords,
             "y_coords": self.y_coords,
-            "map_number": self.map_number,
+            "map_number": (int(data[4 + 80]), data[4 + 80 + 2], data[4 + 80 + 1]),
             "face_dir": self.face_dir,
+            "transport": self.transport,
         }
         print(data_dict)
-        # print("face_dir", self.face_dir)
 
 
 if __name__ == "__main__":
