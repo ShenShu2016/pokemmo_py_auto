@@ -1,6 +1,9 @@
+import json
+import os
 import random
 import re
 import struct
+import time
 
 import pymem
 from capstone import *
@@ -54,7 +57,7 @@ def get_lea_magic_number(aob_hex_list) -> str:
     raise Exception("No lea magic number found")
 
 
-def split_bytes_to_int(self, data, start, end):
+def split_bytes_to_int(data, start, end):
     converted = int.from_bytes(data[start:end], byteorder="little")
     return converted
 
@@ -63,43 +66,105 @@ class MemoryInjector:
     def __init__(self, target_process):
         self.target_process = target_process
         self.pm = pymem.Pymem(target_process)
-        self.real_aob_offset = None
+        self.memory_info_dict = {}
+
+        # Adding a path to your json file
+        self.json_file_path = "injector_memory.json"
+
         self.aob_address_list = []
         self.aob_hex_list = []
-        self.aob_address_list = []
-        self.aob_address = 0  # 这个要放在aob_hex_list后面
-        self.TR = pymem.memory.allocate_memory(self.pm.process_handle, 4)
+        self.aob_address = 0
+        self.TR = None
         self.newmem = None
+        # Try to read the stored values from the json file
+        if os.path.exists(self.json_file_path):
+            with open(self.json_file_path, "r") as json_file:
+                data = json.load(json_file)
+                self.aob_address = data.get("aob_address", 0)
+                self.TR = data.get("TR", None)
+                self.newmem = data.get("newmem", None)
+                print(
+                    f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                )
 
-        self.aob_address = self.aob_scan()
+            # Try to read data
+            try:
+                self.read_data()
+                print(
+                    f"Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                )
+            except Exception as e:
+                print(
+                    "Reading data failed with stored addresses, starting normal scanning and injection process:",
+                    e,
+                )
+                self.aob_address = self.aob_scan()
+                self.try_the_aob()
+        else:
+            self.aob_address = self.aob_scan()
+            self.try_the_aob()
 
     def aob_scan(self):
         for i in range(10):
-            aob_address_list = pattern_scan_all(
+            self.aob_address_list = pattern_scan_all(
                 handle=self.pm.process_handle,
                 pattern=b"\\x0F\\xBE.\\x10.\\x0F\\xB6.\\x12",  # .\\x8B.\\x24\\x45\\x0F\\xB6.\\x11',#pattern=bytes.fromhex(self.aob_dict[i]['aob']),
                 return_multiple=True,
             )
-            print("aob_address_list:", aob_address_list)
-            if len(aob_address_list) >= 1:
-                print(
-                    f"{i} try, aob_address_list offset -1: {aob_address_list} Not unique"
-                )
-                aob_address = aob_address_list[0] - 1
-                self.aob_hex_list = [
-                    hex(b)[2:].zfill(2).upper()
-                    for b in self.pm.read_bytes(aob_address, 5)
-                ]  # ['45', '8B', '55', '18', '45']
-                print("aob_hex_list:", self.aob_hex_list, aob_address)
-                if self.aob_hex_list[0] not in ["45", "41"]:
-                    continue
-                return aob_address
-            else:
+            print("aob_address_list:", self.aob_address_list)
+            if len(self.aob_address_list) >= 1:
+                self.aob_address_list = [
+                    j
+                    for j in self.aob_address_list
+                    if [
+                        hex(b)[2:].zfill(2).upper()
+                        for b in self.pm.read_bytes(j - 1, 5)
+                    ][0]
+                    in ["45", "41"]
+                ]
+                print("aob_address_list after 45 41:", self.aob_address_list)
+                return
+            if len(self.aob_address_list) < 1:
                 print(f"{i} try, retrying...")
+                time.sleep(1)
         raise Exception("No aob found")
+
+    def try_the_aob(self):
+        print("Trying the aob")
+        print("aob_address_list:", self.aob_address_list)
+        for i in self.aob_address_list:
+            self.aob_address = i - 1  # 必定要偏移
+            self.aob_hex_list = [
+                hex(b)[2:].zfill(2).upper()
+                for b in self.pm.read_bytes(self.aob_address, 5)
+            ]
+            print("aob_hex_list:", self.aob_hex_list, self.aob_address)
+
+            try:
+                self.inject_memory()
+                time.sleep(1)
+                self.read_data()
+                with open(self.json_file_path, "w") as json_file:
+                    json.dump(
+                        {
+                            "aob_address": self.aob_address,
+                            "TR": self.TR,
+                            "newmem": self.newmem,
+                            "timestamp": time.time(),  # current timestamp
+                        },
+                        json_file,
+                    )
+
+                print(
+                    f"Injected, aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}, aob_hex_list: {self.aob_hex_list}"
+                )
+            except Exception as e:
+                print(e)
+                continue
 
     def inject_memory(self):
         # Existing code before this...
+        self.TR = pymem.memory.allocate_memory(self.pm.process_handle, 4)
         self.TR_address_reversed_formatted = format_address(self.TR)
         lea_magic_number = get_lea_magic_number(self.aob_hex_list)
         lea_eax_rx_x = ["41", "8D", lea_magic_number, "10"]
@@ -182,29 +247,27 @@ class MemoryInjector:
         self.map_number = split_bytes_to_int(data, 4 + 80, 5 + 80)
         self.face_dir = hex(data[9 + 80])[-1]
         self.transport = split_bytes_to_int(data, 0, 2)
-        data_dict = {
+        self.memory_info_dict = {
             "x_coords": self.x_coords,
             "y_coords": self.y_coords,
             "map_number": (int(data[4 + 80]), data[4 + 80 + 2], data[4 + 80 + 1]),
             "face_dir": self.face_dir,
             "transport": self.transport,
         }
-        print(data_dict)
+        print(self.memory_info_dict)
 
 
 if __name__ == "__main__":
     injector = MemoryInjector("javaw.exe")
-    print(injector.aob_address)
-    print(hex(injector.aob_address))
-    print(injector.TR)
-    print(hex(injector.TR))
+    # print(injector.aob_address)
+    # print(hex(injector.aob_address))
+    # print(injector.TR)
+    # print(hex(injector.TR))
 
-    injector.inject_memory()
-    print(injector.newmem, hex(injector.newmem))
-    import time
-
-    time.sleep(5)
-    injector.read_data()
+    # injector.inject_memory()
+    # print(injector.newmem, hex(injector.newmem))
+    # time.sleep(5)
+    # injector.read_data()
 # self.aob_dict = {
 #     "r8+10": {"aob": "41 0F BE 48 10 45 0F", "offset": 0},
 #     "r9+10": {"aob": "18 41 0F BE 71 10 45", "offset": 1},
