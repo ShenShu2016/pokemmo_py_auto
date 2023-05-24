@@ -204,7 +204,7 @@ class GameStatus:
         self.recent_status_game_status_dict_list.append(
             (current_time, copy.deepcopy(self.game_status_dict))
         )
-        print("game_status_dict", self.game_status_dict)
+        # print("game_status_dict", self.game_status_dict)
         return self.game_status_dict
 
 

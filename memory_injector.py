@@ -62,9 +62,9 @@ def split_bytes_to_int(data, start, end):
 
 
 class MemoryInjector:
-    def __init__(self, target_process):
-        self.target_process = target_process
-        self.pm = pymem.Pymem(target_process)
+    def __init__(self):
+        self.target_process = "javaw.exe"
+        self.pm = pymem.Pymem(self.target_process)
         self.memory_info_dict = {}
 
         # Adding a path to your json file
@@ -238,9 +238,9 @@ class MemoryInjector:
         data = self.pm.read_bytes(self.TR, 4)
         value = int.from_bytes(data, byteorder="little")
         x_address = value - 4 - 80
-        print("x_address", x_address, hex(x_address))
+        # print("x_address", x_address, hex(x_address))
         data = self.pm.read_bytes(x_address, 10 + 80)
-        print("x_y_map_direction", data)
+        # print("x_y_map_direction", data)
         self.x_coords = split_bytes_to_int(data, 0 + 80, 2 + 80)
         self.y_coords = split_bytes_to_int(data, 2 + 80, 4 + 80)
         self.map_number = split_bytes_to_int(data, 4 + 80, 5 + 80)
@@ -253,11 +253,12 @@ class MemoryInjector:
             "face_dir": self.face_dir,
             "transport": self.transport,
         }
-        print(self.memory_info_dict)
+        return self.memory_info_dict
+        # print(self.memory_info_dict)
 
 
 if __name__ == "__main__":
-    injector = MemoryInjector("javaw.exe")
+    injector = MemoryInjector("")
     # print(injector.aob_address)
     # print(hex(injector.aob_address))
     # print(injector.TR)

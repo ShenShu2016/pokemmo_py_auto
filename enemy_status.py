@@ -184,8 +184,8 @@ class EnemyStatus:
                         # go self.pokedex to get the pokemon info
                         name_ORC = name_Lv_ORC.split("Lv")[0].strip()
                         lv_orc = name_Lv_ORC.split("Lv")[1].strip()
-                        print("name_ORC:", name_ORC)
-                        print("lv_orc:", lv_orc)
+                        # print("name_ORC:", name_ORC)
+                        # print("lv_orc:", lv_orc)
                         info = self.pokeMMO.pokedex.loc[
                             self.pokeMMO.pokedex["Pokemon"] == name_ORC
                         ]
@@ -203,5 +203,5 @@ class EnemyStatus:
         self._check_enemy_number()
         self._check_enemy_hp()
         self._check_enemy_name_lv()
-        print("enemy_status_dict", self.enemy_status_dict)
+        # print("enemy_status_dict", self.enemy_status_dict)
         return self.enemy_status_dict

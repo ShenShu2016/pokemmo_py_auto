@@ -12,6 +12,8 @@ import pytesseract
 
 from enemy_status import EnemyStatus
 from game_status import GameStatus
+from log_print_save import LogPrintSave
+from memory_injector import MemoryInjector
 from pokemmoUI import PokemmoUI
 from role_controller import RoleController
 from utils.main.controller import Controller
@@ -67,17 +69,22 @@ class PokeMMO:
         self.state_dict_lock = threading.Lock()
         self.state_dict = {}
 
+        self.memory_status_lock = threading.Lock()
+        self.memory_status = {}
+
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
 
         self.controller = Controller(handle=self.handle)
         self.roleController = RoleController(self)
         self.word_recognizer = Word_Recognizer()
-        self.ui = PokemmoUI(self)
+        self.memory_injector = MemoryInjector()
+        self.log_print_save = LogPrintSave(self)
 
         # Initialize stop flag for threads
         self.stop_threads_flag = False
         # Start the threads
+        self.ui = PokemmoUI(self)
         self.start_threads()
 
     def start_threads(self):
@@ -85,6 +92,10 @@ class PokeMMO:
         threading.Thread(target=self.update_game_status).start()
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
+        threading.Thread(target=self.update_memory_status).start()
+        threading.Thread(target=self.log_print_save.update_logs).start()
+        threading.Thread(target=self.log_print_save.print_logs).start()
+        threading.Thread(target=self.log_print_save.save_logs).start()
 
     def stop_threads(self):
         self.stop_threads_flag = True
@@ -121,19 +132,19 @@ class PokeMMO:
             new_game_state = self.game_status_checker.check_game_status()
             with self.game_status_lock:
                 self.game_status = new_game_state
-                time.sleep(1)  # wait for 3 seconds
+            time.sleep(0.2)  # wait for 3 seconds
 
     def update_enemy_status(self):
         while not self.stop_threads_flag:
             new_enemy_status = self.enemy_status_checker.check_enemy_status()
             with self.enemy_status_lock:
                 self.enemy_status = new_enemy_status
-                time.sleep(1)
+            time.sleep(0.2)
 
     def update_state_dict(self):
         while not self.stop_threads_flag:
             # Update every 30 seconds
-            time.sleep(30)
+            time.sleep(0.5)
             my_address = self.get_text_from_box_coords((30, 0), (250, 25))
             my_money = self.get_text_from_box_coords(
                 (37, 30),
@@ -142,7 +153,7 @@ class PokeMMO:
             )
             with self.state_dict_lock:
                 current_time = datetime.datetime.now()
-                self.state_dict[current_time] = {
+                self.state_dict[str(current_time)] = {
                     "address": my_address,
                     "money": my_money,
                 }
@@ -154,6 +165,13 @@ class PokeMMO:
                     oldest_entry = min(self.state_dict.keys())
                     del self.state_dict[oldest_entry]
                 # print the most recent state_dict
+
+    def update_memory_status(self):
+        while not self.stop_threads_flag:
+            new_memory_status = self.memory_injector.read_data()
+            with self.memory_status_lock:
+                self.memory_status = new_memory_status
+            time.sleep(0.2)
 
     # Use this method to safely access the state_dict variable from other threads
     def get_state_dict(self):
@@ -172,6 +190,10 @@ class PokeMMO:
     def get_enemy_status(self):
         with self.enemy_status_lock:
             return self.enemy_status
+
+    def get_memory_status(self):
+        with self.memory_status_lock:
+            return self.memory_status
 
     def get_latest_img_BRG(self):
         with self.latest_img_BRG_lock:

@@ -162,3 +162,5 @@ cython_debug/
 
 # ignore all files under screenshot folder
 screenshot/*
+
+logs/*
