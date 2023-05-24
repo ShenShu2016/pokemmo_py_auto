@@ -1,6 +1,9 @@
+import random
+import re
 import struct
 
 import pymem
+from capstone import *
 from pymem.pattern import pattern_scan_all
 
 
@@ -8,77 +11,36 @@ class MemoryInjector:
     def __init__(self, target_process):
         self.target_process = target_process
         self.pm = pymem.Pymem(target_process)
-        self.aob_dict = {
-            "r8+10": {"aob": "41 0F BE 48 10 45 0F", "offset": 0},
-            "r9+10": {"aob": "18 41 0F BE 71 10 45", "offset": 1},
-            "r10+10": {"aob": "41 0F BE 72 10 45 0F B6", "offset": 0},
-            "r11+10": {"aob": "45 0F BE 4B 10 41 0F B6", "offset": 0},
-            "r8+10_2": {"aob": "41 0F BE 78 10 45", "offset": 0},
-            "r10+10_2": {"aob": "41 0F BE 5A 10", "offset": 0},
-            "r10+10_3": {"aob": "45 0F BE 4A 10 45", "offset": 0},
-            # Add more keys here as needed
-        }
-        # Define byte sequences for lea and movsx instructions
-        self.lea_dict = {
-            "r9+10": ["41", "8D", "41", "10"],
-            "r10+10": ["41", "8D", "42", "10"],
-            "r10+10_2": ["41", "8D", "42", "10"],  # 都是一样的 _2
-            "r10+10_3": ["41", "8D", "42", "10"],  # 这个和特征码一样
-            "r11+10": ["41", "8D", "43", "10"],
-            "r8+10": ["41", "8D", "40", "10"],
-            "r8+10_2": ["41", "8D", "40", "10"]
-            # Add more keys here as needed
-        }
-        self.movsx_dict = {
-            "r9+10": ["41", "0F", "BE", "71", "10"],
-            "r10+10": ["41", "0F", "BE", "72", "10"],
-            "r10+10_2": ["41", "0F", "BE", "5A", "10"],  # 这个和特征码一样
-            "r10+10_3": ["45", "0F", "BE", "4A", "10"],  # 这个和特征码一样
-            "r11+10": ["45", "0F", "BE", "4B", "10"],
-            "r8+10": ["41", "0F", "BE", "48", "10"],
-            "r8+10_2": ["41", "0F", "BE", "78", "10"]
-            # Add more keys here as needed
-        }
         self.real_aob_offset = None
-        self.aob_address = self.aob_scan()
+        self.aob_hex_list = []
+        self.aob_address = self.aob_scan()  # 这个要放在aob_hex_list后面
         self.TR = pymem.memory.allocate_memory(self.pm.process_handle, 4)
         self.newmem = None
 
     def aob_scan(self):
-        for i in self.aob_dict:
+        for i in range(10):
             aob_address_list = pattern_scan_all(
                 handle=self.pm.process_handle,
-                pattern=bytes.fromhex(self.aob_dict[i]["aob"]),
+                pattern=b"\\x0F\\xBE.\\x10.\\x0F\\xB6.\\x12",  # .\\x8B.\\x24\\x45\\x0F\\xB6.\\x11',#pattern=bytes.fromhex(self.aob_dict[i]['aob']),
                 return_multiple=True,
             )
-            if len(aob_address_list) == 1:
-                self.real_aob_offset = i
-                real_aob_address = aob_address_list[0] + self.aob_dict[i]["offset"]
+            print("aob_address_list:", aob_address_list)
+            if len(aob_address_list) >= 1:
                 print(
-                    f"AOB Found!!! {i}, value is {self.aob_dict[i]['aob']}",
-                    "aob_address",
-                    i,
-                    real_aob_address,
+                    f"{i} try, aob_address_list offset -1: {aob_address_list} Not unique"
                 )
-                return real_aob_address
-            elif len(aob_address_list) > 1:
-                print(
-                    f"key is {i}, value is {self.aob_dict[i]['aob']}",
-                    "aob_address",
-                    i,
-                    aob_address_list,
-                    "not unique",
-                )
-                continue
+                aob_address = random.choice(aob_address_list) - 1
+                self.aob_hex_list = [
+                    hex(b)[2:].zfill(2).upper()
+                    for b in self.pm.read_bytes(aob_address, 5)
+                ]  # ['45', '8B', '55', '18', '45']
+                print("aob_hex_list:", self.aob_hex_list, aob_address)
+                if self.aob_hex_list[0] not in ["45", "41"]:
+                    continue
+                return aob_address
             else:
-                print(
-                    f"key is {i}, value is {self.aob_dict[i]['aob']}",
-                    "aob_address",
-                    i,
-                    "not found",
-                )
-                continue
-        return None
+                print(f"{i} try, retrying...")
+        raise Exception("No aob found")
 
     @staticmethod
     def format_address(address, length=8):
@@ -96,18 +58,58 @@ class MemoryInjector:
         offset = target_addr - (jmp_addr + 5)
         return offset
 
+    def get_lea_magic_number(self) -> str:
+        # Dictionary to map registers to hex numbers
+        register_to_hex = {
+            "r8": "40",
+            "r9": "41",
+            "r10": "42",
+            "r11": "43",
+            "r12": "44",
+            "r13": "45",
+            "r14": "46",
+            "r15": "47",
+        }
+
+        hex_str = "".join(self.aob_hex_list)
+        print(hex_str)
+        # Convert the hex string to bytes
+        shellcode = bytes.fromhex(hex_str)
+        # The first argument is the architecture type, CS_ARCH_X86 for x86.
+        # The second argument is the mode, CS_MODE_64 for 64-bit mode.
+        md = Cs(CS_ARCH_X86, CS_MODE_64)
+
+        # Disassemble the code
+        for i in md.disasm(shellcode, 0x1000):
+            print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+            op_str = i.op_str
+
+            # Find all occurrences of "r" followed by a number
+            matches = re.findall(r"r\d+", op_str)
+            if matches:
+                # Return the hex value corresponding to the register
+                register = matches[-1]  # assuming you want the first match
+                if register in register_to_hex:
+                    return register_to_hex[register]
+            else:
+                raise Exception("No register found in operation")
+
+        raise Exception("No lea magic number found")
+
     def inject_memory(self):
         # Existing code before this...
         self.TR_address_reversed_formatted = self.format_address(self.TR)
         # Add your specific offsets here
-        lea_eax_rx_x = self.lea_dict[self.real_aob_offset]
-        movsx_esi_byte_ptr_rx_x = self.movsx_dict[self.real_aob_offset]
+        print("self.aob_hex_list:", self.aob_hex_list)
+        lea_magic_number = self.get_lea_magic_number()
+        lea_eax_rx_x = ["41", "8D", lea_magic_number, "10"]
+        # movsx_esi_byte_ptr_rx_x = self.movsx_dict[self.real_aob_offset]
         push_rax = ["50"]
         move_TR_eax = ["A3"] + list(self.TR_address_reversed_formatted.split(" "))
         pop_rax = ["58"]
         jmp_place = ["E9"]
         part_head_combine = (
-            push_rax + lea_eax_rx_x + move_TR_eax + pop_rax + movsx_esi_byte_ptr_rx_x
+            push_rax + lea_eax_rx_x + move_TR_eax + pop_rax + self.aob_hex_list
         )
         shell_code_len = len(part_head_combine) + 1 + 4
 
@@ -120,9 +122,9 @@ class MemoryInjector:
         jmp_addr_1 = len(part_head_combine) + self.newmem
         target_addr_1 = self.aob_address + 5
         offset_1 = self.calculate_jmp_offset(jmp_addr_1, target_addr_1)
-        # print("offset_1", offset_1)
+        print("offset_1", offset_1)
         offset_1_le = self.to_signed_32_bit_le(offset_1)
-        # print("offset_1_le", offset_1_le)
+        print("offset_1_le", offset_1_le)
 
         # Create shell code
         hex_values = (
@@ -130,7 +132,7 @@ class MemoryInjector:
             + jmp_place
             + [offset_1_le[0:1], offset_1_le[1:2], offset_1_le[2:3], offset_1_le[3:4]]
         )
-        # print("newmem hex_values", hex_values)
+        print("newmem hex_values", hex_values)
         inject_hex_shellcode = self.convert_hex_values_to_bytes(hex_values)
 
         # Write shell code to new memory
@@ -176,7 +178,7 @@ class MemoryInjector:
 
     def read_data(self):
         data = self.pm.read_bytes(self.TR, 4)
-        # print(data)
+        print(data)
         value = int.from_bytes(data, byteorder="little")
         print("value", value)
         x_address = value - 4 - 80
@@ -211,3 +213,34 @@ if __name__ == "__main__":
 
     time.sleep(5)
     injector.read_data()
+# self.aob_dict = {
+#     "r8+10": {"aob": "41 0F BE 48 10 45 0F", "offset": 0},
+#     "r9+10": {"aob": "18 41 0F BE 71 10 45", "offset": 1},
+#     "r10+10": {"aob": "41 0F BE 72 10 45 0F B6", "offset": 0},
+#     "r11+10": {"aob": "45 0F BE 4B 10 41 0F B6", "offset": 0},
+#     "r8+10_2": {"aob": "41 0F BE 78 10 45", "offset": 0},
+#     "r10+10_2": {"aob": "41 0F BE 5A 10", "offset": 0},
+#     "r10+10_3": {"aob": "45 0F BE 4A 10 45", "offset": 0},
+#     # Add more keys here as needed
+# }
+# # Define byte sequences for lea and movsx instructions
+# self.lea_dict = {
+#     "r9+10": ["41", "8D", "41", "10"],
+#     "r10+10": ["41", "8D", "42", "10"],
+#     "r10+10_2": ["41", "8D", "42", "10"],  # 都是一样的 _2
+#     "r10+10_3": ["41", "8D", "42", "10"],  #
+#     "r11+10": ["41", "8D", "43", "10"],
+#     "r8+10": ["41", "8D", "40", "10"],
+#     "r8+10_2": ["41", "8D", "40", "10"]
+#     # Add more keys here as needed
+# }
+# self.movsx_dict = {
+#     "r9+10": ["41", "0F", "BE", "71", "10"],
+#     "r10+10": ["41", "0F", "BE", "72", "10"],
+#     "r10+10_2": ["41", "0F", "BE", "5A", "10"],  # 这个和特征码一样
+#     "r10+10_3": ["45", "0F", "BE", "4A", "10"],  # 这个和特征码一样
+#     "r11+10": ["45", "0F", "BE", "4B", "10"],
+#     "r8+10": ["41", "0F", "BE", "48", "10"],
+#     "r8+10_2": ["41", "0F", "BE", "78", "10"]
+#     # Add more keys here as needed
+# }
