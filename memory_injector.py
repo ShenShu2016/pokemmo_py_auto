@@ -15,6 +15,7 @@ class MemoryInjector:
             "r11+10": {"aob": "45 0F BE 4B 10 41 0F B6", "offset": 0},
             "r8+10_2": {"aob": "41 0F BE 78 10 45", "offset": 0},
             "r10+10_2": {"aob": "41 0F BE 5A 10", "offset": 0},
+            "r10+10_3": {"aob": "45 0F BE 4A 10 45", "offset": 0},
             # Add more keys here as needed
         }
         # Define byte sequences for lea and movsx instructions
@@ -22,6 +23,7 @@ class MemoryInjector:
             "r9+10": ["41", "8D", "41", "10"],
             "r10+10": ["41", "8D", "42", "10"],
             "r10+10_2": ["41", "8D", "42", "10"],  # 都是一样的 _2
+            "r10+10_3": ["41", "8D", "42", "10"],  # 这个和特征码一样
             "r11+10": ["41", "8D", "43", "10"],
             "r8+10": ["41", "8D", "40", "10"],
             "r8+10_2": ["41", "8D", "40", "10"]
@@ -31,6 +33,7 @@ class MemoryInjector:
             "r9+10": ["41", "0F", "BE", "71", "10"],
             "r10+10": ["41", "0F", "BE", "72", "10"],
             "r10+10_2": ["41", "0F", "BE", "5A", "10"],  # 这个和特征码一样
+            "r10+10_3": ["45", "0F", "BE", "4A", "10"],  # 这个和特征码一样
             "r11+10": ["45", "0F", "BE", "4B", "10"],
             "r8+10": ["41", "0F", "BE", "48", "10"],
             "r8+10_2": ["41", "0F", "BE", "78", "10"]
@@ -175,11 +178,11 @@ class MemoryInjector:
         data = self.pm.read_bytes(self.TR, 4)
         # print(data)
         value = int.from_bytes(data, byteorder="little")
-        # print(value)
+        print("value", value)
         x_address = value - 4 - 80
-        # print('x_address',x_address,hex(x_address))
+        print("x_address", x_address, hex(x_address))
         data = self.pm.read_bytes(x_address, 10 + 80)
-        # print("x_y_map_direction", data)
+        print("x_y_map_direction", data)
         self.x_coords = self.print_and_convert_bytes(data, 0 + 80, 2 + 80)
         self.y_coords = self.print_and_convert_bytes(data, 2 + 80, 4 + 80)
         self.map_number = self.print_and_convert_bytes(data, 4 + 80, 5 + 80)
@@ -201,8 +204,10 @@ if __name__ == "__main__":
     print(hex(injector.aob_address))
     print(injector.TR)
     print(hex(injector.TR))
-    print(injector.newmem, hex(injector.newmem))
 
     injector.inject_memory()
+    print(injector.newmem, hex(injector.newmem))
+    import time
 
+    time.sleep(5)
     injector.read_data()
