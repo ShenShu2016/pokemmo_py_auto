@@ -14,6 +14,7 @@ from enemy_status import EnemyStatus
 from game_status import GameStatus
 from log_print_save import LogPrintSave
 from memory_injector import MemoryInjector
+from memory_injector_solid_aob import MemoryInjector as MemoryInjectorSolidAOB
 from pokemmoUI import PokemmoUI
 from role_controller import RoleController
 from utils.main.controller import Controller
@@ -71,6 +72,8 @@ class PokeMMO:
 
         self.memory_status_lock = threading.Lock()
         self.memory_status = {}
+        self.memory_battle_instance_status_lock = threading.Lock()
+        self.memory_battle_instance_status = {}
 
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
@@ -79,6 +82,13 @@ class PokeMMO:
         self.roleController = RoleController(self)
         self.word_recognizer = Word_Recognizer()
         self.memory_injector = MemoryInjector()
+        self.memory_battle_instance = MemoryInjectorSolidAOB(
+            name="Battle_Memory_Injector",
+            pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",
+            offset=0,
+            json_file_path="battle_memory_injector.json",
+            aob_hex_list_len=7,
+        )
         self.log_print_save = LogPrintSave(self)
 
         # Initialize stop flag for threads
@@ -93,6 +103,7 @@ class PokeMMO:
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
         threading.Thread(target=self.update_memory_status).start()
+        threading.Thread(target=self.update_memory_battle_instance_status).start()
         threading.Thread(target=self.log_print_save.update_logs).start()
         threading.Thread(target=self.log_print_save.print_logs).start()
         threading.Thread(target=self.log_print_save.save_logs).start()
@@ -164,6 +175,13 @@ class PokeMMO:
                 self.memory_status = new_memory_status
             time.sleep(0.2)
 
+    def update_memory_battle_instance_status(self):
+        while not self.stop_threads_flag:
+            new_memory_status = self.memory_battle_instance.read_data()
+            with self.memory_battle_instance_status_lock:
+                self.memory_battle_instance_status = new_memory_status
+            time.sleep(0.2)
+
     # Use this method to safely access the state_dict variable from other threads
     def get_state_dict(self):
         with self.state_dict_lock:
@@ -185,6 +203,10 @@ class PokeMMO:
     def get_memory_status(self):
         with self.memory_status_lock:
             return self.memory_status
+
+    def get_memory_battle_instance_status(self):
+        with self.memory_battle_instance_status_lock:
+            return self.memory_battle_instance_status
 
     def get_latest_img_BRG(self):
         with self.latest_img_BRG_lock:

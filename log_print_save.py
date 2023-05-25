@@ -37,58 +37,32 @@ class LogPrintSave:
                 # print(f"state_dict time: {time.time() - start_time}")
                 memory_status = self.pokemmo.get_memory_status()
                 # print(f"memory_status time: {time.time() - start_time}")
+                memory_battle_instance_status = (
+                    self.pokemmo.get_memory_battle_instance_status()
+                )
 
                 new_log = {
                     "game_status": game_status,
                     "enemy_status": enemy_status,
                     "state_dict": state_dict,
                     "memory_status": memory_status,
-                    "timestamp": time.time(),
-                }
-                new_log = {
-                    "game_status": game_status,
-                    "enemy_status": enemy_status,
-                    "state_dict": state_dict,
-                    "memory_status": memory_status,
+                    "memory_battle_instance_status": memory_battle_instance_status,
                     "timestamp": time.time(),
                 }
                 self.logs.append(new_log)
                 self.data.append(new_log)
                 # print(f"Data: {self.data}")  # debug print statement
                 # print(f"log run time: {time.time() - start_time}")
-                time.sleep(0.3)
+                time.sleep(0.2)
             except Exception as e:
                 print(f"An error occurred in update_logs: {e}")
-
-    # def save_logs(self):
-    #     print("Starting save_logs")
-    #     """Save the logs to a JSON file every 5 seconds."""
-    #     while not self.pokemmo.stop_threads_flag:
-    #         try:
-    #             time.sleep(10)
-    #             if self.data:
-    #                 # Save the logs to a JSON file
-    #                 with open(f"logs\logs_{int(time.time())}.json", "w") as file:
-    #                     # json.dump(list(map(lambda deque: list(deque), self.data)), file)
-    #                     for item in self.data:
-    #                         json.dump(item, file)
-    #                         file.write("\n")
-    #                     file.flush()
-    #                     os.fsync(file.fileno())
-    #                 # Reset the logs
-    #                 self.data = []
-    #         except Exception as e:
-    #             file.flush()
-    #             os.fsync(file.fileno())
-    #             self.data = []
-    #             print(f"An error occurred in save_logs: {e}")
 
     def save_logs(self):
         print("Starting save_logs")
         """Save the logs to a JSON file every 5 seconds."""
         while not self.pokemmo.stop_threads_flag:
             try:
-                time.sleep(10)
+                time.sleep(15)
                 if self.data:
                     # Convert list of dictionaries to DataFrame
                     df = pd.DataFrame(self.data)
@@ -114,6 +88,10 @@ class LogPrintSave:
                 print(f"enemy_status: {self.logs[-1]['enemy_status']}")
                 print(f"state_dict: {self.logs[-1]['state_dict']}")
                 print(f"memory_status: {self.logs[-1]['memory_status']}")
+                print(
+                    f'memory_battle_instance_status: {self.logs[-1]["memory_battle_instance_status"]}'
+                )
+
                 time.sleep(1)
             except Exception as e:
                 pass

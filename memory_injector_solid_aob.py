@@ -208,28 +208,54 @@ class MemoryInjector:
         return bytes(byte_values)
 
     def read_data(self):
-        pass
-        # data = self.pm.read_bytes(self.TR, 4)
-        # value = int.from_bytes(data, byteorder="little")
-        # x_address = value - 4 - 80
-        # # print("x_address", x_address, hex(x_address))
-        # data = self.pm.read_bytes(x_address, 10 + 80)
-        # # print("x_y_map_direction", data)
-        # self.x_coords = split_bytes_to_int(data, 0 + 80, 2 + 80)
-        # self.y_coords = split_bytes_to_int(data, 2 + 80, 4 + 80)
-        # self.map_number = split_bytes_to_int(data, 4 + 80, 5 + 80)
-        # self.face_dir = hex(data[9 + 80])[-1]
-        # self.transport = split_bytes_to_int(data, 0, 2)
-        # self.memory_info_dict = {
-        #     "x_coords": self.x_coords,
-        #     "y_coords": self.y_coords,
-        #     "map_number": (int(data[4 + 80]), data[4 + 80 + 2], data[4 + 80 + 1]),
-        #     "face_dir": self.face_dir,
-        #     "transport": self.transport,
-        # }
-        # if self.memory_info_dict["map_number"] == (0, 0, 0):
-        #     raise Exception("Map number is 0, 0, 0")
-        # return self.memory_info_dict
+        # pass
+        # while True:
+        battle_time_passed = None
+        player_info_not_sure_address = None
+        battle_instance_address = None
+        data = self.pm.read_bytes(self.TR, 4)
+        value = int.from_bytes(data, byteorder="little")
+        start_address = value - 4
+        data = self.pm.read_bytes(start_address, 36)
+        player_info_not_sure_address = split_bytes_to_int(data, 0, 4)
+        battle_instance_address = split_bytes_to_int(data, 4, 8)
+        if str(battle_instance_address) != "0":
+            battle_instance_data = self.pm.read_bytes(battle_instance_address, 64)
+            # print(
+            #     "battle_instance_data",
+            #     battle_instance_data,
+            #     hex(battle_instance_address),
+            # )
+            battle_time_passed = struct.unpack("<f", battle_instance_data[60:64])[0]
+
+            # battle_option_ready = hex(split_bytes_to_int(data, 368, 372))
+
+            # chunk_size = 4  # bytes size of each chunk
+
+            # chunks = [
+            #     battle_instance_data[i : i + chunk_size]
+            #     for i in range(0, len(battle_instance_data), chunk_size)
+            # ]  # split into each chunk
+
+            # int_values = [
+            #     struct.unpack("<I", chunk)[0] for chunk in chunks
+            # ]  # interpret as little-endian 4-byte integers
+
+            # print("==========================")
+            # for int_value in int_values:
+            #     print(
+            #         hex(int_value)[2:].zfill(8).upper(), end=" "
+            #     )
+            # print as zero-padded uppercase hexadecimal
+        # time.sleep(0.5)
+
+        self.memory_info_dict = {
+            "player_info_not_sure_address": player_info_not_sure_address,
+            "battle_instance_address": battle_instance_address,
+            "battle_time_passed": battle_time_passed,
+            # "battle_option_ready": battle_option_ready,
+        }
+
         # print(self.memory_info_dict)
 
 
