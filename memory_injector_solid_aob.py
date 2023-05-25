@@ -29,6 +29,18 @@ def split_bytes_to_int(data, start, end):
     return converted
 
 
+def analyze_shellcode(battle_instance_data, chunk_size):
+    chunks = [
+        battle_instance_data[i : i + chunk_size]
+        for i in range(0, len(battle_instance_data), chunk_size)
+    ]  # split into each chunk
+
+    print("==========================")
+    for i, chunk in enumerate(chunks):
+        hex_values = [hex(byte)[2:].zfill(2).upper() for byte in chunk]
+        print(f"Position {i*chunk_size}: {' '.join(hex_values)}")
+
+
 class MemoryInjector:
     def __init__(self, name, pattern, offset, json_file_path, aob_hex_list_len):
         self.target_process = "javaw.exe"
@@ -213,6 +225,7 @@ class MemoryInjector:
         battle_time_passed = None
         player_info_not_sure_address = None
         battle_instance_address = None
+        battle_option_ready = None
         data = self.pm.read_bytes(self.TR, 4)
         value = int.from_bytes(data, byteorder="little")
         start_address = value - 4
@@ -220,13 +233,17 @@ class MemoryInjector:
         player_info_not_sure_address = split_bytes_to_int(data, 0, 4)
         battle_instance_address = split_bytes_to_int(data, 4, 8)
         if str(battle_instance_address) != "0":
-            battle_instance_data = self.pm.read_bytes(battle_instance_address, 64)
+            battle_instance_data = self.pm.read_bytes(battle_instance_address, 128)
             # print(
             #     "battle_instance_data",
             #     battle_instance_data,
             #     hex(battle_instance_address),
             # )
-            battle_time_passed = struct.unpack("<f", battle_instance_data[60:64])[0]
+            battle_time_passed = round(
+                struct.unpack("<f", battle_instance_data[60:64])[0], 2
+            )
+            battle_option_ready = split_bytes_to_int(battle_instance_data, 98, 99)
+            # 0:battle_option_ready 1: battle in progress
 
             # battle_option_ready = hex(split_bytes_to_int(data, 368, 372))
 
@@ -251,10 +268,13 @@ class MemoryInjector:
 
         self.memory_info_dict = {
             "player_info_not_sure_address": player_info_not_sure_address,
-            "battle_instance_address": battle_instance_address,
+            "battle_instance_address": None
+            if battle_instance_address == 0
+            else battle_instance_address,
             "battle_time_passed": battle_time_passed,
-            # "battle_option_ready": battle_option_ready,
+            "battle_option_ready": False if battle_option_ready == 1 else True,
         }
+        return self.memory_info_dict
 
         # print(self.memory_info_dict)
 
@@ -262,8 +282,9 @@ class MemoryInjector:
 if __name__ == "__main__":
     injector = MemoryInjector(
         name="Battle_Memory_Injector",
-        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",
+        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",
         offset=0,
         json_file_path="battle_memory_injector.json",
         aob_hex_list_len=7,
     )
+    injector.read_data()

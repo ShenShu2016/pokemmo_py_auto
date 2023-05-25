@@ -165,7 +165,7 @@ class GameStatus:
             return is_match
 
         def check_battle_end_pokemon_caught():
-            print("check_battle_end_pokemon_caught")
+            # print("check_battle_end_pokemon_caught")
             pokemon_summary_coords_list = self.pokeMMO.find_items(
                 img_BRG=self.img_BRG,
                 bottom_r=(1360, 487),  # ,(479, 12)
@@ -179,7 +179,7 @@ class GameStatus:
                 len(pokemon_summary_coords_list) > 0,
                 pokemon_summary_coords_list,
             )
-            print(self.game_status_dict["battle_end_pokemon_caught"])
+            # print(self.game_status_dict["battle_end_pokemon_caught"])
 
         black_ratio = self.pokeMMO.calculate_black_ratio(img_BRG=self.img_BRG)
         self.game_status_dict["black_ratio"] = black_ratio

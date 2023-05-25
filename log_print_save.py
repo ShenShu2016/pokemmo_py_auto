@@ -92,6 +92,6 @@ class LogPrintSave:
                     f'memory_battle_instance_status: {self.logs[-1]["memory_battle_instance_status"]}'
                 )
 
-                time.sleep(1)
+                time.sleep(2)
             except Exception as e:
                 pass
