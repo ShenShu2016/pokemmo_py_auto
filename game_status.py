@@ -17,22 +17,18 @@ if TYPE_CHECKING:
 class GameStatus:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
-        self.recent_status_game_status_dict_list = deque(maxlen=100)
+        self.recent_status_game_status_dict_list = deque(maxlen=200)
         self.recent_images = deque(maxlen=5)
         self.last_image_save_time = 0
         self.img_BRG = None
-        self.game_status_dict = {
-            "real_status": 0,  # Unknown Game Status
-        }
+        self.memory_battle_status = {}
+        self.memory_coords_status = {}
+        self.game_status_dict = {}
 
     def determine_game_status(self):
         def check_not_active_status():
             if self.game_status_dict.get("important") == 404:
                 return set_and_return_status(404)  # Not Active Game Status
-
-        def check_normal_status():
-            if self.game_status_dict.get("check_normal")[0]:
-                return set_and_return_status(1)  # Normal Game Status
 
         def check_battle_option_status():
             if self.game_status_dict.get("battle_option_ORC") == True:
@@ -42,37 +38,9 @@ class GameStatus:
             if self.game_status_dict.get("battle_option_go_back_ORC") == True:
                 return set_and_return_status(22)  # Battle Go Back Status
 
-        def check_battle_end_pokemon_caught_status():
-            if (
-                self.game_status_dict.get("battle_end_pokemon_caught") is not None
-                and self.game_status_dict.get("battle_end_pokemon_caught")[0] == True
-            ):
-                return set_and_return_status(23)
-
-        def check_battle_loading_status():
-            if (
-                self.game_status_dict.get("black_ratio") is not None
-                and self.game_status_dict.get("black_ratio") > 0.65
-            ):
-                return set_and_return_status(20)  # Battle Loading Status
-
         def set_and_return_status(status):
             self.game_status_dict["real_status"] = status
             return status
-
-        def check_recent_status_or_return_unknown():
-            timestamp = time.time()
-            self.game_status_dict["real_status"] = 0  # Unknown Game Status
-
-            if self.recent_status_game_status_dict_list:
-                for recent_timestamp, recent_status_dict in reversed(
-                    self.recent_status_game_status_dict_list
-                ):
-                    recent_status = recent_status_dict.get("real_status")
-                    if recent_status != 0 and timestamp - recent_timestamp <= 10:
-                        return recent_status
-
-            return 0  # Unknown Game Status
 
         status_check_funcs = [
             check_not_active_status,
@@ -121,22 +89,6 @@ class GameStatus:
             else:
                 self.recent_images.append((time.time(), filename, None))
 
-    def check_normal(self):
-        my_name_x_y = (624, 270), (738, 291)
-        my_name_ORC = self.pokeMMO.get_text_from_box_coords(
-            top_l=my_name_x_y[0],
-            bottom_r=my_name_x_y[1],
-            config="--psm 7",
-            img_BRG=self.img_BRG,
-        )
-        is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
-            my_name_ORC,
-            target_words=target_words_dict["my_name_ORC"],
-            threshold=30,
-        )
-        self.game_status_dict["check_normal"] = (is_match, match_ratio)
-        return is_match
-
     def check_battle(self):
         def check_battle_option():
             battle_option_x_y = (229, 507), (399, 522)  # select your attack move
@@ -164,49 +116,60 @@ class GameStatus:
             self.game_status_dict["battle_option_go_back_ORC"] = is_match
             return is_match
 
-        def check_battle_end_pokemon_caught():
-            # print("check_battle_end_pokemon_caught")
-            pokemon_summary_coords_list = self.pokeMMO.find_items(
-                img_BRG=self.img_BRG,
-                bottom_r=(1360, 487),  # ,(479, 12)
-                top_l=(316, 7),
-                temp_BRG=self.pokeMMO.pokemon_summary_BRG,  # self.pokeMMO.Pokemon_Summary_Exit_Button_BRG,
-                threshold=0.99,
-                max_matches=2,
-            )
+    def check_battle_end_pokemon_caught(self):
+        # print("check_battle_end_pokemon_caught")
+        pokemon_summary_coords_list = self.pokeMMO.find_items(
+            img_BRG=self.img_BRG,
+            bottom_r=(1360, 487),  # ,(479, 12)
+            top_l=(316, 7),
+            temp_BRG=self.pokeMMO.pokemon_summary_BRG,  # self.pokeMMO.Pokemon_Summary_Exit_Button_BRG,
+            threshold=0.99,
+            max_matches=2,
+        )
+        return (len(pokemon_summary_coords_list) > 0, pokemon_summary_coords_list)
 
-            self.game_status_dict["battle_end_pokemon_caught"] = (
-                len(pokemon_summary_coords_list) > 0,
-                pokemon_summary_coords_list,
-            )
-            # print(self.game_status_dict["battle_end_pokemon_caught"])
-
-        black_ratio = self.pokeMMO.calculate_black_ratio(img_BRG=self.img_BRG)
-        self.game_status_dict["black_ratio"] = black_ratio
-        if black_ratio > 0.35:
-            if not check_battle_option():
-                check_battle_go_back()
-        if black_ratio <= 0.35:
-            check_battle_end_pokemon_caught()
-
-    def check_game_status(self) -> int:
-        self.img_BRG = self.pokeMMO.get_latest_img_BRG()
-        current_time = time.time()
+    def check_game_status(self):
         self.game_status_dict = {
-            "real_status": 0,  # Unknown Game Status
+            "return_status": 0,
+            "check_battle_end_pokemon_caught": (
+                False,
+                [],
+            ),  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
+            "x_coords": None,
+            "y_coords": None,
+            "map_number_tuple": None,
+            "face_dir": None,
+            "transport": None,
+            "battle_time_passed": 0,
         }
+        return_status = 0
 
-        if not self.check_normal():
-            self.check_battle()
+        self.img_BRG = self.pokeMMO.get_latest_img_BRG()
+        self.memory_coords_status = self.pokeMMO.get_memory_coords_status()
+        self.memory_battle_status = self.pokeMMO.get_memory_battle_status()
+        current_time = time.time()
 
-        self.save_screenshot_check_status()
+        if self.memory_coords_status.get("battle_instance_address") == None:
+            return_status = 1
+        elif self.memory_coords_status.get("battle_instance_address") == 1:
+            return_status = 20
+        elif self.memory_coords_status.get("battle_instance_address") == 0:
+            return_status = 21
 
-        return_status = self.determine_game_status()
-        self.game_status_dict["return_status"] = return_status
+        self.game_status_dict = {
+            "return_status": return_status,
+            "check_battle_end_pokemon_caught": self.check_battle_end_pokemon_caught(),  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
+            "x_coords": self.memory_coords_status.get("x_coords"),
+            "y_coords": self.memory_coords_status.get("y_coords"),
+            "map_number_tuple": self.memory_coords_status.get("map_number"),
+            "face_dir": self.memory_coords_status.get("face_dir"),
+            "transport": self.memory_coords_status.get("transport"),
+            "battle_time_passed": self.memory_battle_status.get("battle_time_passed"),
+        }
         self.recent_status_game_status_dict_list.append(
             (current_time, copy.deepcopy(self.game_status_dict))
         )
-        # print("game_status_dict", self.game_status_dict)
+
         return self.game_status_dict
 
 

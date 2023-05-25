@@ -35,18 +35,16 @@ class LogPrintSave:
                 # print(f"enemy_status time: {time.time() - start_time}")
                 state_dict = self.pokemmo.get_state_dict()
                 # print(f"state_dict time: {time.time() - start_time}")
-                memory_status = self.pokemmo.get_memory_status()
-                # print(f"memory_status time: {time.time() - start_time}")
-                memory_battle_instance_status = (
-                    self.pokemmo.get_memory_battle_instance_status()
-                )
+                memory_coords = self.pokemmo.get_memory_coords_status()
+                # print(f"memory_coords time: {time.time() - start_time}")
+                memory_battle_status = self.pokemmo.get_memory_battle_status()
 
                 new_log = {
                     "game_status": game_status,
                     "enemy_status": enemy_status,
                     "state_dict": state_dict,
-                    "memory_status": memory_status,
-                    "memory_battle_instance_status": memory_battle_instance_status,
+                    "memory_coords": memory_coords,
+                    "memory_battle_status": memory_battle_status,
                     "timestamp": time.time(),
                 }
                 self.logs.append(new_log)
@@ -87,10 +85,8 @@ class LogPrintSave:
                 print(f"game_status: {self.logs[-1]['game_status']}")
                 print(f"enemy_status: {self.logs[-1]['enemy_status']}")
                 print(f"state_dict: {self.logs[-1]['state_dict']}")
-                print(f"memory_status: {self.logs[-1]['memory_status']}")
-                print(
-                    f'memory_battle_instance_status: {self.logs[-1]["memory_battle_instance_status"]}'
-                )
+                print(f"memory_coords: {self.logs[-1]['memory_coords']}")
+                print(f'memory_battle_status: {self.logs[-1]["memory_battle_status"]}')
 
                 time.sleep(2)
             except Exception as e:

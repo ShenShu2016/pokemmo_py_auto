@@ -268,11 +268,9 @@ class MemoryInjector:
 
         self.memory_info_dict = {
             "player_info_not_sure_address": player_info_not_sure_address,
-            "battle_instance_address": None
-            if battle_instance_address == 0
-            else battle_instance_address,
+            "battle_instance_address": battle_instance_address,
             "battle_time_passed": battle_time_passed,
-            "battle_option_ready": False if battle_option_ready == 1 else True,
+            "battle_option_ready": battle_option_ready,
         }
         return self.memory_info_dict
 
