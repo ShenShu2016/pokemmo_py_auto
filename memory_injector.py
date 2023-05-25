@@ -253,6 +253,8 @@ class MemoryInjector:
             "face_dir": self.face_dir,
             "transport": self.transport,
         }
+        if self.memory_info_dict["map_number"] == (0, 0, 0):
+            raise Exception("Map number is 0, 0, 0")
         return self.memory_info_dict
         # print(self.memory_info_dict)
 

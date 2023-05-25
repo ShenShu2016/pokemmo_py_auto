@@ -74,6 +74,7 @@ class RoleController:
 
     def run_from_s21(self):
         self.pokeMMO.controller.click(522, 557, tolerance=15)
+        sleep(2)
         print("Running from battle")
 
     def throw_pokeball(self, pokeball_type="pokeball"):
@@ -98,6 +99,7 @@ class RoleController:
             sleep(5)
 
     def close_pokemon_summary(self, game_status):
+        print("正在关闭 Pokemon Summary")
         for i in game_status["battle_end_pokemon_caught"][1]:  # [(814, 262, 936, 277)]
             exit_button_x = (i[0] + i[2]) / 2 + 103
             exit_button_y = (i[1] + i[3]) / 2 + 0

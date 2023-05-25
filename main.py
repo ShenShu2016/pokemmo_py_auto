@@ -152,19 +152,10 @@ class PokeMMO:
                 config="--psm 6 -c tessedit_char_whitelist=0123456789",
             )
             with self.state_dict_lock:
-                current_time = datetime.datetime.now()
-                self.state_dict[str(current_time)] = {
+                self.state_dict = {
                     "address": my_address,
                     "money": my_money,
                 }
-                # print(
-                #     f"Updated state_dict at {current_time}, address: {my_address}, money: {my_money}"
-                # )
-                # If the dictionary size has exceeded 10, remove the oldest entry
-                if len(self.state_dict) > 10:
-                    oldest_entry = min(self.state_dict.keys())
-                    del self.state_dict[oldest_entry]
-                # print the most recent state_dict
 
     def update_memory_status(self):
         while not self.stop_threads_flag:

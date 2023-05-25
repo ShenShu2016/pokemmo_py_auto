@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import PokeMMO
 
+import pandas as pd
+
 
 class LogPrintSave:
     """A class to manage logs, print them to the terminal, and save them to a JSON file."""
@@ -17,11 +19,11 @@ class LogPrintSave:
     def __init__(self, pokemmo: PokeMMO):
         """Initialize the LogPrintSave class."""
         self.pokemmo = pokemmo
-        self.logs = deque(maxlen=50)  # A queue that holds the last 25 logs
+        self.logs = []  # A queue that holds the last 25 logs
         self.data = []
 
     def update_logs(self):
-        """Update the logs every 0.2 seconds."""
+        """Update the logs every 0.3 seconds."""
         print("Starting update_logs")
         while not self.pokemmo.stop_threads_flag:
             try:
@@ -35,20 +37,51 @@ class LogPrintSave:
                 # print(f"state_dict time: {time.time() - start_time}")
                 memory_status = self.pokemmo.get_memory_status()
                 # print(f"memory_status time: {time.time() - start_time}")
-                new_record = {
+
+                new_log = {
                     "game_status": game_status,
                     "enemy_status": enemy_status,
                     "state_dict": state_dict,
                     "memory_status": memory_status,
                     "timestamp": time.time(),
                 }
-                self.logs.append(new_record)
-                self.data.append(new_record)
+                new_log = {
+                    "game_status": game_status,
+                    "enemy_status": enemy_status,
+                    "state_dict": state_dict,
+                    "memory_status": memory_status,
+                    "timestamp": time.time(),
+                }
+                self.logs.append(new_log)
+                self.data.append(new_log)
                 # print(f"Data: {self.data}")  # debug print statement
-                print(f"log run time: {time.time() - start_time}")
+                # print(f"log run time: {time.time() - start_time}")
                 time.sleep(0.3)
             except Exception as e:
                 print(f"An error occurred in update_logs: {e}")
+
+    # def save_logs(self):
+    #     print("Starting save_logs")
+    #     """Save the logs to a JSON file every 5 seconds."""
+    #     while not self.pokemmo.stop_threads_flag:
+    #         try:
+    #             time.sleep(10)
+    #             if self.data:
+    #                 # Save the logs to a JSON file
+    #                 with open(f"logs\logs_{int(time.time())}.json", "w") as file:
+    #                     # json.dump(list(map(lambda deque: list(deque), self.data)), file)
+    #                     for item in self.data:
+    #                         json.dump(item, file)
+    #                         file.write("\n")
+    #                     file.flush()
+    #                     os.fsync(file.fileno())
+    #                 # Reset the logs
+    #                 self.data = []
+    #         except Exception as e:
+    #             file.flush()
+    #             os.fsync(file.fileno())
+    #             self.data = []
+    #             print(f"An error occurred in save_logs: {e}")
 
     def save_logs(self):
         print("Starting save_logs")
@@ -56,17 +89,17 @@ class LogPrintSave:
         while not self.pokemmo.stop_threads_flag:
             try:
                 time.sleep(10)
-                # Save the logs to a JSON file
-                with open(f"logs\logs_{int(time.time())}.json", "w") as file:
-                    # json.dump(list(map(lambda deque: list(deque), self.data)), file)
-                    for item in self.data:
-                        json.dump(item, file)
-                        file.write("\n")
-                    file.flush()
-                    os.fsync(file.fileno())
-                # Reset the logs
-                self.data = []
+                if self.data:
+                    # Convert list of dictionaries to DataFrame
+                    df = pd.DataFrame(self.data)
+
+                    # Save the logs to a CSV file
+                    df.to_csv(f"logs\logs_{int(time.time())}.csv", index=False, sep=";")
+
+                    # Reset the logs
+                    self.data = []
             except Exception as e:
+                self.data = []
                 print(f"An error occurred in save_logs: {e}")
 
     def print_logs(self):
@@ -76,6 +109,11 @@ class LogPrintSave:
             # Print the logs to the terminal
             try:
                 # print("\n".join(map(str, self.logs[-1])))
-                time.sleep(2)
-            except IndexError:
+                # os.system("cls" if os.name == "nt" else "clear")  # Clear the terminal
+                print(f"game_status: {self.logs[-1]['game_status']}")
+                print(f"enemy_status: {self.logs[-1]['enemy_status']}")
+                print(f"state_dict: {self.logs[-1]['state_dict']}")
+                print(f"memory_status: {self.logs[-1]['memory_status']}")
+                time.sleep(1)
+            except Exception as e:
                 pass
