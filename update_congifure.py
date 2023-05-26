@@ -2,7 +2,7 @@ import json
 import os
 
 # Define the directory to scan and the configuration file
-directory = "asserts"
+directory = "asserts/template"
 config_file = "configure.json"
 
 # Get a list of all files in the directory

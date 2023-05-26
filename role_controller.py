@@ -9,6 +9,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import PokeMMO
 
+import queue
+import threading
+from functools import wraps
+
 
 def calculate_catch_rate(
     max_hp=65, current_hp=1, catch_rate=1, ball_rate=1, pokemon_condition=1
@@ -28,7 +32,18 @@ class RoleController:
         self.sweet_scent = 0
         self.false_swipe = 0
         self.press_down_count = 5
+        self.action_lock = threading.Lock()
 
+    @staticmethod
+    def synchronized(method):
+        @wraps(method)
+        def _synchronized(self, *args, **kwargs):
+            with self.action_lock:
+                return method(self, *args, **kwargs)
+
+        return _synchronized
+
+    @synchronized
     def move_left_right(self, delay: float):
         keys = ["a", "d"]
         random.shuffle(keys)
@@ -44,6 +59,7 @@ class RoleController:
         sleep(total_delay)
         self.my_recent_actions_list.append(("move_left_right", time.time()))
 
+    @synchronized
     def fight_skill_1_from_s21(self):  # False Swipe
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("z", 0.2)
@@ -52,6 +68,7 @@ class RoleController:
         sleep(5)
         print("Using False Swipe")
 
+    @synchronized
     def fight_skill_2_from_s21(self):  # Spore
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("d", 0.2)
@@ -60,14 +77,15 @@ class RoleController:
         sleep(5)
         print("Using Spore")
 
+    @synchronized
     def fight_skill_3_from_s21(self):
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("s", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
-
         self.my_recent_actions_list.append(("fight_skill_3_from_s21", time.time()))
         sleep(5)
 
+    @synchronized
     def fight_skill_4_from_s21(self):
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("s", 0.2)
@@ -76,11 +94,13 @@ class RoleController:
         self.my_recent_actions_list.append(("fight_skill_4_from_s21", time.time()))
         sleep(5)
 
+    @synchronized
     def run_from_s21(self):
         self.pokeMMO.controller.click(522, 557, tolerance=15)
         sleep(2)
         print("Running from battle")
 
+    @synchronized
     def throw_pokeball(self, pokeball_type="pokeball"):
         print("Throwing Pokeball")
         self.pokeMMO.controller.click(527, 506, tolerance=15)  # 点击背包
@@ -102,8 +122,8 @@ class RoleController:
             print("Throwing Pokeball")
             sleep(5)
 
+    @synchronized
     def close_pokemon_summary(self, game_status):
-        print("正在关闭 Pokemon Summary")
         for i in game_status["check_battle_end_pokemon_caught"][
             1
         ]:  # [(814, 262, 936, 277)]
@@ -115,6 +135,7 @@ class RoleController:
             self.my_recent_actions_list.append(("close_pokemon_summary", time.time()))
             print("Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y))
 
+    @synchronized
     def restart_from_hospital(self):
         self.pokeMMO.controller.key_press("8")
         sleep(4.5)
@@ -122,9 +143,6 @@ class RoleController:
             self.pokeMMO.controller.key_press("z", 0.15)
             sleep(0.2)
         self.pokeMMO.controller.key_press("s", 5)
-        # self.pokeMMO.controller.key_press("d", 0.75)
-        # self.pokeMMO.controller.key_press("s", 2)
-
         self.pokeMMO.controller.key_press("z", 1)
         self.pokeMMO.controller.key_press("z", 1)
         self.pokeMMO.controller.key_press("z", 1)
@@ -134,6 +152,7 @@ class RoleController:
 
         print("Restarting from hospital")
 
+    @synchronized
     def use_sweet_sent(self):
         if self.false_swipe > 0 and self.sweet_scent > 0:
             self.pokeMMO.controller.key_press("2")
