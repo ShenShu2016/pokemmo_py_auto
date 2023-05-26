@@ -376,6 +376,6 @@ if __name__ == "__main__":
     windll.user32.SetProcessDPIAware()
     # Initialize the PokeMMO class and get a screenshot
     pokeMMO = PokeMMO()
-    pokeMMO.start_ui()
+    # pokeMMO.start_ui()
 
     cv2.destroyAllWindows()

@@ -100,7 +100,9 @@ class RoleController:
 
     def close_pokemon_summary(self, game_status):
         print("正在关闭 Pokemon Summary")
-        for i in game_status["battle_end_pokemon_caught"][1]:  # [(814, 262, 936, 277)]
+        for i in game_status["check_battle_end_pokemon_caught"][
+            1
+        ]:  # [(814, 262, 936, 277)]
             exit_button_x = (i[0] + i[2]) / 2 + 103
             exit_button_y = (i[1] + i[3]) / 2 + 0
             print(exit_button_x, exit_button_y)
@@ -154,6 +156,17 @@ if __name__ == "__main__":
 
             pokeMMO.roleController.use_sweet_sent()
             round = 0
+            if pokeMMO.get_game_status().get("check_battle_end_pokemon_caught")[0]:
+                pokeMMO.roleController.close_pokemon_summary(game_status)
+                round = 0
+                print(
+                    "剩余:",
+                    "sweet_scent",
+                    pokeMMO.roleController.sweet_scent,
+                    "false_swipe",
+                    pokeMMO.roleController.false_swipe,
+                )
+                break
             pokeMMO.roleController.move_left_right(0.8)
 
         # start battle 有可能进医院黑屏了，有可能就是进入战斗了
@@ -202,24 +215,11 @@ if __name__ == "__main__":
                 and enemy_status.get("enemy_count") > 1
             ):
                 pokeMMO.roleController.run_from_s21()
-
-            if game_status["return_status"] == 23:
-                pokeMMO.roleController.close_pokemon_summary(game_status)
-                round = 0
-                print(
-                    "剩余:",
-                    "sweet_scent",
-                    pokeMMO.roleController.sweet_scent,
-                    "false_swipe",
-                    pokeMMO.roleController.false_swipe,
-                )
-                break
-            # print(game_status["black_ratio"])
-
             if (
                 game_status.get("black_ratio") is not None
                 and game_status.get("black_ratio") <= 0.35
             ) or game_status["return_status"] == 1:
+                # print(game_status["black_ratio"])
                 print(
                     "剩余:",
                     "sweet_scent",

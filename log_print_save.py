@@ -84,9 +84,9 @@ class LogPrintSave:
                 # os.system("cls" if os.name == "nt" else "clear")  # Clear the terminal
                 print(f"game_status: {self.logs[-1]['game_status']}")
                 print(f"enemy_status: {self.logs[-1]['enemy_status']}")
-                print(f"state_dict: {self.logs[-1]['state_dict']}")
-                print(f"memory_coords: {self.logs[-1]['memory_coords']}")
-                print(f'memory_battle_status: {self.logs[-1]["memory_battle_status"]}')
+                # print(f"state_dict: {self.logs[-1]['state_dict']}")
+                # print(f"memory_coords: {self.logs[-1]['memory_coords']}")
+                # print(f'memory_battle_status: {self.logs[-1]["memory_battle_status"]}')
 
                 time.sleep(2)
             except Exception as e:

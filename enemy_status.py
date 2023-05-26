@@ -19,10 +19,41 @@ def _play_mp3(file_path=MP3_FILE_PATH):
     subprocess.run(["wmplayer", file_path])
 
 
+enemy_hp_coords = [
+    [(329, 97), (346, 110)],
+    [(589, 97), (606, 110)],
+    [(849, 97), (866, 110)],
+    [(329, 137), (345, 150)],
+    [(849, 137), (865, 150)],
+]
+special_cases = [
+    {"coords": [(254, 147), (268, 160)], "enemy_count": 1},
+    {"coords": [(329, 137), (345, 150)], "enemy_count": 5},
+    {"coords": [(849, 137), (865, 150)], "enemy_count": 5},
+]
+enemy_hp_bar_coords = {
+    1: [(274, 151), (471, 155)],  # Enemy 1 HP coordinates
+    2: [(349, 101), (502, 105)],  # Enemy 2 HP coordinates
+    3: [(609, 101), (757, 105)],  # Enemy 3 HP coordinates
+    4: [(870, 101), (1020, 105)],  # Enemy 4 HP coordinates
+    5: [(349, 141), (503, 145)],  # Enemy 5 HP coordinates
+    6: [(869, 141), (1020, 145)],  # Enemy 6 HP coordinates
+}
+enemy_name_coords = {
+    1: [(251, 129), (492, 147)],
+    2: [(316, 79), (516, 98)],
+    3: [(576, 79), (780, 96)],
+    4: [(836, 79), (1037, 96)],
+    5: [(316, 117), (517, 136)],
+    6: [(835, 117), (1037, 136)],
+}
+
+
 class EnemyStatus:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
         self.enemy_status_dict = {"enemy_count": 0}
+        self.game_status_dict = {}
 
     def _match_coords(self, hp_coords, tolerance, found_hp):
         return (
@@ -39,12 +70,16 @@ class EnemyStatus:
         )
 
     def _check_enemy_number(self):
-        if self.pokeMMO.get_game_status()["return_status"] == 1:
-            self.enemy_status_dict = {"enemy_count": 0}
+        if self.game_status_dict.get("return_status") == 1:
+            self.enemy_status_dict = {"enemy_count": None}
+
             return
-        if (self.pokeMMO.get_game_status()["return_status"] in [20, 21, 22, 23]) and (
-            self.enemy_status_dict["enemy_count"] == 0
-        ):
+        if self.game_status_dict.get("return_status") in [
+            20,
+            21,
+            22,
+            23,
+        ] and self.enemy_status_dict.get("enemy_count") in [0, None]:
             hp_BRG_x_y_list = self.pokeMMO.find_items(
                 temp_BRG=self.pokeMMO.hp_BRG,
                 threshold=0.99,
@@ -55,22 +90,8 @@ class EnemyStatus:
             )
             # print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
             if not hp_BRG_x_y_list:
-                self.enemy_status_dict["enemy_count"] = 0
-                # print("No HP bars found.")
                 return
 
-            enemy_hp_coords = [
-                [(329, 97), (346, 110)],
-                [(589, 97), (606, 110)],
-                [(849, 97), (866, 110)],
-                [(329, 137), (345, 150)],
-                [(849, 137), (865, 150)],
-            ]
-            special_cases = [
-                {"coords": [(254, 147), (268, 160)], "enemy_count": 1},
-                {"coords": [(329, 137), (345, 150)], "enemy_count": 5},
-                {"coords": [(849, 137), (865, 150)], "enemy_count": 5},
-            ]
             tolerance = 10
             enemy_count = 0
 
@@ -90,19 +111,14 @@ class EnemyStatus:
         # print("enemy_count:", self.enemy_status_dict["enemy_count"])
 
     def _check_enemy_hp(self):
-        if self.pokeMMO.get_game_status()["return_status"] == 21:  # battle_option
+        if self.game_status_dict.get("return_status") in [
+            20,
+            21,
+            22,
+            23,
+        ]:  # battle_option
             # Define the enemy hp bar coordinates
-            enemy_hp_bar_coords = {
-                1: [(274, 151), (471, 155)],  # Enemy 1 HP coordinates
-                2: [(349, 101), (502, 105)],  # Enemy 2 HP coordinates
-                3: [(609, 101), (757, 105)],  # Enemy 3 HP coordinates
-                4: [(870, 101), (1020, 105)],  # Enemy 4 HP coordinates
-                5: [(349, 141), (503, 145)],  # Enemy 5 HP coordinates
-                6: [(869, 141), (1020, 145)],  # Enemy 6 HP coordinates
-            }
-
             enemy_count = self.enemy_status_dict["enemy_count"]
-
             if enemy_count in [3, 5]:
                 for i in range(2, enemy_count + 2):
                     hp_pct = self.pokeMMO.get_hp_pct(
@@ -119,16 +135,7 @@ class EnemyStatus:
 
     def _check_enemy_name_lv(self):
         enemy_count = self.enemy_status_dict["enemy_count"]
-        if enemy_count > 0:
-            enemy_name_coords = {
-                1: [(251, 129), (492, 147)],
-                2: [(316, 79), (516, 98)],
-                3: [(576, 79), (780, 96)],
-                4: [(836, 79), (1037, 96)],
-                5: [(316, 117), (517, 136)],
-                6: [(835, 117), (1037, 136)],
-            }
-
+        if enemy_count not in [0, None]:
             for i in range(1, enemy_count + 1):
                 if (
                     f"enemy_{i}_hp_pct" in self.enemy_status_dict
@@ -200,6 +207,7 @@ class EnemyStatus:
 
     def check_enemy_status(self):
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
+        self.game_status_dict = self.pokeMMO.get_game_status()
         self._check_enemy_number()
         self._check_enemy_hp()
         self._check_enemy_name_lv()

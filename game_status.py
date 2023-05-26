@@ -147,14 +147,22 @@ class GameStatus:
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         self.memory_coords_status = self.pokeMMO.get_memory_coords_status()
         self.memory_battle_status = self.pokeMMO.get_memory_battle_status()
+        # print("memory_battle_status", self.memory_battle_status)
+        # print("memory_coords_status", self.memory_coords_status)
         current_time = time.time()
 
-        if self.memory_coords_status.get("battle_instance_address") == None:
+        if self.memory_battle_status.get("battle_instance_address") in [None, 0]:
             return_status = 1
-        elif self.memory_coords_status.get("battle_instance_address") == 1:
+        elif self.memory_battle_status.get("battle_option_ready") == 1:
             return_status = 20
-        elif self.memory_coords_status.get("battle_instance_address") == 0:
+        elif self.memory_battle_status.get("battle_option_ready") == 0:
             return_status = 21
+        else:
+            print(
+                self.memory_battle_status.get("battle_instance_address"),
+                self.memory_battle_status.get("battle_option_ready"),
+                self.memory_battle_status.get("battle_option_ready"),
+            )
 
         self.game_status_dict = {
             "return_status": return_status,
@@ -166,6 +174,7 @@ class GameStatus:
             "transport": self.memory_coords_status.get("transport"),
             "battle_time_passed": self.memory_battle_status.get("battle_time_passed"),
         }
+
         self.recent_status_game_status_dict_list.append(
             (current_time, copy.deepcopy(self.game_status_dict))
         )
