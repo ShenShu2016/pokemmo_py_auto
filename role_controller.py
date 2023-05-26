@@ -57,13 +57,16 @@ class RoleController:
         self.pokeMMO.controller.key_press("d", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
+        sleep(5)
         print("Using Spore")
 
     def fight_skill_3_from_s21(self):
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("s", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
+
         self.my_recent_actions_list.append(("fight_skill_3_from_s21", time.time()))
+        sleep(5)
 
     def fight_skill_4_from_s21(self):
         self.pokeMMO.controller.click(314, 508, tolerance=15)
@@ -71,6 +74,7 @@ class RoleController:
         self.pokeMMO.controller.key_press("d", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_4_from_s21", time.time()))
+        sleep(5)
 
     def run_from_s21(self):
         self.pokeMMO.controller.click(522, 557, tolerance=15)
@@ -178,9 +182,6 @@ if __name__ == "__main__":
             # print("进入战斗")
             game_status = pokeMMO.get_game_status()
             enemy_status = pokeMMO.get_enemy_status()
-            # print("game_status", game_status)
-            # print("enemy_status", enemy_status)
-            # print("enemy_status.get(enemy_1_info)", enemy_status.get("enemy_1_info"))
             if (
                 game_status["return_status"] == 21
                 and enemy_status.get("enemy_1_info") is not None
@@ -215,10 +216,7 @@ if __name__ == "__main__":
                 and enemy_status.get("enemy_count") > 1
             ):
                 pokeMMO.roleController.run_from_s21()
-            if (
-                game_status.get("black_ratio") is not None
-                and game_status.get("black_ratio") <= 0.35
-            ) or game_status["return_status"] == 1:
+            if game_status["return_status"] == 1:
                 # print(game_status["black_ratio"])
                 print(
                     "剩余:",

@@ -84,7 +84,8 @@ class PokeMMO:
         self.memory_injector = MemoryInjector()
         self.memory_battle = MemoryInjectorSolidAOB(
             name="Battle_Memory_Injector",
-            pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",
+            # pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  #
+            pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",
             offset=0,
             json_file_path="battle_memory_injector.json",
             aob_hex_list_len=7,
@@ -173,14 +174,14 @@ class PokeMMO:
             new_memory_coords = self.memory_injector.read_data()
             with self.memory_coords_status_lock:
                 self.memory_coords_status = new_memory_coords
-            time.sleep(0.2)
+            time.sleep(0.05)
 
     def update_memory_battle_status(self):
         while not self.stop_threads_flag:
             new_memory_coords = self.memory_battle.read_data()
             with self.memory_battle_status_lock:
                 self.memory_battle_status = new_memory_coords
-            time.sleep(0.2)
+            time.sleep(0.05)
 
     # Use this method to safely access the state_dict variable from other threads
     def get_state_dict(self):
