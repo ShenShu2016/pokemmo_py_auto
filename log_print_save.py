@@ -90,6 +90,6 @@ class LogPrintSave:
                 # print(f"memory_coords: {self.logs[-1]['memory_coords']}")
                 # print(f'memory_battle_status: {self.logs[-1]["memory_battle_status"]}')
 
-                time.sleep(2)
+                time.sleep(1)
             except Exception as e:
                 pass
