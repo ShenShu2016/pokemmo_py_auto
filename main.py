@@ -34,53 +34,37 @@ class PokeMMO:
         self.window_manager = Window_Manager()
         self.window_name = self.window_manager.get_window_name()
         self.handle = windll.user32.FindWindowW(None, self.window_name)
-
         with open("configure.json", "r") as f:
             self.config = json.load(f)
+
         pytesseract.pytesseract.tesseract_cmd = self.config["tesseract"]
+        self.load_assets()
 
-        # Load the template images
-        loaded_asserts_itmem_count = 0
-        for key, path in self.config.items():
-            if path.endswith(".png"):
-                loaded_asserts_itmem_count += 1
-                # Create variable name
-                var_name = key.replace("_path", "_BRG")
-                # Load image and set it as instance variable
-                setattr(self, var_name, cv2.imread(path, cv2.IMREAD_COLOR))
-        logger.info(f"Loaded {loaded_asserts_itmem_count} asserts.")
-
-        self.pokedex = pd.read_csv("asserts\clean_pokedex.csv")
-        print(self.pokedex.head())
-        SetForegroundWindow = windll.user32.SetForegroundWindow
-        SetForegroundWindow(self.handle)
+        # SetForegroundWindow = windll.user32.SetForegroundWindow
+        # SetForegroundWindow(self.handle)
 
         self.imgs_BRG_list_lock = threading.Lock()
-        self.imgs_BRG_list = []
-
         self.latest_img_BRG_lock = threading.Lock()
+        self.game_status_lock = threading.Lock()
+        self.enemy_status_lock = threading.Lock()
+        self.state_dict_lock = threading.Lock()
+        self.memory_coords_status_lock = threading.Lock()
+        self.memory_battle_status_lock = threading.Lock()
         self.latest_img_BRG = self.window_manager.get_current_img_BRG()
 
-        self.game_status_lock = threading.Lock()
+        self.imgs_BRG_list = []
         self.game_status = {"return_status": 0}
-
-        self.enemy_status_lock = threading.Lock()
         self.enemy_status = {}
-
-        self.state_dict_lock = threading.Lock()
         self.state_dict = {}
-
-        self.memory_coords_status_lock = threading.Lock()
         self.memory_coords_status = {}
-        self.memory_battle_status_lock = threading.Lock()
         self.memory_battle_status = {}
 
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
-
         self.controller = Controller(handle=self.handle)
         self.roleController = RoleController(self)
         self.word_recognizer = Word_Recognizer()
+        self.log_print_save = LogPrintSave(self)
         self.memory_injector = MemoryInjector()
         self.memory_battle = MemoryInjectorSolidAOB(
             name="Battle_Memory_Injector",
@@ -90,12 +74,9 @@ class PokeMMO:
             json_file_path="battle_memory_injector.json",
             aob_hex_list_len=7,
         )
-        self.log_print_save = LogPrintSave(self)
 
-        # Initialize stop flag for threads
         self.stop_threads_flag = False
-        # Start the threads
-        self.ui = PokemmoUI(self)
+
         self.start_threads()
 
     def start_threads(self):
@@ -111,6 +92,22 @@ class PokeMMO:
 
     def stop_threads(self):
         self.stop_threads_flag = True
+
+    def load_assets(self):
+        """Load images and CSV files from the configuration file."""
+        asset_count = 0
+        for key, path in self.config.items():
+            if key.endswith("_path"):
+                var_name = key.replace(
+                    "_path", "_BRG" if path.endswith(".png") else "_csv"
+                )
+                if path.endswith(".png"):
+                    setattr(self, var_name, cv2.imread(path, cv2.IMREAD_COLOR))
+                elif path.endswith(".csv"):
+                    setattr(self, var_name, pd.read_csv(path))
+                print(f"Loaded {var_name} from {path}")
+                asset_count += 1
+        logger.info(f"Loaded {asset_count} assets.")
 
     def start_ui(self):
         """Start the user interface."""
@@ -336,25 +333,6 @@ class PokeMMO:
             cv2.waitKey()
 
         return match_coords
-
-    def calculate_black_ratio(self, img_BRG=None):
-        """Calculate the ratio of black area in the image."""
-        # Get the current image
-        if img_BRG is None:
-            img_BRG = self.get_latest_img_BRG()
-
-        # Define the value for black pixels in RGB
-        black_value = [0, 0, 0]
-
-        # Count the number of black pixels
-        black_pixels = np.sum(np.all(img_BRG == black_value, axis=-1))
-
-        # Get the total number of pixels in the image
-        total_pixels = img_BRG.shape[0] * img_BRG.shape[1]
-
-        # Calculate and return the ratio of black pixels
-        black_ratio = black_pixels / total_pixels
-        return round(black_ratio, 2)
 
     def get_hp_pct(self, top_l, bottom_r, img_BRG=None):
         if img_BRG is None:

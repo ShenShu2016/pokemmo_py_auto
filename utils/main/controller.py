@@ -17,7 +17,7 @@ class Controller:
         self.window.click_input(
             button="move", coords=(int(x) + tolerance, int(y) + tolerance)
         )
-        sleep(0.05)
+        sleep(0.02)
 
     def click(self, x=None, y=None, tolerance=0):
         """Click at the current mouse position or at a specific position if provided."""
@@ -41,7 +41,6 @@ class Controller:
         keyboard.send_keys("{" + key + " down}")
         time.sleep(delay)
         keyboard.send_keys("{" + key + " up}")
-        time.sleep(0.05)
 
 
 if __name__ == "__main__":

@@ -193,8 +193,8 @@ class EnemyStatus:
                         lv_orc = name_Lv_ORC.split("Lv")[1].strip()
                         # print("name_ORC:", name_ORC)
                         # print("lv_orc:", lv_orc)
-                        info = self.pokeMMO.pokedex.loc[
-                            self.pokeMMO.pokedex["Pokemon"] == name_ORC
+                        info = self.pokeMMO.pokedex_csv.loc[
+                            self.pokeMMO.pokedex_csv["Pokemon"] == name_ORC
                         ]
                         if info.empty == False and enemy_count == 1:
                             info_dict = info.to_dict(orient="records")
