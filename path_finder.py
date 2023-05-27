@@ -122,8 +122,12 @@ class PathFinder:
         elif direction == "d":
             return (start_point[0], start_point[1] + 1)
 
-    def get_action(self, end_point):
+    def get_action(
+        self, end_point=None, end_point_map=None, style="farming"
+    ):  # style random_end_point,solid_end_point
         # Reset the index if it's not a continuous integer sequence starting from 0
+
+        df = self.pokeMMO.df_dict["SOOTOPOLIS_CITY_coords_tracking_csv"]
         df = self.pokeMMO.SOOTOPOLIS_CITY_coords_tracking_csv
 
         df = df.reset_index(drop=True)

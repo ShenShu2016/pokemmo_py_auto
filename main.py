@@ -58,6 +58,7 @@ class PokeMMO:
         self.state_dict = {}
         self.memory_coords_status = {}
         self.memory_battle_status = {}
+        self.df_dict = {}
 
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
@@ -107,6 +108,8 @@ class PokeMMO:
                     setattr(self, var_name, cv2.imread(path, cv2.IMREAD_COLOR))
                 elif path.endswith(".csv"):
                     setattr(self, var_name, pd.read_csv(path))
+                    self.df_dict[var_name] = getattr(self, var_name)
+
                 print(f"Loaded {var_name} from {path}")
                 asset_count += 1
         logger.info(f"Loaded {asset_count} assets.")
@@ -346,6 +349,7 @@ class PokeMMO:
             for y in range(hp_image.shape[0]):
                 # Check if the pixel is close to white
                 if np.all(hp_image[y, x] >= [251, 251, 251]):
+                    current_hp_length = x
                     hp_pct = (current_hp_length / total_hp_length) * 100
                     return round(hp_pct, 1)
         return 100  # Return 0 if no white pixel is found
