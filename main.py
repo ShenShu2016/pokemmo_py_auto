@@ -61,7 +61,9 @@ class PokeMMO:
 
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
+
         self.controller = Controller(handle=self.handle)
+
         self.roleController = RoleController(self)
         self.word_recognizer = Word_Recognizer()
         self.log_print_save = LogPrintSave(self)
@@ -344,16 +346,12 @@ class PokeMMO:
             for y in range(hp_image.shape[0]):
                 # Check if the pixel is close to white
                 if np.all(hp_image[y, x] >= [251, 251, 251]):
-                    current_hp_length = x
                     hp_pct = (current_hp_length / total_hp_length) * 100
                     return round(hp_pct, 1)
         return 100  # Return 0 if no white pixel is found
 
 
 if __name__ == "__main__":
-    # Make the process DPI-aware
-    windll.user32.SetProcessDPIAware()
-    # Initialize the PokeMMO class and get a screenshot
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
 
