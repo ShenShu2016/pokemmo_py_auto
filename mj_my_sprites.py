@@ -74,17 +74,17 @@ def process_shellcode(shellcode):
     return name, new_shellcode
 
 
-class MemoryInjector_MyPokemon:
+class MemoryInjector_MySprites:
     def __init__(self):
         self.target_process = "javaw.exe"
         self.pattern = b"\\x8B\\x5B\\x0C\\x3B\\xD8"
-        self.process_name = "mj_aob_my_pokemon"
+        self.process_name = "mj_my_sprites"
         self.offset = 0
         self.pm = pymem.Pymem(self.target_process)
-        self.team_dict
+        self.team_dict = {}
 
         # Adding a path to your json file
-        self.json_file_path = r"mj_aob_my_pokemon.json"
+        self.json_file_path = r"mj_my_sprites.json"
         self.aob_hex_list_len = 5  # 注入那条指令的长度
         self.aob_address_list = []
         self.aob_hex_list = []
@@ -147,8 +147,8 @@ class MemoryInjector_MyPokemon:
 
             try:
                 self.inject_memory()
-                time.sleep(1)
-                # self.read_data() #!不需要了因为找到肯定是对的
+                time.sleep(5)
+                # self.read_data()  #!不需要了因为找到肯定是对的
                 with open(self.json_file_path, "w") as json_file:
                     json.dump(
                         {
@@ -278,10 +278,10 @@ class MemoryInjector_MyPokemon:
                 },
             }
 
-        print(self.team_dict)
+        # print(self.team_dict)
         return self.team_dict
 
 
 if __name__ == "__main__":
-    injector = MemoryInjector_MyPokemon()
+    injector = MemoryInjector_MySprites()
     # injector.read_data()

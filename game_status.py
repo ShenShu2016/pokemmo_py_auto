@@ -23,6 +23,7 @@ class GameStatus:
         self.img_BRG = None
         self.memory_battle_status = {}
         self.memory_coords_status = {}
+        self.memory_my_sprits_status = {}
         self.game_status_dict = {}
 
     def determine_game_status(self):
@@ -147,6 +148,7 @@ class GameStatus:
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         self.memory_coords_status = self.pokeMMO.get_memory_coords_status()
         self.memory_battle_status = self.pokeMMO.get_memory_battle_status()
+        self.memory_my_sprits_status = self.pokeMMO.get_memory_my_sprits_status()
         # print("memory_battle_status", self.memory_battle_status)
         # print("memory_coords_status", self.memory_coords_status)
         current_time = time.time()
@@ -163,6 +165,27 @@ class GameStatus:
                 self.memory_battle_status.get("battle_option_ready"),
                 self.memory_battle_status.get("battle_option_ready"),
             )
+        new_sprite_dict = {
+            "Sweet Scent": {"pp": 0, "sprite": None},
+            "False Swipe": {"pp": 0, "sprite": None},
+        }
+
+        try:
+            for key in self.memory_my_sprits_status:
+                for skill_key in ["skill_0", "skill_1", "skill_2", "skill_3"]:
+                    if self.memory_my_sprits_status[key][skill_key]["id"] == 206:
+                        new_sprite_dict["False Swipe"] = {
+                            "pp": self.memory_my_sprits_status[key][skill_key]["pp"],
+                            "sprite": key,
+                        }
+                    elif self.memory_my_sprits_status[key][skill_key]["id"] == 230:
+                        new_sprite_dict["Sweet Scent"] = {
+                            "pp": self.memory_my_sprits_status[key][skill_key]["pp"],
+                            "sprite": key,
+                        }
+
+        except:
+            pass
 
         self.game_status_dict = {
             "return_status": return_status,
@@ -173,6 +196,7 @@ class GameStatus:
             "face_dir": self.memory_coords_status.get("face_dir"),
             "transport": self.memory_coords_status.get("transport"),
             "battle_time_passed": self.memory_battle_status.get("battle_time_passed"),
+            "sprite_dict": new_sprite_dict,
         }
 
         self.recent_status_game_status_dict_list.append(

@@ -15,6 +15,7 @@ from game_status import GameStatus
 from log_print_save import LogPrintSave
 from memory_injector import MemoryInjector
 from memory_injector_solid_aob import MemoryInjector as MemoryInjectorSolidAOB
+from mj_my_sprites import MemoryInjector_MySprites
 from pokemmoUI import PokemmoUI
 from role_controller import RoleController
 from utils.main.controller import Controller
@@ -49,6 +50,7 @@ class PokeMMO:
         self.state_dict_lock = threading.Lock()
         self.memory_coords_status_lock = threading.Lock()
         self.memory_battle_status_lock = threading.Lock()
+        self.memory_my_sprits_status_lock = threading.Lock()
         self.latest_img_BRG = self.window_manager.get_current_img_BRG()
 
         self.imgs_BRG_list = []
@@ -57,6 +59,7 @@ class PokeMMO:
         self.state_dict = {}
         self.memory_coords_status = {}
         self.memory_battle_status = {}
+        self.memory_my_sprits_status = {}
         self.df_dict = {}
         self.load_assets()
         self.game_status_checker = GameStatus(self)
@@ -68,6 +71,7 @@ class PokeMMO:
         self.word_recognizer = Word_Recognizer()
         self.log_print_save = LogPrintSave(self)
         self.memory_injector = MemoryInjector()
+        self.memory_my_sprits = MemoryInjector_MySprites()
         self.memory_battle = MemoryInjectorSolidAOB(
             name="Battle_Memory_Injector",
             # pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  #
@@ -87,6 +91,7 @@ class PokeMMO:
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
         threading.Thread(target=self.update_memory_coords).start()
+        threading.Thread(target=self.update_memory_my_sprits_status).start()
         threading.Thread(target=self.update_memory_battle_status).start()
         threading.Thread(target=self.log_print_save.update_logs).start()
         threading.Thread(target=self.log_print_save.print_logs).start()
@@ -184,6 +189,13 @@ class PokeMMO:
                 self.memory_battle_status = new_memory_coords
             time.sleep(0.05)
 
+    def update_memory_my_sprits_status(self):
+        while not self.stop_threads_flag:
+            new_memory_coords = self.memory_my_sprits.read_data()
+            with self.memory_my_sprits_status_lock:
+                self.memory_my_sprits_status = new_memory_coords
+            time.sleep(2)
+
     # Use this method to safely access the state_dict variable from other threads
     def get_state_dict(self):
         with self.state_dict_lock:
@@ -209,6 +221,10 @@ class PokeMMO:
     def get_memory_battle_status(self):
         with self.memory_battle_status_lock:
             return self.memory_battle_status
+
+    def get_memory_my_sprits_status(self):
+        with self.memory_my_sprits_status_lock:
+            return self.memory_my_sprits_status
 
     def get_latest_img_BRG(self):
         with self.latest_img_BRG_lock:

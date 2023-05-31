@@ -84,6 +84,7 @@ class MemoryInjector:
                 self.try_the_aob()
         else:
             self.aob_address = self.aob_scan()
+            time.sleep(5)
             self.try_the_aob()
 
     def aob_scan(self):
@@ -114,8 +115,8 @@ class MemoryInjector:
 
             try:
                 self.inject_memory()
-                time.sleep(1)
-                self.read_data()
+                # time.sleep(1)
+                # self.read_data() #! 找到了基本就是对的
                 with open(self.json_file_path, "w") as json_file:
                     json.dump(
                         {
@@ -280,9 +281,9 @@ class MemoryInjector:
 if __name__ == "__main__":
     injector = MemoryInjector(
         name="Battle_Memory_Injector",
-        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",
+        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",
         offset=0,
         json_file_path="battle_memory_injector.json",
         aob_hex_list_len=7,
     )
-    injector.read_data()
+    # injector.read_data()
