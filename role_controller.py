@@ -52,9 +52,7 @@ class RoleController:
             self.press_down_count -= 1
 
         self.pokeMMO.controller.key_press(keys[0], delay + random.uniform(0, delay))
-
         self.pokeMMO.controller.key_press(keys[1], delay + random.uniform(0, delay))
-
         total_delay = random.uniform(0, 0.5)
         sleep(total_delay)
         self.my_recent_actions_list.append(("move_left_right", time.time()))
@@ -139,15 +137,11 @@ class RoleController:
     def restart_from_hospital(self):
         self.pokeMMO.controller.key_press("8")
         sleep(4.5)
-
         self.pokeMMO.controller.key_press("z", 1.5)  # 护士姐姐对话
-
         self.pokeMMO.controller.key_press("s", 5)
         self.pokeMMO.controller.key_press("z", 1.5)  # 下水
-
         self.sweet_scent = 4
         self.false_swipe = 30
-
         print("Restarting from hospital")
 
     @synchronized

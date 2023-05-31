@@ -32,31 +32,23 @@ enemy_hp_positions = {
 }
 
 
-def get_enemy_hp_bar_position():
-    for i, pos in enemy_hp_positions.items():
-        top_left = (pos[0][0] + 20, pos[0][1] + 4)
-        bottom_right = (pos[1][0] + 203, pos[1][1] - 5)
-        enemy_hp_bar_positions[i] = [top_left, bottom_right]
-
-
-enemy_hp_bar_positions = {}
-
-enemy_hp_bar_positions = get_enemy_hp_bar_position()
-
-
 city_info = {
     "SOOTOPOLIS_CITY": {
+        "town_map_coords": (836, 414),
         "map_number": (1, 7, 50),
         "112": (43, 32, 1),
         "112_map_number": (1, 2, 65),
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(6, 8, 0), (7, 8, 0)],
+        "coords_tracking_ready": True,
     },
     "FALLARBOR_TOWN": {
+        "town_map_coords": (403, 241),
         "map_number": (1, 13, 50),
         "112": (14, 8, 1),
         "112_map_number": (1, 4, 55),
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(6, 8, 0), (7, 8, 0)],
+        "coords_tracking_ready": False,
     },
 }
