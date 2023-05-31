@@ -139,13 +139,11 @@ class RoleController:
     def restart_from_hospital(self):
         self.pokeMMO.controller.key_press("8")
         sleep(4.5)
-        for i in range(0, 8):
-            self.pokeMMO.controller.key_press("z", 0.15)
-            sleep(0.2)
+
+        self.pokeMMO.controller.key_press("z", 1.5)  # 护士姐姐对话
+
         self.pokeMMO.controller.key_press("s", 5)
-        self.pokeMMO.controller.key_press("z", 1)
-        self.pokeMMO.controller.key_press("z", 1)
-        self.pokeMMO.controller.key_press("z", 1)
+        self.pokeMMO.controller.key_press("z", 1.5)  # 下水
 
         self.sweet_scent = 4
         self.false_swipe = 30

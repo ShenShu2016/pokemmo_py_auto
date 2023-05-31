@@ -38,7 +38,6 @@ class PokeMMO:
             self.config = json.load(f)
 
         pytesseract.pytesseract.tesseract_cmd = self.config["tesseract"]
-        self.load_assets()
 
         # SetForegroundWindow = windll.user32.SetForegroundWindow
         # SetForegroundWindow(self.handle)
@@ -59,7 +58,7 @@ class PokeMMO:
         self.memory_coords_status = {}
         self.memory_battle_status = {}
         self.df_dict = {}
-
+        self.load_assets()
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
 
