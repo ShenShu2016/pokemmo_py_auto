@@ -230,6 +230,7 @@ class PathFinder:
         city="SOOTOPOLIS_CITY",
         end_point_map=None,
         style="farming",
+        face_dir=None,
     ):  # style random_end_point,solid_end_point
         # Reset the index if it's not a continuous integer sequence starting from 0
 
@@ -283,6 +284,34 @@ class PathFinder:
 
             self.pf_move(end_face_dir=city_info[city]["112_nurse"][2])
             time.sleep(0.5)  # 等一会儿才能知道到底到了没到
+
+    def leave_pc_center(self, city="SOOTOPOLIS_CITY"):
+        while True:
+            game_status = self.pokeMMO.get_game_status()
+            if (
+                game_status["x_coords"] == city_info[city]["112_out"][0][0]
+                and game_status["y_coords"] == city_info[city]["112_out"][0][1]
+                and game_status["face_dir"] == city_info[city]["112_pc_center"][0][2]
+            ):
+                break
+            self.path = self.a_star_no_obstacle(
+                (game_status["y_coords"], game_status["x_coords"]),
+                (
+                    city_info[city]["112_pc_center"][1],
+                    city_info[city]["112_pc_center"][0],
+                ),
+            )
+            print(self.path)
+
+            self.pf_move(end_face_dir=city_info[city]["112_pc_center"][2])
+            time.sleep(0.5)
+        self.pokeMMO.controller.key_press("s", 1)
+        time.sleep(3)
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["map_number_tuple"] == city_info[city]["map_number"]:
+            return True
+        else:
+            raise Exception("Failed to leave pc center")
 
     def pf_move(self, end_face_dir=None):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
         game_status = self.pokeMMO.get_game_status()

@@ -136,7 +136,7 @@ class MemoryInjector:
                 ]
                 # print("aob_hex_list:", self.aob_hex_list, self.aob_address)
                 if i in self.bad_newmen_18:
-                    print("bad_newmen_18")
+                    # print("bad_newmen_18")
                     continue
                 try:
                     self.inject_memory()
@@ -319,6 +319,7 @@ class MemoryInjector:
         if self.pm.read_bytes(player_info_not_sure_address, 4) in [
             b"\x11\x00\x00\x00",
             b"\t\x00\x00\x00",
+            b"\x01\x00\x00\x00",
         ]:  # 90000
             print(self.pm.read_bytes(player_info_not_sure_address, 4))
             return True

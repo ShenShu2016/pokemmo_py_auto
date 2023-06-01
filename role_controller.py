@@ -156,13 +156,13 @@ class RoleController:
     @synchronized
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.pokeMMO.controller.key_press("7")
-        sleep(2)
+        sleep(1)
         self.pokeMMO.controller.click(
             city_info[city]["town_map_coords"][0],
             city_info[city]["town_map_coords"][1],
             tolerance=3,
         )
-        sleep(5)
+        sleep(3)
         # check if in right city
         game_status = self.pokeMMO.get_game_status()
         if game_status["map_number_tuple"] == city_info[city]["map_number"]:
@@ -175,7 +175,28 @@ class RoleController:
                 "112"
             ]:
                 self.pokeMMO.controller.key_press("w", 1)
-                self.pokeMMO.pf.go_to_nurse()
+                self.pokeMMO.pf.go_to_nurse(city="SOOTOPOLIS_CITY")
+
+    @synchronized
+    def talk_to_nurse(self):
+        self.pokeMMO.controller.key_press("z", 1.5)
+        game_status = self.pokeMMO.get_game_status()
+        if (
+            game_status["sprite_dict"]["Sweet Scent"]["pp"] >= 20
+            and game_status["sprite_dict"]["False Swipe"]["pp"] >= 30
+        ):
+            return True
+        else:
+            raise Exception("Not enough PP")
+
+    @synchronized
+    def use_surf(self):
+        self.pokeMMO.controller.key_press("z", 1)
+        sleep(3)
+        if self.pokeMMO.get_game_status()["transport"] in [1, 11]:
+            return True
+        else:
+            raise Exception("Not in water")
 
     @synchronized
     def use_bike(self):

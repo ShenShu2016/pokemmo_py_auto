@@ -264,7 +264,9 @@ class MemoryInjector:
 
 
 if __name__ == "__main__":
-    injector = MemoryInjector("")
+    injector = MemoryInjector()
+    injector.read_data()
+    print(injector.memory_info_dict)
     # print(injector.aob_address)
     # print(hex(injector.aob_address))
     # print(injector.TR)
