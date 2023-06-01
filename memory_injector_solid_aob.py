@@ -93,8 +93,7 @@ class MemoryInjector:
                 data = json.load(json_file)
                 if data.get("window_id") != self.window_id:
                     print("window_id not match")
-                    self.aob_address = self.aob_scan()
-                    self.try_the_aob()
+                    self.aob_scan()
 
                 else:
                     self.aob_address = data.get("aob_address", 0)
@@ -103,39 +102,73 @@ class MemoryInjector:
                     print(
                         f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
                     )
-
                     # Try to read data
-                    try:
-                        self.check_data_right()
+
+                    result = self.check_data_right()
+                    if result:
                         print(
                             f"{self.process_name} Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
                         )
-                    except Exception as e:
-                        print(
-                            f"{self.process_name} Reading data failed with stored addresses, starting normal scanning and injection process:",
-                            e,
-                        )
-                        self.aob_address = self.aob_scan()
-                        self.try_the_aob()
+                    else:
+                        print("data not right")
+                        self.aob_scan()
+
         else:
-            self.aob_address = self.aob_scan()
-            time.sleep(5)
-            self.try_the_aob()
+            self.aob_scan()
 
     def aob_scan(self):
-        while True:
-            self.aob_address_list = pattern_scan_all(
-                handle=self.pm.process_handle,
-                pattern=self.pattern,  #  b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3"
-                return_multiple=True,
-            )
-            print("aob_address_list:", self.aob_address_list)
-            if len(self.aob_address_list) >= 1:
-                print(f"{self.process_name}aob_address_list:", self.aob_address_list)
-                return
-            if len(self.aob_address_list) < 1:
-                print(f"waiting for AOB {self.process_name} appear, retrying...")
-                time.sleep(1)
+        is_found = False
+        while not is_found:
+            try:
+                self.aob_address_list = pattern_scan_all(
+                    handle=self.pm.process_handle,
+                    pattern=self.pattern,
+                    return_multiple=True,
+                )
+            except:
+                print("scan error")
+                continue
+            for i in self.aob_address_list:
+                self.aob_address = i + self.offset  # 必定要偏移
+                self.aob_hex_list = [
+                    hex(b)[2:].zfill(2).upper()
+                    for b in self.pm.read_bytes(self.aob_address, self.aob_hex_list_len)
+                ]
+                # print("aob_hex_list:", self.aob_hex_list, self.aob_address)
+                if i in self.bad_newmen_18:
+                    print("bad_newmen_18")
+                    continue
+                try:
+                    self.inject_memory()
+                    result = self.check_data_right()  #! 找到了基本就是对的
+                    if result:
+                        with open(self.json_file_path, "w") as json_file:
+                            json.dump(
+                                {
+                                    "aob_address": self.aob_address,
+                                    "TR": self.TR,
+                                    "newmem": self.newmem,
+                                    "window_id": self.window_id,
+                                    "timestamp": time.time(),  # current timestamp
+                                },
+                                json_file,
+                            )
+
+                        print(
+                            f"Injected {self.process_name}, aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}, aob_hex_list: {self.aob_hex_list}"
+                        )
+                        is_found = True
+                except Exception as e:
+                    print(e)
+                    continue
+
+            # print("aob_address_list:", self.aob_address_list)
+            # if len(self.aob_address_list) >= 1:
+            #     print(f"{self.process_name}aob_address_list:", self.aob_address_list)
+            #     return
+            # if len(self.aob_address_list) < 1:
+            #     print(f"waiting for AOB {self.process_name} appear, retrying...")
+            #     time.sleep(1)
 
     def try_the_aob(self):
         print("Trying the aob")
@@ -147,7 +180,7 @@ class MemoryInjector:
                 for b in self.pm.read_bytes(self.aob_address, self.aob_hex_list_len)
             ]
             print("aob_hex_list:", self.aob_hex_list, self.aob_address)
-            if self.aob_address in self.bad_newmen_18:
+            if i in self.bad_newmen_18:
                 print("bad_newmen_18")
                 continue
             try:
@@ -262,6 +295,7 @@ class MemoryInjector:
         print(
             "check_data_right---------------------------------------------------------------------------"
         )
+        self.bad_newmen_18.append(self.newmem + 18)
         time.sleep(1)
         print(
             f"Checking data for {self.process_name}... aob_address: {self.aob_address} TR: {self.TR} newmem: {self.newmem}"
@@ -272,7 +306,7 @@ class MemoryInjector:
         print("start_address", start_address, hex(start_address))
 
         data = self.pm.read_bytes(start_address, 4)
-        analyze_shellcode(data, 4)
+        # analyze_shellcode(data, 4)
         print("data", data)
         player_info_not_sure_address = split_bytes_to_int(data, 0, 4)
 
@@ -293,10 +327,9 @@ class MemoryInjector:
                 "self.pm.read_bytes(player_info_not_sure_address, 4)",
                 self.pm.read_bytes(player_info_not_sure_address, 4),
             )
-            self.bad_newmen_18.append(self.newmem + 18)
             analyze_shellcode(self.pm.read_bytes(player_info_not_sure_address, 4), 4)
 
-            raise Exception("Data is not right")
+            return False
 
     def read_data(self):
         # pass
@@ -332,10 +365,10 @@ class MemoryInjector:
 if __name__ == "__main__":
     injector = MemoryInjector(
         name="Battle_Memory_Injector",
-        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # \\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # 45 8B 9A 98 00 00 00 45 8b
+        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # \\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # 45 8B 9A 98 00 00 00
         offset=0,
         json_file_path="battle_memory_injector.json",
         aob_hex_list_len=7,
     )
-    # injector.read_data()
-    # print(injector.memory_info_dict)
+    injector.read_data()
+    print(injector.memory_info_dict)

@@ -70,7 +70,10 @@ def analyze_shellcode(battle_instance_data, chunk_size):
 def process_shellcode(shellcode):
     # print(shellcode)
     string_end = shellcode.index(b"\x00\x00")
-    name = shellcode[:string_end].decode()
+    try:
+        name = shellcode[:string_end].decode()
+    except:
+        name = "Unknown"
     shellcode_start = shellcode.index(b"\x81\x00")
     shellcode_start = shellcode_start - 1 if shellcode_start > 0 else shellcode_start
     new_shellcode = shellcode[shellcode_start:]
@@ -263,11 +266,14 @@ class MemoryInjector_MySprites:
                     target_value, start_index, end_index
                 )
                 # print("pokemon_address", pokemon_address, hex(pokemon_address))
-                pokemon_data = self.pm.read_bytes(pokemon_address + 200, 64)
-
                 pokemon_data = self.pm.read_bytes(pokemon_address, 264)
                 pokemon_data_200_plus = pokemon_data[200:]
-                name, new_shellcode = process_shellcode(pokemon_data_200_plus)
+                try:
+                    name, new_shellcode = process_shellcode(pokemon_data_200_plus)
+                except Exception as e:
+                    print(e)
+                    name = "unknown"
+                # print("name", name, "new_shellcode", new_shellcode)
 
                 self.team_dict[i] = {
                     "pokedex": split_bytes_to_int(pokemon_data, 86, 88),
@@ -301,6 +307,6 @@ class MemoryInjector_MySprites:
 
 if __name__ == "__main__":
     injector = MemoryInjector_MySprites()
-    # time.sleep(5)
+    time.sleep(1)
     injector.read_data()
     print(injector.team_dict)

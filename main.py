@@ -76,13 +76,11 @@ class PokeMMO:
         self.memory_my_sprits = MemoryInjector_MySprites()
         self.memory_battle = MemoryInjectorSolidAOB(
             name="Battle_Memory_Injector",
-            # pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  #
-            pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",
+            pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # \\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # 45 8B 9A 98 00 00 00 45 8b
             offset=0,
             json_file_path="battle_memory_injector.json",
             aob_hex_list_len=7,
         )
-
         self.stop_threads_flag = False
 
         self.start_threads()
