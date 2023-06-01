@@ -51,7 +51,21 @@ city_info = {
         "112": (14, 8, 1),
         "112_map_number": (1, 4, 55),
         "112_nurse": (7, 4, 1),  # x,y,dir
-        "112_out": [(6, 8, 0), (7, 8, 0)],
+        "112_out": [
+            (7, 8, 0),
+            (6, 8, 0),
+        ],
         "coords_tracking_ready": False,
+    },
+    "PETALBURG_CITY": {
+        "town_map_coords": (357, 457),
+        "map_number": (1, 0, 50),
+        "112": (20, 17, 1),
+        "112_map_number": (1, 4, 58),
+        "112_nurse": (7, 4, 1),  # x,y,dir
+        "112_out": [
+            (7, 8, 0),
+            (6, 8, 0),
+        ],
     },
 }

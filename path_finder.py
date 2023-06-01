@@ -101,7 +101,7 @@ class PathFinder:
 
     #     return keys_and_delays
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
-        transport_speed = {"bike": 0.1, "walk": 0.3, "run": 0.2, "surf": 0.1}
+        transport_speed = {"bike": 0.1, "walk": 0.25, "run": 0.2, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.3, "run": 0.0, "surf": 0.0}  # 启动延迟
         game_state = self.pokeMMO.get_game_status()
         current_face_dir = game_state["face_dir"]
