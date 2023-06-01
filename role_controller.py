@@ -61,7 +61,6 @@ class RoleController:
     def fight_skill_1_from_s21(self):  # False Swipe
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("z", 0.2)
-        self.false_swipe -= 1
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
         sleep(5)
         print("Using False Swipe")
@@ -116,7 +115,7 @@ class RoleController:
             > 0
         ):
             print("扔球")
-            self.pokeMMO.controller.key_press("z", 5)
+            self.pokeMMO.controller.key_press("z", 1)
             print("Throwing Pokeball")
             sleep(5)
 
@@ -185,8 +184,10 @@ class RoleController:
     @synchronized
     def talk_to_nurse(self):
         print("Talking to nurse")
-        self.pokeMMO.controller.key_press("z", 1.5)
+        self.pokeMMO.controller.key_press("z", 2)
+        time.sleep(2)
         game_status = self.pokeMMO.get_game_status()
+
         if (
             game_status["sprite_dict"]["Sweet Scent"]["pp"] >= 20
             and game_status["sprite_dict"]["False Swipe"]["pp"] >= 30
@@ -198,12 +199,14 @@ class RoleController:
 
     @synchronized
     def use_surf(self):
-        self.pokeMMO.controller.key_press("z", 1)
-        sleep(3)
-        if self.pokeMMO.get_game_status()["transport"] in [1, 11]:
-            return True
-        else:
-            raise Exception("Not in water")
+        self.pokeMMO.controller.key_press("z", 1.5)
+
+        for i in range(10):
+            if self.pokeMMO.get_game_status()["transport"] in [1, 11]:
+                return True
+            sleep(0.1)
+
+        raise Exception("Not in water")
 
     @synchronized
     def use_bike(self):

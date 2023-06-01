@@ -39,7 +39,10 @@ city_info = {
         "112": (43, 32, 1),
         "112_map_number": (1, 2, 65),
         "112_nurse": (7, 4, 1),  # x,y,dir
-        "112_out": [(6, 8, 0), (7, 8, 0)],
+        "112_out": [
+            (7, 8, 0),
+            (6, 8, 0),
+        ],  # 把正对着护士的放在第一个
         "coords_tracking_ready": True,
     },
     "FALLARBOR_TOWN": {

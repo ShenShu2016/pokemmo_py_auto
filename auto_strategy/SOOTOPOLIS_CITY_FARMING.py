@@ -86,6 +86,10 @@ class Faming_SOOTOPOLIS_CITY:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
                 game_status = self.pokeMMO.get_game_status()
+                if self.pokeMMO.get_game_status().get(
+                    "check_battle_end_pokemon_caught"
+                )[0]:
+                    self.pokeMMO.roleController.close_pokemon_summary(game_status)
                 if (game_status["sprite_dict"]["Sweet Scent"]["pp"] == 0) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
                 ):
@@ -95,10 +99,6 @@ class Faming_SOOTOPOLIS_CITY:
                     )  # 应该已经到了湖里了
 
                 self.pokeMMO.roleController.use_sweet_sent()
-
-                # if self.pokeMMO.get_game_status().get("check_battle_end_pokemon_caught")[0]:
-                #     self.pokeMMO.roleController.close_pokemon_summary(game_status)
-                #     break
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,

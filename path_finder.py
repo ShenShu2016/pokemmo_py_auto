@@ -101,7 +101,7 @@ class PathFinder:
 
     #     return keys_and_delays
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
-        transport_speed = {"bike": 0.1, "walk": 0.3, "run": 0.2, "surf": 0.2}
+        transport_speed = {"bike": 0.1, "walk": 0.3, "run": 0.2, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.3, "run": 0.0, "surf": 0.0}  # 启动延迟
         game_state = self.pokeMMO.get_game_status()
         current_face_dir = game_state["face_dir"]
@@ -135,11 +135,11 @@ class PathFinder:
             if keys_and_delays and keys_and_delays[-1][0] == key:
                 keys_and_delays[-1] = (
                     key,
-                    keys_and_delays[-1][1] + transport_speed[transport],
+                    round(keys_and_delays[-1][1], 3) + transport_speed[transport],
                 )
             else:
                 keys_and_delays.append(
-                    (key, transport_speed[transport] + start_delay[transport])
+                    (key, round(transport_speed[transport] + start_delay[transport], 3))
                 )
 
         # 如果指定了最后的面向方向，添加相应的转向动作
@@ -247,12 +247,26 @@ class PathFinder:
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
         if style == "farming":
             self.grid[
-                df[(df["mark"] == 1)]["y_coords"],
-                df[(df["mark"] == 1)]["x_coords"],
+                df[(df["mark"] == 1) | (df["mark"] == 2)]["y_coords"],
+                df[(df["mark"] == 1) | (df["mark"] == 2)]["x_coords"],
             ] = 1  #!地图上1表示可以farming区域
-            random_row = df[df["mark"] == 1].sample(n=1)
+            if city == "SOOTOPOLIS_CITY":
+                # 定义区域范围
+                min_x = 22
+                max_x = 41
+                min_y = 46
+                max_y = 55
+                # 随机选择一个满足条件的mark为1的记录
+                filtered_df = df[
+                    (df["mark"] == 1)
+                    & (df["x_coords"].between(min_x, max_x))
+                    & (df["y_coords"].between(min_y, max_y))
+                ]
+                random_row = filtered_df.sample(n=1)
 
-            # 获取y_coords和x_coords的值
+            else:
+                random_row = df[df["mark"] == 1].sample(n=1)
+                # 获取y_coords和x_coords的值
             y = random_row["y_coords"].values[0]
             x = random_row["x_coords"].values[0]
             end_point = (y, x)
@@ -325,13 +339,13 @@ class PathFinder:
 
             self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
             time.sleep(0.5)
-        self.pokeMMO.controller.key_press("s", 1)
-        time.sleep(2)
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"] == city_info[city]["map_number"]:
-            return True
-        else:
-            raise Exception("Failed to leave pc center")
+            self.pokeMMO.controller.key_press("s", 0.2)
+            time.sleep(2)
+            game_status = self.pokeMMO.get_game_status()
+            if game_status["map_number_tuple"] == city_info[city]["map_number"]:
+                return True
+            else:
+                raise Exception("Failed to leave pc center")
 
     def pf_move(self, end_face_dir=None):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
         game_status = self.pokeMMO.get_game_status()
@@ -368,13 +382,9 @@ if __name__ == "__main__":
 
     pokeMMO = PokeMMO()
     sleep(1)
-    # while True:
-    #     pokeMMO.pf.go_to_nurse()
-    #     sleep(3)
-
-    # pathFinder = PathFinder(pokeMMO)
-    while True:
-        keys_and_delays = pokeMMO.pf.go_somewhere((37, 40))
-        sleep(5)
-
-    pass
+    pokeMMO.pf.go_somewhere(
+        end_point=None,
+        end_face_dir=None,
+        city="SOOTOPOLIS_CITY",
+        style="farming",
+    )
