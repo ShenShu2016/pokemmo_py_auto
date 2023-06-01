@@ -13,11 +13,15 @@ import heapq
 import numpy as np
 import pandas as pd
 
+from constant import city_info
+
 
 class PathFinder:
     def __init__(self, pokeMMO: PokeMMO):
         """Initialize the LogPrintSave class."""
         self.pokeMMO = pokeMMO
+        self.path = []
+        self.keys_and_delays = []
 
     # 启发式函数（这里使用曼哈顿距离）
     def heuristic(self, a, b):
@@ -95,6 +99,48 @@ class PathFinder:
 
         return keys_and_delays
 
+    def a_star_no_obstacle(self, start, end):
+        self.max_x = max(start[1], end[1]) + 1
+        self.max_y = max(start[0], end[0]) + 1
+        heap = []
+        heapq.heappush(heap, (0, start))
+        parent = {start: None}
+        g_score = {start: 0}
+        f_score = {start: self.heuristic(start, end)}
+
+        while heap:
+            curr = heapq.heappop(heap)[1]
+
+            if curr == end:
+                path = []
+                while curr is not None:
+                    path.append(curr)
+                    curr = parent[curr]
+                return path[::-1]
+
+            for next_node in self.neighbors_no_obstacle(curr):
+                tentative_g_score = g_score[curr] + 1
+                if next_node not in g_score or tentative_g_score < g_score[next_node]:
+                    g_score[next_node] = tentative_g_score
+                    f_score[next_node] = tentative_g_score + self.heuristic(
+                        next_node, end
+                    )
+                    parent[next_node] = curr
+                    if next_node not in [i[1] for i in heap]:
+                        heapq.heappush(heap, (f_score[next_node], next_node))
+
+        return None
+
+    # 获取邻居节点
+    def neighbors_no_obstacle(self, node):
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        result = []
+        for direction in directions:
+            next_node = (node[0] + direction[0], node[1] + direction[1])
+            if 0 <= next_node[0] < self.max_y and 0 <= next_node[1] < self.max_x:
+                result.append(next_node)
+        return result
+
     def try_to_find_known_grid(self, start_point, end_point):
         # 以任何方式尝试回到已知的网格，例如，你可以创建一个默认的方向列表
         default_directions = ["w", "d", "s", "a"]  # 上、右、下、左
@@ -123,12 +169,15 @@ class PathFinder:
             return (start_point[0], start_point[1] + 1)
 
     def get_action(
-        self, end_point=None, end_point_map=None, style="farming"
+        self,
+        end_point=None,
+        city="SOOTOPOLIS_CITY",
+        end_point_map=None,
+        style="farming",
     ):  # style random_end_point,solid_end_point
         # Reset the index if it's not a continuous integer sequence starting from 0
 
-        df = self.pokeMMO.df_dict["SOOTOPOLIS_CITY_coords_tracking_csv"]
-        df = self.pokeMMO.SOOTOPOLIS_CITY_coords_tracking_csv
+        df = self.pokeMMO.df_dict[f"{city}_coords_tracking_csv"]
 
         df = df.reset_index(drop=True)
         df["x_coords"] = df["x_coords"].astype(int)
@@ -158,6 +207,27 @@ class PathFinder:
                 return result
         return self.try_to_find_known_grid(start_point, end_point)
 
+    def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
+        while True:
+            game_status = self.pokeMMO.get_game_status()
+            if (
+                game_status["x_coords"] == city_info[city]["112_nurse"][0]
+                and game_status["y_coords"] == city_info[city]["112_nurse"][1]
+            ):
+                break
+            self.path = self.a_star_no_obstacle(
+                (game_status["y_coords"], game_status["x_coords"]),
+                (city_info[city]["112_nurse"][1], city_info[city]["112_nurse"][0]),
+            )
+            print(self.path)
+            self.keys_and_delays = self.path_to_keys_and_delays(self.path)
+            time.sleep(0.5)
+
+    def move(self):
+        if self.keys_and_delays is not None:
+            for key, delay in self.keys_and_delays:
+                pokeMMO.controller.key_press(key, delay)
+
 
 if __name__ == "__main__":
     from time import sleep
@@ -166,13 +236,14 @@ if __name__ == "__main__":
 
     pokeMMO = PokeMMO()
     sleep(1)
-    pathFinder = PathFinder(pokeMMO)
-    while True:
-        keys_and_delays = pathFinder.get_action((37, 40))
-        if keys_and_delays is not None:
-            for key, delay in keys_and_delays:
-                pokeMMO.controller.key_press(key, delay)
+    pokeMMO.pf.go_to_nurse()
+    # pathFinder = PathFinder(pokeMMO)
+    # while True:
+    #     keys_and_delays = pathFinder.get_action((37, 40))
+    #     if keys_and_delays is not None:
+    #         for key, delay in keys_and_delays:
+    #             pokeMMO.controller.key_press(key, delay)
 
-            sleep(5)
+    #         sleep(5)
 
-    pass
+    # pass

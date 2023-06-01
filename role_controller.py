@@ -13,6 +13,8 @@ import queue
 import threading
 from functools import wraps
 
+from constant import city_info
+
 
 def calculate_catch_rate(
     max_hp=65, current_hp=1, catch_rate=1, ball_rate=1, pokemon_condition=1
@@ -151,12 +153,50 @@ class RoleController:
             self.sweet_scent -= 1
             sleep(3)
 
+    @synchronized
+    def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
+        self.pokeMMO.controller.key_press("7")
+        sleep(2)
+        self.pokeMMO.controller.click(
+            city_info[city]["town_map_coords"][0],
+            city_info[city]["town_map_coords"][1],
+            tolerance=3,
+        )
+        sleep(5)
+        # check if in right city
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["map_number_tuple"] == city_info[city]["map_number"]:
+            print("Flying to %s" % city)
+        else:
+            raise Exception("Not in %s" % city)
+
+        if locate_teleport:
+            if (game_status["x_coords"], game_status["y_coords"]) == city_info[city][
+                "112"
+            ]:
+                self.pokeMMO.controller.key_press("w", 1)
+                self.pokeMMO.pf.go_to_nurse()
+
+    @synchronized
+    def use_bike(self):
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["map_number_tuple"][2] == 50 and game_status[
+            "transport"
+        ] not in [
+            1,
+            11,
+        ]:  # 室外
+            self.pokeMMO.controller.key_press("3")
+            sleep(1)
+
 
 if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
+    # pokeMMO.roleController.fly_to_city("SOOTOPOLIS_CITY")
+    # pokeMMO.roleController.use_bike()
 
     while True:
         round = 0

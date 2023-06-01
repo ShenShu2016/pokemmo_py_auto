@@ -8,6 +8,8 @@ import pymem
 from capstone import *
 from pymem.pattern import pattern_scan_all
 
+from utils.main.window_manager import Window_Manager
+
 
 def format_address(address, length=8):
     reversed_bytes = address.to_bytes(length, byteorder="little")
@@ -30,6 +32,9 @@ def split_bytes_to_int(data, start, end):
 
 
 def analyze_shellcode(battle_instance_data, chunk_size):
+    if chunk_size != 4:
+        raise ValueError("This function only accepts chunks of size 4")
+
     chunks = [
         battle_instance_data[i : i + chunk_size]
         for i in range(0, len(battle_instance_data), chunk_size)
@@ -38,7 +43,29 @@ def analyze_shellcode(battle_instance_data, chunk_size):
     print("==========================")
     for i, chunk in enumerate(chunks):
         hex_values = [hex(byte)[2:].zfill(2).upper() for byte in chunk]
-        print(f"Position {i*chunk_size}: {' '.join(hex_values)}")
+
+        # Convert each byte to decimal
+        dec1_values = [str(byte).rjust(3, " ") for byte in chunk]
+
+        # Convert each 2 bytes to decimal and hexadecimal
+        dec2_values = [
+            str(int.from_bytes(chunk[j : j + 2], "little")).rjust(5, " ")
+            for j in range(0, len(chunk), 2)
+        ]
+        hex2_values = [
+            hex(int.from_bytes(chunk[j : j + 2], "little"))[2:]
+            .zfill(4)
+            .upper()
+            .rjust(5, " ")
+            for j in range(0, len(chunk), 2)
+        ]
+
+        # Convert 4 bytes to hexadecimal
+        hex4_value = hex(int.from_bytes(chunk, "little"))[2:].zfill(8).upper()
+
+        print(
+            f"Position {str(i*chunk_size).zfill(2)}: 1-byte DEC: {' '.join(dec1_values)} 2-byte DEC: {' '.join(dec2_values)} 2-byte HEX: {' '.join(hex2_values)} 4-byte HEX: {hex4_value} RAW: {' '.join(hex_values)}"
+        )
 
 
 class MemoryInjector:
@@ -48,6 +75,7 @@ class MemoryInjector:
         self.process_name = name
         self.offset = offset
         self.pm = pymem.Pymem(self.target_process)
+        self.window_id = Window_Manager().get_window_id()
         self.memory_info_dict = {}
 
         # Adding a path to your json file
@@ -56,32 +84,39 @@ class MemoryInjector:
         self.aob_address_list = []
         self.aob_hex_list = []
         self.aob_address = 0
+        self.bad_newmen_18 = []
         self.TR = None
         self.newmem = None
         # Try to read the stored values from the json file
         if os.path.exists(self.json_file_path):
             with open(self.json_file_path, "r") as json_file:
                 data = json.load(json_file)
-                self.aob_address = data.get("aob_address", 0)
-                self.TR = data.get("TR", None)
-                self.newmem = data.get("newmem", None)
-                print(
-                    f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
-                )
+                if data.get("window_id") != self.window_id:
+                    print("window_id not match")
+                    self.aob_address = self.aob_scan()
+                    self.try_the_aob()
 
-            # Try to read data
-            try:
-                self.read_data()
-                print(
-                    f"{self.process_name} Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
-                )
-            except Exception as e:
-                print(
-                    f"{self.process_name} Reading data failed with stored addresses, starting normal scanning and injection process:",
-                    e,
-                )
-                self.aob_address = self.aob_scan()
-                self.try_the_aob()
+                else:
+                    self.aob_address = data.get("aob_address", 0)
+                    self.TR = data.get("TR", None)
+                    self.newmem = data.get("newmem", None)
+                    print(
+                        f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                    )
+
+                    # Try to read data
+                    try:
+                        self.check_data_right()
+                        print(
+                            f"{self.process_name} Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                        )
+                    except Exception as e:
+                        print(
+                            f"{self.process_name} Reading data failed with stored addresses, starting normal scanning and injection process:",
+                            e,
+                        )
+                        self.aob_address = self.aob_scan()
+                        self.try_the_aob()
         else:
             self.aob_address = self.aob_scan()
             time.sleep(5)
@@ -112,17 +147,19 @@ class MemoryInjector:
                 for b in self.pm.read_bytes(self.aob_address, self.aob_hex_list_len)
             ]
             print("aob_hex_list:", self.aob_hex_list, self.aob_address)
-
+            if self.aob_address in self.bad_newmen_18:
+                print("bad_newmen_18")
+                continue
             try:
                 self.inject_memory()
-                # time.sleep(1)
-                # self.read_data() #! 找到了基本就是对的
+                result = self.check_data_right()  #! 找到了基本就是对的
                 with open(self.json_file_path, "w") as json_file:
                     json.dump(
                         {
                             "aob_address": self.aob_address,
                             "TR": self.TR,
                             "newmem": self.newmem,
+                            "window_id": self.window_id,
                             "timestamp": time.time(),  # current timestamp
                         },
                         json_file,
@@ -131,6 +168,7 @@ class MemoryInjector:
                 print(
                     f"Injected {self.process_name}, aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}, aob_hex_list: {self.aob_hex_list}"
                 )
+                break
             except Exception as e:
                 print(e)
                 continue
@@ -220,6 +258,46 @@ class MemoryInjector:
                 byte_values.append(int.from_bytes(hv, "little"))
         return bytes(byte_values)
 
+    def check_data_right(self):
+        print(
+            "check_data_right---------------------------------------------------------------------------"
+        )
+        time.sleep(1)
+        print(
+            f"Checking data for {self.process_name}... aob_address: {self.aob_address} TR: {self.TR} newmem: {self.newmem}"
+        )
+        data = self.pm.read_bytes(self.TR, 4)
+        value = int.from_bytes(data, byteorder="little")
+        start_address = value - 4
+        print("start_address", start_address, hex(start_address))
+
+        data = self.pm.read_bytes(start_address, 4)
+        analyze_shellcode(data, 4)
+        print("data", data)
+        player_info_not_sure_address = split_bytes_to_int(data, 0, 4)
+
+        print(
+            "player_info_not_sure_address",
+            player_info_not_sure_address,
+            hex(player_info_not_sure_address),
+        )
+
+        if self.pm.read_bytes(player_info_not_sure_address, 4) in [
+            b"\x11\x00\x00\x00",
+            b"\t\x00\x00\x00",
+        ]:  # 90000
+            print(self.pm.read_bytes(player_info_not_sure_address, 4))
+            return True
+        else:
+            print(
+                "self.pm.read_bytes(player_info_not_sure_address, 4)",
+                self.pm.read_bytes(player_info_not_sure_address, 4),
+            )
+            self.bad_newmen_18.append(self.newmem + 18)
+            analyze_shellcode(self.pm.read_bytes(player_info_not_sure_address, 4), 4)
+
+            raise Exception("Data is not right")
+
     def read_data(self):
         # pass
         # while True:
@@ -235,37 +313,10 @@ class MemoryInjector:
         battle_instance_address = split_bytes_to_int(data, 4, 8)
         if str(battle_instance_address) != "0":
             battle_instance_data = self.pm.read_bytes(battle_instance_address, 128)
-            # print(
-            #     "battle_instance_data",
-            #     battle_instance_data,
-            #     hex(battle_instance_address),
-            # )
             battle_time_passed = round(
                 struct.unpack("<f", battle_instance_data[60:64])[0], 2
             )
             battle_option_ready = split_bytes_to_int(battle_instance_data, 98, 99)
-            # 0:battle_option_ready 1: battle in progress
-
-            # battle_option_ready = hex(split_bytes_to_int(data, 368, 372))
-
-            # chunk_size = 4  # bytes size of each chunk
-
-            # chunks = [
-            #     battle_instance_data[i : i + chunk_size]
-            #     for i in range(0, len(battle_instance_data), chunk_size)
-            # ]  # split into each chunk
-
-            # int_values = [
-            #     struct.unpack("<I", chunk)[0] for chunk in chunks
-            # ]  # interpret as little-endian 4-byte integers
-
-            # print("==========================")
-            # for int_value in int_values:
-            #     print(
-            #         hex(int_value)[2:].zfill(8).upper(), end=" "
-            #     )
-            # print as zero-padded uppercase hexadecimal
-        # time.sleep(0.5)
 
         self.memory_info_dict = {
             "player_info_not_sure_address": player_info_not_sure_address,
@@ -281,9 +332,10 @@ class MemoryInjector:
 if __name__ == "__main__":
     injector = MemoryInjector(
         name="Battle_Memory_Injector",
-        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00\\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",
+        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # \\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # 45 8B 9A 98 00 00 00 45 8b
         offset=0,
         json_file_path="battle_memory_injector.json",
         aob_hex_list_len=7,
     )
     # injector.read_data()
+    # print(injector.memory_info_dict)

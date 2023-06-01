@@ -7,6 +7,8 @@ import pymem
 from capstone import *
 from pymem.pattern import pattern_scan_all
 
+from utils.main.window_manager import Window_Manager
+
 
 def format_address(address, length=8):
     reversed_bytes = address.to_bytes(length, byteorder="little")
@@ -66,6 +68,7 @@ def analyze_shellcode(battle_instance_data, chunk_size):
 
 
 def process_shellcode(shellcode):
+    # print(shellcode)
     string_end = shellcode.index(b"\x00\x00")
     name = shellcode[:string_end].decode()
     shellcode_start = shellcode.index(b"\x81\x00")
@@ -80,6 +83,7 @@ class MemoryInjector_MySprites:
         self.pattern = b"\\x8B\\x5B\\x0C\\x3B\\xD8"
         self.process_name = "mj_my_sprites"
         self.offset = 0
+        self.window_id = Window_Manager().get_window_id()
         self.pm = pymem.Pymem(self.target_process)
         self.team_dict = {}
 
@@ -95,26 +99,34 @@ class MemoryInjector_MySprites:
         if os.path.exists(self.json_file_path):
             with open(self.json_file_path, "r") as json_file:
                 data = json.load(json_file)
-                self.aob_address = data.get("aob_address", 0)
-                self.TR = data.get("TR", None)
-                self.newmem = data.get("newmem", None)
-                print(
-                    f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
-                )
+                if data.get("window_id") != self.window_id:
+                    print("window_id not match")
+                    self.aob_address = self.aob_scan()
+                    self.try_the_aob()
 
-            # Try to read data
-            try:
-                self.read_data()
-                print(
-                    f"{self.process_name} Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
-                )
-            except Exception as e:
-                print(
-                    f"{self.process_name} Reading data failed with stored addresses, starting normal scanning and injection process:",
-                    e,
-                )
-                self.aob_address = self.aob_scan()
-                self.try_the_aob()
+                else:
+                    print("window_id match")
+
+                    self.aob_address = data.get("aob_address", 0)
+                    self.TR = data.get("TR", None)
+                    self.newmem = data.get("newmem", None)
+                    print(
+                        f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                    )
+
+                    # Try to read data
+                    try:
+                        self.read_data()
+                        print(
+                            f"{self.process_name} Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                        )
+                    except Exception as e:
+                        print(
+                            f"{self.process_name} Reading data failed with stored addresses, starting normal scanning and injection process:",
+                            e,
+                        )
+                        self.aob_address = self.aob_scan()
+                        self.try_the_aob()
         else:
             self.aob_address = self.aob_scan()
             self.try_the_aob()
@@ -147,7 +159,7 @@ class MemoryInjector_MySprites:
 
             try:
                 self.inject_memory()
-                time.sleep(5)
+                # time.sleep(5)
                 # self.read_data()  #!不需要了因为找到肯定是对的
                 with open(self.json_file_path, "w") as json_file:
                     json.dump(
@@ -155,6 +167,7 @@ class MemoryInjector_MySprites:
                             "aob_address": self.aob_address,
                             "TR": self.TR,
                             "newmem": self.newmem,
+                            "window_id": self.window_id,
                             "timestamp": time.time(),  # current timestamp
                         },
                         json_file,
@@ -237,51 +250,57 @@ class MemoryInjector_MySprites:
         return bytes(byte_values)
 
     def read_data(self):
-        data = self.pm.read_bytes(self.TR, 4)
-        value = int.from_bytes(data, byteorder="little")
-        print("value", value)
-        target_value = self.pm.read_bytes(value, 28)
-        self.team_dict = {}
-        for i in range(6):
-            start_index = 4 + i * 4
-            end_index = start_index + 4
-            pokemon_address = split_bytes_to_int(target_value, start_index, end_index)
-            # print("pokemon_address", pokemon_address, hex(pokemon_address))
-            pokemon_data = self.pm.read_bytes(pokemon_address + 200, 64)
+        try:
+            data = self.pm.read_bytes(self.TR, 4)
+            value = int.from_bytes(data, byteorder="little")
+            print("value", value)
+            target_value = self.pm.read_bytes(value, 28)
+            self.team_dict = {}
+            for i in range(6):
+                start_index = 4 + i * 4
+                end_index = start_index + 4
+                pokemon_address = split_bytes_to_int(
+                    target_value, start_index, end_index
+                )
+                # print("pokemon_address", pokemon_address, hex(pokemon_address))
+                pokemon_data = self.pm.read_bytes(pokemon_address + 200, 64)
 
-            pokemon_data = self.pm.read_bytes(pokemon_address, 264)
-            pokemon_data_200_plus = pokemon_data[200:]
-            name, new_shellcode = process_shellcode(pokemon_data_200_plus)
+                pokemon_data = self.pm.read_bytes(pokemon_address, 264)
+                pokemon_data_200_plus = pokemon_data[200:]
+                name, new_shellcode = process_shellcode(pokemon_data_200_plus)
 
-            self.team_dict[i] = {
-                "pokedex": split_bytes_to_int(pokemon_data, 86, 88),
-                "hp": split_bytes_to_int(pokemon_data, 88, 90),
-                "happiness": round(
-                    split_bytes_to_int(pokemon_data, 94, 96) / 255 * 100, 0
-                ),
-                "name": name,
-                "skill_0": {
-                    "id": split_bytes_to_int(new_shellcode, 8, 10),
-                    "pp": split_bytes_to_int(new_shellcode, 32, 33),
-                },
-                "skill_1": {
-                    "id": split_bytes_to_int(new_shellcode, 10, 12),
-                    "pp": split_bytes_to_int(new_shellcode, 33, 34),
-                },
-                "skill_2": {
-                    "id": split_bytes_to_int(new_shellcode, 12, 14),
-                    "pp": split_bytes_to_int(new_shellcode, 34, 35),
-                },
-                "skill_3": {
-                    "id": split_bytes_to_int(new_shellcode, 14, 16),
-                    "pp": split_bytes_to_int(new_shellcode, 35, 36),
-                },
-            }
-
+                self.team_dict[i] = {
+                    "pokedex": split_bytes_to_int(pokemon_data, 86, 88),
+                    "hp": split_bytes_to_int(pokemon_data, 88, 90),
+                    "happiness": round(
+                        split_bytes_to_int(pokemon_data, 94, 96) / 255 * 100, 0
+                    ),
+                    "name": name,
+                    "skill_0": {
+                        "id": split_bytes_to_int(new_shellcode, 8, 10),
+                        "pp": split_bytes_to_int(new_shellcode, 32, 33),
+                    },
+                    "skill_1": {
+                        "id": split_bytes_to_int(new_shellcode, 10, 12),
+                        "pp": split_bytes_to_int(new_shellcode, 33, 34),
+                    },
+                    "skill_2": {
+                        "id": split_bytes_to_int(new_shellcode, 12, 14),
+                        "pp": split_bytes_to_int(new_shellcode, 34, 35),
+                    },
+                    "skill_3": {
+                        "id": split_bytes_to_int(new_shellcode, 14, 16),
+                        "pp": split_bytes_to_int(new_shellcode, 35, 36),
+                    },
+                }
+        except Exception as e:
+            print(e)
         # print(self.team_dict)
         return self.team_dict
 
 
 if __name__ == "__main__":
     injector = MemoryInjector_MySprites()
-    # injector.read_data()
+    # time.sleep(5)
+    injector.read_data()
+    print(injector.team_dict)

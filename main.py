@@ -16,6 +16,7 @@ from log_print_save import LogPrintSave
 from memory_injector import MemoryInjector
 from memory_injector_solid_aob import MemoryInjector as MemoryInjectorSolidAOB
 from mj_my_sprites import MemoryInjector_MySprites
+from path_finder import PathFinder
 from pokemmoUI import PokemmoUI
 from role_controller import RoleController
 from utils.main.controller import Controller
@@ -69,6 +70,7 @@ class PokeMMO:
 
         self.roleController = RoleController(self)
         self.word_recognizer = Word_Recognizer()
+        self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
         self.memory_injector = MemoryInjector()
         self.memory_my_sprits = MemoryInjector_MySprites()

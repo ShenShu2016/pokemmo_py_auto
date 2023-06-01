@@ -82,3 +82,15 @@ class Window_Manager:
         image_normal = np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
         img_BRG = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
         return img_BRG  # return img_BRG
+
+    def get_window_id(self):
+        """Get the unique ID of the PokeMMO game window."""
+        if self.handle is None:
+            self.get_window_name()  # 获取窗口名字以确保句柄被正确获取
+        return self.handle
+
+
+if __name__ == "__main__":
+    window_manager = Window_Manager()
+    window_id = window_manager.get_window_id()
+    print(window_id)
