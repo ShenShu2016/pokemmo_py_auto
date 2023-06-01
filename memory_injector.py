@@ -249,8 +249,12 @@ class MemoryInjector:
         self.memory_info_dict = {
             "x_coords": self.x_coords,
             "y_coords": self.y_coords,
-            "map_number": (int(data[4 + 80]), data[4 + 80 + 2], data[4 + 80 + 1]),
-            "face_dir": self.face_dir,
+            "map_number": (
+                int(data[4 + 80]),
+                int(data[4 + 80 + 2]),
+                int(data[4 + 80 + 1]),
+            ),
+            "face_dir": int(self.face_dir),
             "transport": self.transport,
         }
         if self.memory_info_dict["map_number"] == (0, 0, 0):

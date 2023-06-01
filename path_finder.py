@@ -72,7 +72,39 @@ class PathFinder:
 
         return None
 
-    def path_to_keys_and_delays(self, path):
+    # def path_to_keys_and_delays(self, path, speed=0.1, end_face_dir=None):
+    #     game_state = self.pokeMMO.get_game_status()
+    #     current_face_dir = game_state["face_dir"]
+    #     if path is None:
+    #         return None
+    #     keys_and_delays = []
+    #     for i in range(1, len(path)):
+    #         dy = path[i][0] - path[i - 1][0]
+    #         dx = path[i][1] - path[i - 1][1]
+    #         if dy == 1:
+    #             key = "s"
+    #         elif dy == -1:
+    #             key = "w"
+    #         elif dx == 1:
+    #             key = "d"
+    #         elif dx == -1:
+    #             key = "a"
+    #         else:
+    #             continue
+
+    #         if keys_and_delays and keys_and_delays[-1][0] == key:
+    #             # 如果与上一个方向相同，则增加对应的按键时间
+    #             keys_and_delays[-1] = (key, keys_and_delays[-1][1] + 0.1)
+    #         else:
+    #             # 如果与上一个方向不同，则添加新的按键和延时
+    #             keys_and_delays.append((key, speed))
+
+    #     return keys_and_delays
+    def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
+        transport_speed = {"bike": 0.1, "walk": 0.3, "run": 0.2, "surf": 0.2}
+        start_delay = {"bike": 0.0, "walk": 0.3, "run": 0.0, "surf": 0.0}  # 启动延迟
+        game_state = self.pokeMMO.get_game_status()
+        current_face_dir = game_state["face_dir"]
         if path is None:
             return None
         keys_and_delays = []
@@ -81,21 +113,45 @@ class PathFinder:
             dx = path[i][1] - path[i - 1][1]
             if dy == 1:
                 key = "s"
+                new_face_dir = 0
             elif dy == -1:
                 key = "w"
+                new_face_dir = 1
             elif dx == 1:
                 key = "d"
+                new_face_dir = 3
             elif dx == -1:
                 key = "a"
+                new_face_dir = 2
             else:
                 continue
 
+            if current_face_dir != new_face_dir:
+                # 如果当前面向的方向与下一个方向不同，插入一个转向的动作并更新方向
+                keys_and_delays.append((key, 0.03))
+                current_face_dir = new_face_dir
+
+            # 在确定方向相同之后再添加移动动作
             if keys_and_delays and keys_and_delays[-1][0] == key:
-                # 如果与上一个方向相同，则增加对应的按键时间
-                keys_and_delays[-1] = (key, keys_and_delays[-1][1] + 0.1)
+                keys_and_delays[-1] = (
+                    key,
+                    keys_and_delays[-1][1] + transport_speed[transport],
+                )
             else:
-                # 如果与上一个方向不同，则添加新的按键和延时
-                keys_and_delays.append((key, 0.1))
+                keys_and_delays.append(
+                    (key, transport_speed[transport] + start_delay[transport])
+                )
+
+        # 如果指定了最后的面向方向，添加相应的转向动作
+        if end_face_dir is not None and current_face_dir != end_face_dir:
+            if end_face_dir == 0:
+                keys_and_delays.append(("s", 0.1))
+            elif end_face_dir == 1:
+                keys_and_delays.append(("w", 0.1))
+            elif end_face_dir == 2:
+                keys_and_delays.append(("a", 0.1))
+            elif end_face_dir == 3:
+                keys_and_delays.append(("d", 0.1))
 
         return keys_and_delays
 
@@ -168,7 +224,7 @@ class PathFinder:
         elif direction == "d":
             return (start_point[0], start_point[1] + 1)
 
-    def get_action(
+    def go_somewhere(
         self,
         end_point=None,
         city="SOOTOPOLIS_CITY",
@@ -195,17 +251,20 @@ class PathFinder:
             df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)]["y_coords"],
             df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)]["x_coords"],
         ] = 1
-        game_status = self.pokeMMO.get_game_status()
-        start_point = (game_status["y_coords"], game_status["x_coords"])
-        if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
-            path = self.a_star(start=start_point, end=end_point)  #! y在前面
+        while True:
+            game_status = self.pokeMMO.get_game_status()
+            if (
+                game_status["x_coords"] == end_point[1]
+                and game_status["y_coords"] == end_point[0]
+            ):
+                break
+            start_point = (game_status["y_coords"], game_status["x_coords"])
+            if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
+                self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
+                self.pf_move(end_face_dir=None)
+            sleep(0.1)
 
-            result = self.path_to_keys_and_delays(path)
-            if result is not None:
-                for i in result:
-                    print(i)
-                return result
-        return self.try_to_find_known_grid(start_point, end_point)
+        # return self.try_to_find_known_grid(start_point, end_point)
 
     def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
         while True:
@@ -213,6 +272,7 @@ class PathFinder:
             if (
                 game_status["x_coords"] == city_info[city]["112_nurse"][0]
                 and game_status["y_coords"] == city_info[city]["112_nurse"][1]
+                and game_status["face_dir"] == city_info[city]["112_nurse"][2]
             ):
                 break
             self.path = self.a_star_no_obstacle(
@@ -220,13 +280,36 @@ class PathFinder:
                 (city_info[city]["112_nurse"][1], city_info[city]["112_nurse"][0]),
             )
             print(self.path)
-            self.keys_and_delays = self.path_to_keys_and_delays(self.path)
-            time.sleep(0.5)
 
-    def move(self):
+            self.pf_move(end_face_dir=city_info[city]["112_nurse"][2])
+            time.sleep(0.5)  # 等一会儿才能知道到底到了没到
+
+    def pf_move(self, end_face_dir=None):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
+        game_status = self.pokeMMO.get_game_status()
+
+        transport = None
+        if game_status["map_number_tuple"][2] == 50 and game_status[
+            "transport"
+        ] not in [1, 11]:
+            transport = "bike"
+            if game_status["transport"] != 10:
+                self.pokeMMO.controller.key_press("3", 0.1)
+
+        elif game_status["transport"] in [1, 11]:
+            transport = "surf"
+
+        elif game_status["map_number_tuple"][2] != 50:
+            transport = "walk"
+
+        self.keys_and_delays = self.path_to_keys_and_delays(
+            self.path, transport=transport, end_face_dir=end_face_dir
+        )
+        # start move
+        print(self.keys_and_delays)
         if self.keys_and_delays is not None:
             for key, delay in self.keys_and_delays:
-                pokeMMO.controller.key_press(key, delay)
+                self.pokeMMO.controller.key_press(key, delay)
+                time.sleep(0.1)
 
 
 if __name__ == "__main__":
@@ -236,14 +319,13 @@ if __name__ == "__main__":
 
     pokeMMO = PokeMMO()
     sleep(1)
-    pokeMMO.pf.go_to_nurse()
-    # pathFinder = PathFinder(pokeMMO)
     # while True:
-    #     keys_and_delays = pathFinder.get_action((37, 40))
-    #     if keys_and_delays is not None:
-    #         for key, delay in keys_and_delays:
-    #             pokeMMO.controller.key_press(key, delay)
+    #     pokeMMO.pf.go_to_nurse()
+    #     sleep(3)
 
-    #         sleep(5)
+    # pathFinder = PathFinder(pokeMMO)
+    while True:
+        keys_and_delays = pokeMMO.pf.go_somewhere((37, 40))
+        sleep(5)
 
-    # pass
+    pass
