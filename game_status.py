@@ -138,7 +138,7 @@ class GameStatus:
             ),  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
             "x_coords": None,
             "y_coords": None,
-            "map_number_tuple": None,
+            "map_number_tuple": (None, None, None),
             "face_dir": None,
             "transport": None,
             "battle_time_passed": 0,

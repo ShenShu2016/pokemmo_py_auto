@@ -256,7 +256,7 @@ class MemoryInjector_MySprites:
         try:
             data = self.pm.read_bytes(self.TR, 4)
             value = int.from_bytes(data, byteorder="little")
-            print("value", value)
+            # print("value", value)
             target_value = self.pm.read_bytes(value, 28)
             self.team_dict = {}
             for i in range(6):

@@ -228,9 +228,8 @@ class PathFinder:
         self,
         end_point=None,
         city="SOOTOPOLIS_CITY",
-        end_point_map=None,
-        style="farming",
-        face_dir=None,
+        style=None,
+        end_face_dir=None,
     ):  # style random_end_point,solid_end_point
         # Reset the index if it's not a continuous integer sequence starting from 0
 
@@ -246,24 +245,42 @@ class PathFinder:
 
         # 创建网格，所有元素默认为障碍物（0表示障碍物）
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
+        if style == "farming":
+            self.grid[
+                df[(df["mark"] == 1)]["y_coords"],
+                df[(df["mark"] == 1)]["x_coords"],
+            ] = 1  #!地图上1表示可以farming区域
+            random_row = df[df["mark"] == 1].sample(n=1)
 
-        # 设置可走的区域
-        self.grid[
-            df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)]["y_coords"],
-            df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)]["x_coords"],
-        ] = 1
-        while True:
+            # 获取y_coords和x_coords的值
+            y = random_row["y_coords"].values[0]
+            x = random_row["x_coords"].values[0]
+            end_point = (y, x)
+        else:
+            # 设置可走的区域
+            self.grid[
+                df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)][
+                    "y_coords"
+                ],
+                df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)][
+                    "x_coords"
+                ],
+            ] = 1
+
+        while end_point:
             game_status = self.pokeMMO.get_game_status()
             if (
                 game_status["x_coords"] == end_point[1]
                 and game_status["y_coords"] == end_point[0]
             ):
                 break
+            if style == "farming" and game_status["return_status"] >= 20:  # 进入战斗了
+                break
             start_point = (game_status["y_coords"], game_status["x_coords"])
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
-                self.pf_move(end_face_dir=None)
-            sleep(0.1)
+                self.pf_move(end_face_dir=end_face_dir)
+            time.sleep(0.1)
 
         # return self.try_to_find_known_grid(start_point, end_point)
 
@@ -283,7 +300,10 @@ class PathFinder:
             print(self.path)
 
             self.pf_move(end_face_dir=city_info[city]["112_nurse"][2])
+
             time.sleep(0.5)  # 等一会儿才能知道到底到了没到
+        print("到达了护士那里")
+        return True
 
     def leave_pc_center(self, city="SOOTOPOLIS_CITY"):
         while True:
@@ -291,22 +311,22 @@ class PathFinder:
             if (
                 game_status["x_coords"] == city_info[city]["112_out"][0][0]
                 and game_status["y_coords"] == city_info[city]["112_out"][0][1]
-                and game_status["face_dir"] == city_info[city]["112_pc_center"][0][2]
+                and game_status["face_dir"] == city_info[city]["112_out"][0][2]
             ):
                 break
             self.path = self.a_star_no_obstacle(
-                (game_status["y_coords"], game_status["x_coords"]),
-                (
-                    city_info[city]["112_pc_center"][1],
-                    city_info[city]["112_pc_center"][0],
+                start=(game_status["y_coords"], game_status["x_coords"]),
+                end=(
+                    city_info[city]["112_out"][0][1],
+                    city_info[city]["112_out"][0][0],
                 ),
             )
             print(self.path)
 
-            self.pf_move(end_face_dir=city_info[city]["112_pc_center"][2])
+            self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
             time.sleep(0.5)
         self.pokeMMO.controller.key_press("s", 1)
-        time.sleep(3)
+        time.sleep(2)
         game_status = self.pokeMMO.get_game_status()
         if game_status["map_number_tuple"] == city_info[city]["map_number"]:
             return True

@@ -31,8 +31,6 @@ class RoleController:
     def __init__(self, pokeMMO: PokeMMO):
         self.pokeMMO = pokeMMO
         self.my_recent_actions_list = deque(maxlen=1000)
-        self.sweet_scent = 0
-        self.false_swipe = 0
         self.press_down_count = 5
         self.action_lock = threading.Lock()
 
@@ -148,22 +146,22 @@ class RoleController:
 
     @synchronized
     def use_sweet_sent(self):
-        if self.false_swipe > 0 and self.sweet_scent > 0:
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["sprite_dict"]["Sweet Scent"]["pp"] > 0:
             self.pokeMMO.controller.key_press("2")
-            self.sweet_scent -= 1
             sleep(3)
 
-    @synchronized
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.pokeMMO.controller.key_press("7")
-        sleep(1)
+        sleep(0.5)
         self.pokeMMO.controller.click(
             city_info[city]["town_map_coords"][0],
             city_info[city]["town_map_coords"][1],
             tolerance=3,
         )
-        sleep(3)
+        sleep(5)
         # check if in right city
+        print("Checking if in %s" % city)
         game_status = self.pokeMMO.get_game_status()
         if game_status["map_number_tuple"] == city_info[city]["map_number"]:
             print("Flying to %s" % city)
@@ -171,20 +169,29 @@ class RoleController:
             raise Exception("Not in %s" % city)
 
         if locate_teleport:
-            if (game_status["x_coords"], game_status["y_coords"]) == city_info[city][
-                "112"
-            ]:
+            if (game_status["x_coords"], game_status["y_coords"]) == (
+                city_info[city]["112"][0],
+                city_info[city]["112"][1],
+            ):
                 self.pokeMMO.controller.key_press("w", 1)
+                time.sleep(2)
+                print("going to find nurse")
                 self.pokeMMO.pf.go_to_nurse(city="SOOTOPOLIS_CITY")
+                self.talk_to_nurse()
+                return True
+            else:
+                raise Exception("Not in front of teleport")
 
     @synchronized
     def talk_to_nurse(self):
+        print("Talking to nurse")
         self.pokeMMO.controller.key_press("z", 1.5)
         game_status = self.pokeMMO.get_game_status()
         if (
             game_status["sprite_dict"]["Sweet Scent"]["pp"] >= 20
             and game_status["sprite_dict"]["False Swipe"]["pp"] >= 30
         ):
+            print("Heal done")
             return True
         else:
             raise Exception("Not enough PP")
@@ -209,6 +216,22 @@ class RoleController:
         ]:  # 室外
             self.pokeMMO.controller.key_press("3")
             sleep(1)
+        if game_status["transport"] == 10:
+            return True
+        else:
+            raise Exception("Not in bike,还没做完")
+
+    @synchronized
+    def use_teleport(self):
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["map_number_tuple"][2] == 50:
+            self.pokeMMO.controller.key_press("8")
+            sleep(3)
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["map_number_tuple"][2] != 50:
+            return True
+        else:
+            raise Exception("Not in building,还没做完")
 
 
 if __name__ == "__main__":
@@ -218,85 +241,86 @@ if __name__ == "__main__":
     # pokeMMO.start_ui()
     # pokeMMO.roleController.fly_to_city("SOOTOPOLIS_CITY")
     # pokeMMO.roleController.use_bike()
+    pokeMMO.roleController.talk_to_nurse()
 
-    while True:
-        round = 0
-        sleep(0.5)
+    # while True:
+    #     round = 0
+    #     sleep(0.5)
 
-        while pokeMMO.get_game_status()["return_status"] < 20:
-            if (
-                pokeMMO.roleController.false_swipe <= 0
-                and pokeMMO.roleController.sweet_scent == 0
-            ):
-                pokeMMO.roleController.restart_from_hospital()
+    #     while pokeMMO.get_game_status()["return_status"] < 20:
+    #         if (
+    #             pokeMMO.roleController.false_swipe <= 0
+    #             and pokeMMO.roleController.sweet_scent == 0
+    #         ):
+    #             pokeMMO.roleController.restart_from_hospital()
 
-            pokeMMO.roleController.use_sweet_sent()
-            round = 0
-            if pokeMMO.get_game_status().get("check_battle_end_pokemon_caught")[0]:
-                pokeMMO.roleController.close_pokemon_summary(game_status)
-                round = 0
-                print(
-                    "剩余:",
-                    "sweet_scent",
-                    pokeMMO.roleController.sweet_scent,
-                    "false_swipe",
-                    pokeMMO.roleController.false_swipe,
-                )
-                break
-            pokeMMO.roleController.move_left_right(0.8)
+    #         pokeMMO.roleController.use_sweet_sent()
+    #         round = 0
+    #         if pokeMMO.get_game_status().get("check_battle_end_pokemon_caught")[0]:
+    #             pokeMMO.roleController.close_pokemon_summary(game_status)
+    #             round = 0
+    #             print(
+    #                 "剩余:",
+    #                 "sweet_scent",
+    #                 pokeMMO.roleController.sweet_scent,
+    #                 "false_swipe",
+    #                 pokeMMO.roleController.false_swipe,
+    #             )
+    #             break
+    #         pokeMMO.roleController.move_left_right(0.8)
 
-        # start battle 有可能进医院黑屏了，有可能就是进入战斗了
+    #     # start battle 有可能进医院黑屏了，有可能就是进入战斗了
 
-        # 1 解决进入医院黑屏问题dwd
+    #     # 1 解决进入医院黑屏问题dwd
 
-        # 进入战斗
-        while True:
-            # print("进入战斗")
-            game_status = pokeMMO.get_game_status()
-            enemy_status = pokeMMO.get_enemy_status()
-            if (
-                game_status["return_status"] == 21
-                and enemy_status.get("enemy_1_info") is not None
-            ):  # 当血量不够低的时候，就用技能1
-                # print("当血量不够低的时候，就用技能1")
-                if (
-                    enemy_status.get("enemy_1_hp_pct") >= 8
-                    and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1]) <= 10
-                ) or (
-                    enemy_status.get("enemy_1_hp_pct") >= 2.5
-                    and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1]) >= 10
-                ):
-                    round += 1
-                    pokeMMO.roleController.fight_skill_1_from_s21()
-                    round += 1
-                elif (
-                    (
-                        enemy_status.get("enemy_1_hp_pct") < 8
-                        and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                        <= 10
-                    )
-                    or (
-                        enemy_status.get("enemy_1_hp_pct") < 2.5
-                        and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                        >= 10
-                    )
-                ) and enemy_status.get("enemy_1_info")["CatchRate"] == 255:
-                    pokeMMO.roleController.throw_pokeball()
-                    round += 1
-            elif (
-                game_status["return_status"] == 21
-                and enemy_status.get("enemy_count") > 1
-            ):
-                pokeMMO.roleController.run_from_s21()
-            if game_status["return_status"] == 1:
-                # print(game_status["black_ratio"])
-                print(
-                    "剩余:",
-                    "sweet_scent",
-                    pokeMMO.roleController.sweet_scent,
-                    "false_swipe",
-                    pokeMMO.roleController.false_swipe,
-                )
-                break
+    #     # 进入战斗
+    #     while True:
+    #         # print("进入战斗")
+    #         game_status = pokeMMO.get_game_status()
+    #         enemy_status = pokeMMO.get_enemy_status()
+    #         if (
+    #             game_status["return_status"] == 21
+    #             and enemy_status.get("enemy_1_info") is not None
+    #         ):  # 当血量不够低的时候，就用技能1
+    #             # print("当血量不够低的时候，就用技能1")
+    #             if (
+    #                 enemy_status.get("enemy_1_hp_pct") >= 8
+    #                 and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1]) <= 10
+    #             ) or (
+    #                 enemy_status.get("enemy_1_hp_pct") >= 2.5
+    #                 and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1]) >= 10
+    #             ):
+    #                 round += 1
+    #                 pokeMMO.roleController.fight_skill_1_from_s21()
+    #                 round += 1
+    #             elif (
+    #                 (
+    #                     enemy_status.get("enemy_1_hp_pct") < 8
+    #                     and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
+    #                     <= 10
+    #                 )
+    #                 or (
+    #                     enemy_status.get("enemy_1_hp_pct") < 2.5
+    #                     and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
+    #                     >= 10
+    #                 )
+    #             ) and enemy_status.get("enemy_1_info")["CatchRate"] == 255:
+    #                 pokeMMO.roleController.throw_pokeball()
+    #                 round += 1
+    #         elif (
+    #             game_status["return_status"] == 21
+    #             and enemy_status.get("enemy_count") > 1
+    #         ):
+    #             pokeMMO.roleController.run_from_s21()
+    #         if game_status["return_status"] == 1:
+    #             # print(game_status["black_ratio"])
+    #             print(
+    #                 "剩余:",
+    #                 "sweet_scent",
+    #                 pokeMMO.roleController.sweet_scent,
+    #                 "false_swipe",
+    #                 pokeMMO.roleController.false_swipe,
+    #             )
+    #             break
 
-            sleep(0.1)
+    #         sleep(0.1)
