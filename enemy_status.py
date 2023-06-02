@@ -191,7 +191,7 @@ class EnemyStatus:
                         # go self.pokedex to get the pokemon info
                         name_ORC = name_Lv_ORC.split("Lv")[0].strip()
                         lv_orc = name_Lv_ORC.split("Lv")[1].strip()
-                        # print("name_ORC:", name_ORC)
+                        print("name_ORC:", name_ORC)
                         # print("lv_orc:", lv_orc)
                         info = self.pokeMMO.pokedex_csv.loc[
                             self.pokeMMO.pokedex_csv["Pokemon"] == name_ORC
@@ -201,7 +201,7 @@ class EnemyStatus:
                             # Print the dictionary
                             self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
                             print(info_dict[0])
-                            pass
+
                         else:
                             print(f"{name_ORC} info not found")
 

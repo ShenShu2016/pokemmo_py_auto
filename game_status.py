@@ -31,9 +31,10 @@ class GameStatus:
 
     def save_screenshot_check_status(self):  #! later need to be multi-thread
         if time.time() - self.last_image_save_time >= 15:
+            img_BRG = self.pokeMMO.get_latest_img_BRG()
             print("Saving screenshot")
             self.last_image_save_time = time.time()
-            gray_image = cv2.cvtColor(self.img_BRG, cv2.COLOR_BGR2GRAY)
+            gray_image = cv2.cvtColor(img_BRG, cv2.COLOR_BGR2GRAY)
 
             timestamp_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
             folder_path = "screenshot"
@@ -56,7 +57,7 @@ class GameStatus:
                     image_data[2] is not None and image_data[2] >= 0.2
                     for image_data in self.recent_images
                 ):
-                    self.game_status_dict["important"] = "404"
+                    raise Exception("Game is stuck")
             else:
                 self.recent_images.append((time.time(), filename, None))
 

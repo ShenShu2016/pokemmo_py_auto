@@ -85,17 +85,12 @@ class Faming_PETALBURG_CITY:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
-                if (
-                    game_status["return_status"] == 21
-                    and enemy_status.get("enemy_1_info") is not None
-                ):  # 当血量不够低的时候，就用技能1
+                if game_status["return_status"] == 21:  # 当血量不够低的时候，就用技能1
                     # print("当血量不够低的时候，就用技能1")
-                    if enemy_status.get("enemy_1_hp_pct") >= 10:
+                    if enemy_status.get("enemy_1_hp_pct") >= 20:
                         self.pokeMMO.roleController.fight_skill_1_from_s21()
 
-                    elif (enemy_status.get("enemy_1_hp_pct") < 10) and enemy_status.get(
-                        "enemy_1_info"
-                    ):
+                    elif enemy_status.get("enemy_1_hp_pct") < 20:
                         self.pokeMMO.roleController.throw_pokeball()
 
                 elif (
