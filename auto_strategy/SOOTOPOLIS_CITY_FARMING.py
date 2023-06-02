@@ -116,29 +116,10 @@ class Faming_SOOTOPOLIS_CITY:
                     and enemy_status.get("enemy_1_info") is not None
                 ):  # 当血量不够低的时候，就用技能1
                     # print("当血量不够低的时候，就用技能1")
-                    if (
-                        enemy_status.get("enemy_1_hp_pct") >= 8
-                        and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                        <= 10
-                    ) or (
-                        enemy_status.get("enemy_1_hp_pct") >= 2.5
-                        and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                        >= 10
-                    ):
+                    if enemy_status.get("enemy_1_hp_pct") >= 5:
                         self.pokeMMO.roleController.fight_skill_1_from_s21()
 
-                    elif (
-                        (
-                            enemy_status.get("enemy_1_hp_pct") < 8
-                            and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                            <= 10
-                        )
-                        or (
-                            enemy_status.get("enemy_1_hp_pct") < 2.5
-                            and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                            >= 10
-                        )
-                    ) and enemy_status.get("enemy_1_info")["CatchRate"] == 255:
+                    elif enemy_status.get("enemy_1_hp_pct") < 5:
                         self.pokeMMO.roleController.throw_pokeball()
 
                 elif (

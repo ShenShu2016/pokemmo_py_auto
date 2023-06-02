@@ -168,6 +168,7 @@ class GameStatus:
         new_sprite_dict = {
             "Sweet Scent": {"pp": 0, "sprite": None},
             "False Swipe": {"pp": 0, "sprite": None},
+            "Spore": {"pp": 0, "sprite": None},
         }
 
         try:
@@ -180,6 +181,11 @@ class GameStatus:
                         }
                     elif self.memory_my_sprits_status[key][skill_key]["id"] == 230:
                         new_sprite_dict["Sweet Scent"] = {
+                            "pp": self.memory_my_sprits_status[key][skill_key]["pp"],
+                            "sprite": key,
+                        }
+                    elif self.memory_my_sprits_status[key][skill_key]["id"] == 147:
+                        new_sprite_dict["Spore"] = {
                             "pp": self.memory_my_sprits_status[key][skill_key]["pp"],
                             "sprite": key,
                         }

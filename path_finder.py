@@ -5,6 +5,8 @@ import threading
 import time
 from typing import TYPE_CHECKING
 
+from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
+
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -250,23 +252,25 @@ class PathFinder:
                 df[(df["mark"] == 1) | (df["mark"] == 2)]["y_coords"],
                 df[(df["mark"] == 1) | (df["mark"] == 2)]["x_coords"],
             ] = 1  #!地图上1表示可以farming区域
+
             if city == "SOOTOPOLIS_CITY":
                 # 定义区域范围
-                min_x = 22
-                max_x = 41
-                min_y = 46
-                max_y = 55
+                min_x, max_x, min_y, max_y = 22, 41, 46, 55
                 # 随机选择一个满足条件的mark为1的记录
-                filtered_df = df[
-                    (df["mark"] == 1)
-                    & (df["x_coords"].between(min_x, max_x))
-                    & (df["y_coords"].between(min_y, max_y))
-                ]
-                random_row = filtered_df.sample(n=1)
+
+            elif city == "PETALBURG_CITY":
+                min_x, max_x, min_y, max_y = 32, 40, 12, 17
 
             else:
                 random_row = df[df["mark"] == 1].sample(n=1)
                 # 获取y_coords和x_coords的值
+
+            filtered_df = df[
+                (df["mark"] == 1)
+                & (df["x_coords"].between(min_x, max_x))
+                & (df["y_coords"].between(min_y, max_y))
+            ]
+            random_row = filtered_df.sample(n=1)
             y = random_row["y_coords"].values[0]
             x = random_row["x_coords"].values[0]
             end_point = (y, x)
@@ -282,7 +286,11 @@ class PathFinder:
             ] = 1
 
         while end_point:
-            game_status = self.pokeMMO.get_game_status()
+            if city == "PETALBURG_CITY":
+                game_status = add_x_y_coords_offset_PETALBURG_CITY(
+                    self.pokeMMO.get_game_status()
+                )
+
             if (
                 game_status["x_coords"] == end_point[1]
                 and game_status["y_coords"] == end_point[0]

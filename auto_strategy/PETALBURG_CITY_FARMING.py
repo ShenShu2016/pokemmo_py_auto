@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import random
 import time
 from typing import TYPE_CHECKING
 
@@ -8,60 +7,27 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 
+def add_x_y_coords_offset_PETALBURG_CITY(game_status):
+    if game_status["map_number_tuple"][1] == 17:
+        game_status["x_coords"] = game_status["x_coords"] + 30
+        game_status["y_coords"] = game_status["y_coords"] + 10
+
+    else:
+        pass
+    return game_status
+
+
 class Faming_PETALBURG_CITY:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
         self.my_df = self.pokeMMO.df_dict["PETALBURG_CITY_coords_tracking_csv"]
-        self.lake_edge_df = self.my_df[
-            self.my_df["mark"] == 3
-        ].copy()  # Create a copy of the filtered DataFrame
-        self.lake_edge_df.loc[:, "face_dir"] = self.lake_edge_df.apply(
-            lambda row: self.determine_face_dir(self.my_df, row), axis=1
-        )
-        self.lake_edge_face_dir_list = list(
-            self.lake_edge_df[["y_coords", "x_coords", "face_dir"]].itertuples(
-                index=False, name=None
-            )
-        )
-
-    @staticmethod
-    def determine_face_dir(df, row):
-        # Look around the point in four directions
-        directions = [
-            (0, -1, 1),
-            (0, 1, 0),
-            (-1, 0, 2),
-            (1, 0, 3),
-        ]  # (dx, dy, face_dir)
-        for dx, dy, face_dir in directions:
-            # If there is a lake in the direction, return the direction
-            if (
-                df[
-                    (df["x_coords"] == row["x_coords"] + dx)
-                    & (df["y_coords"] == row["y_coords"] + dy)
-                    & (df["mark"].isin([1, 2]))
-                ].size
-                > 0
-            ):
-                return face_dir
-        return None  # Return None if no lake is around
 
     def leave_pc_center_and_go_farm(self, city="PETALBURG_CITY"):
         self.pokeMMO.pf.leave_pc_center(city=city)
-        # 去湖边
-        my_edge_choice = random.choice(self.lake_edge_face_dir_list)
-        self.pokeMMO.pf.go_somewhere(
-            end_point=(my_edge_choice[0], my_edge_choice[1]),
-            end_face_dir=my_edge_choice[2],
-            city=city,
-        )
-
-        # 冲浪
-        self.pokeMMO.roleController.use_surf()
 
     def teleport_and_heal(self, city: str):
         self.pokeMMO.roleController.use_teleport()
-        self.pokeMMO.roleController.talk_to_nurse()
+        self.pokeMMO.roleController.talk_to_nurse()  # teleport 就直接面对护士了
 
     def run(self):
         # 首先要确认是否能飞走
@@ -85,18 +51,28 @@ class Faming_PETALBURG_CITY:
         while True:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
-                game_status = self.pokeMMO.get_game_status()
+                game_status = add_x_y_coords_offset_PETALBURG_CITY(
+                    self.pokeMMO.get_game_status()
+                )
                 if self.pokeMMO.get_game_status().get(
                     "check_battle_end_pokemon_caught"
                 )[0]:
                     self.pokeMMO.roleController.close_pokemon_summary(game_status)
                 if (game_status["sprite_dict"]["Sweet Scent"]["pp"] == 0) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
+                    or game_status["sprite_dict"]["Spore"]["pp"] <= 2
                 ):
                     self.teleport_and_heal(city="PETALBURG_CITY")
                     self.leave_pc_center_and_go_farm(city="PETALBURG_CITY")  # 应该已经到了湖里了
+                min_x, max_x, min_y, max_y = 22, 41, 12, 16
 
-                self.pokeMMO.roleController.use_sweet_sent()
+                if (
+                    (game_status["x_coords"] >= min_x)
+                    and (game_status["x_coords"] <= max_x)
+                    and (game_status["y_coords"] >= min_y)
+                    and (game_status["y_coords"] <= max_y)
+                ):
+                    self.pokeMMO.roleController.use_sweet_sent()
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,
@@ -114,29 +90,12 @@ class Faming_PETALBURG_CITY:
                     and enemy_status.get("enemy_1_info") is not None
                 ):  # 当血量不够低的时候，就用技能1
                     # print("当血量不够低的时候，就用技能1")
-                    if (
-                        enemy_status.get("enemy_1_hp_pct") >= 8
-                        and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                        <= 10
-                    ) or (
-                        enemy_status.get("enemy_1_hp_pct") >= 2.5
-                        and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                        >= 10
-                    ):
+                    if enemy_status.get("enemy_1_hp_pct") >= 10:
                         self.pokeMMO.roleController.fight_skill_1_from_s21()
 
-                    elif (
-                        (
-                            enemy_status.get("enemy_1_hp_pct") < 8
-                            and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                            <= 10
-                        )
-                        or (
-                            enemy_status.get("enemy_1_hp_pct") < 2.5
-                            and int(enemy_status.get("enemy_1_name_Lv").split("Lv")[-1])
-                            >= 10
-                        )
-                    ) and enemy_status.get("enemy_1_info")["CatchRate"] == 255:
+                    elif (enemy_status.get("enemy_1_hp_pct") < 10) and enemy_status.get(
+                        "enemy_1_info"
+                    ):
                         self.pokeMMO.roleController.throw_pokeball()
 
                 elif (
