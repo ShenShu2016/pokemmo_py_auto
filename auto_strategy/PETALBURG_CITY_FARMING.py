@@ -85,6 +85,11 @@ class Faming_PETALBURG_CITY:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
+                if self.pokeMMO.get_game_status().get(
+                    "check_battle_end_pokemon_caught"
+                )[0]:
+                    self.pokeMMO.roleController.close_pokemon_summary(game_status)
+
                 if game_status["return_status"] == 21:  # 当血量不够低的时候，就用技能1
                     # print("当血量不够低的时候，就用技能1")
                     if enemy_status.get("enemy_1_hp_pct") >= 20:

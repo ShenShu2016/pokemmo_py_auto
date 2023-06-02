@@ -67,7 +67,7 @@ class Faming_SOOTOPOLIS_CITY:
         # 首先要确认是否能飞走
         time.sleep(1)
 
-        if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
+        if self.pokeMMO.get_game_status()["map_number_tuple"][2] in [50, 76]:
             result = self.pokeMMO.roleController.fly_to_city(
                 "SOOTOPOLIS_CITY", locate_teleport=True
             )
@@ -111,6 +111,10 @@ class Faming_SOOTOPOLIS_CITY:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
+                if self.pokeMMO.get_game_status().get(
+                    "check_battle_end_pokemon_caught"
+                )[0]:
+                    self.pokeMMO.roleController.close_pokemon_summary(game_status)
                 if (
                     game_status["return_status"] == 21
                     and enemy_status.get("enemy_1_info") is not None
