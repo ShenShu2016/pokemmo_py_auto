@@ -129,6 +129,9 @@ class RoleController:
             print(exit_button_x, exit_button_y)
 
             self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=0)
+            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=3)
+            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=3)
+            sleep(0.1)
             self.my_recent_actions_list.append(("close_pokemon_summary", time.time()))
             print("Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y))
 

@@ -135,7 +135,7 @@ if __name__ == "__main__":
     import sys
 
     sys.path.append(
-        "C:/Users/SS/Documents/GitHub/pokemmo_py_auto"
+        r"C:\Users\shush\文档\Git\pokemmo_py_auto"
     )  # 将 main.py 所在的文件夹路径添加到模块搜索路径中
 
     from main import PokeMMO
