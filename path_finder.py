@@ -286,10 +286,12 @@ class PathFinder:
             ] = 1
 
         while end_point:
+            game_status=self.pokeMMO.get_game_status()
             if city == "PETALBURG_CITY":
                 game_status = add_x_y_coords_offset_PETALBURG_CITY(
-                    self.pokeMMO.get_game_status()
+                    game_status
                 )
+
 
             if (
                 game_status["x_coords"] == end_point[1]

@@ -72,8 +72,8 @@ class EnemyStatus:
     def _check_enemy_number(self):
         if self.game_status_dict.get("return_status") == 1:
             self.enemy_status_dict = {"enemy_count": None}
-
             return
+
         if self.game_status_dict.get("return_status") in [
             20,
             21,
@@ -196,7 +196,7 @@ class EnemyStatus:
                         info = self.pokeMMO.pokedex_csv.loc[
                             self.pokeMMO.pokedex_csv["Pokemon"] == name_ORC
                         ]
-                        if info.empty == False and enemy_count == 1:
+                        if info.empty == False:
                             info_dict = info.to_dict(orient="records")
                             # Print the dictionary
                             self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]

@@ -12,6 +12,8 @@ from constant import target_words_dict
 
 if TYPE_CHECKING:
     from main import PokeMMO
+# muti-thread
+import threading
 
 
 class GameStatus:
@@ -25,39 +27,7 @@ class GameStatus:
         self.memory_coords_status = {}
         self.memory_my_sprits_status = {}
         self.game_status_dict = {}
-
-    def determine_game_status(self):
-        def check_not_active_status():
-            if self.game_status_dict.get("important") == 404:
-                return set_and_return_status(404)  # Not Active Game Status
-
-        def check_battle_option_status():
-            if self.game_status_dict.get("battle_option_ORC") == True:
-                return set_and_return_status(21)  # Battle Option Status
-
-        def check_battle_go_back_status():
-            if self.game_status_dict.get("battle_option_go_back_ORC") == True:
-                return set_and_return_status(22)  # Battle Go Back Status
-
-        def set_and_return_status(status):
-            self.game_status_dict["real_status"] = status
-            return status
-
-        status_check_funcs = [
-            check_not_active_status,
-            check_normal_status,
-            check_battle_option_status,
-            check_battle_go_back_status,
-            check_battle_loading_status,
-            check_battle_end_pokemon_caught_status,
-        ]
-
-        for check_func in status_check_funcs:
-            status = check_func()
-            if status:
-                return status
-
-        return check_recent_status_or_return_unknown()
+        threading.Thread(target=self.save_screenshot_check_status).start()
 
     def save_screenshot_check_status(self):  #! later need to be multi-thread
         if time.time() - self.last_image_save_time >= 15:
@@ -89,33 +59,6 @@ class GameStatus:
                     self.game_status_dict["important"] = "404"
             else:
                 self.recent_images.append((time.time(), filename, None))
-
-    def check_battle(self):
-        def check_battle_option():
-            battle_option_x_y = (229, 507), (399, 522)  # select your attack move
-            battle_option_ORC = self.pokeMMO.get_text_from_box_coords(
-                battle_option_x_y[0], battle_option_x_y[1], img_BRG=self.img_BRG
-            )
-            is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
-                battle_option_ORC, target_words_dict["battle_option_ORC"]
-            )
-            self.game_status_dict["battle_option_ORC"] = is_match
-            return is_match
-
-        def check_battle_go_back():
-            battle_option_go_back_x_y = (1080, 558), (1142, 575)
-            battle_option_go_back_ORC = self.pokeMMO.get_text_from_box_coords(
-                battle_option_go_back_x_y[0],
-                battle_option_go_back_x_y[1],
-                config="--psm 7",
-                img_BRG=self.img_BRG,
-            )
-            is_match, match_ratio = self.pokeMMO.word_recognizer.compare_with_target(
-                battle_option_go_back_ORC,
-                target_words_dict["battle_option_go_back_ORC"],
-            )
-            self.game_status_dict["battle_option_go_back_ORC"] = is_match
-            return is_match
 
     def check_battle_end_pokemon_caught(self):
         # print("check_battle_end_pokemon_caught")
