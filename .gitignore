@@ -164,3 +164,7 @@ cython_debug/
 screenshot/*
 
 logs/*
+
+battle_memory_injector.json
+injector_memory.json
+mj_my_sprites.json
