@@ -29,7 +29,7 @@ class Faming_PETALBURG_CITY:
         self.pokeMMO.roleController.use_teleport()
         self.pokeMMO.roleController.talk_to_nurse()  # teleport 就直接面对护士了
 
-    def run(self):
+    def run(self, repeat_times=10):
         # 首先要确认是否能飞走
         time.sleep(1)
 
@@ -48,6 +48,7 @@ class Faming_PETALBURG_CITY:
         # 检测是否回城补给
         # 开始刷怪
 
+        farming_times = 0
         while True:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
@@ -62,8 +63,12 @@ class Faming_PETALBURG_CITY:
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
                     or game_status["sprite_dict"]["Spore"]["pp"] <= 2
                 ):
+                    farming_times += 1
+                    if farming_times >= repeat_times:
+                        return
                     self.teleport_and_heal(city="PETALBURG_CITY")
                     self.leave_pc_center_and_go_farm(city="PETALBURG_CITY")  # 应该已经到了湖里了
+
                 min_x, max_x, min_y, max_y = 22, 41, 12, 16
 
                 if (

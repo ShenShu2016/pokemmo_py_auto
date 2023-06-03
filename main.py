@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import pytesseract
 
+from auto_strategy.PETALBURG_CITY_FARMING import Faming_PETALBURG_CITY
+from auto_strategy.SOOTOPOLIS_CITY_FARMING import Faming_SOOTOPOLIS_CITY
 from enemy_status import EnemyStatus
 from game_status import GameStatus
 from log_print_save import LogPrintSave
@@ -82,6 +84,9 @@ class PokeMMO:
             aob_hex_list_len=7,
         )
         self.stop_threads_flag = False
+
+        self.PETALBURG_CITY_FARMING = Faming_PETALBURG_CITY(self)
+        self.SOOTOPOLIS_CITY_FARMING = Faming_SOOTOPOLIS_CITY(self)
 
         self.start_threads()
 
@@ -374,4 +379,8 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
 
-    cv2.destroyAllWindows()
+    while True:
+        pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
+        time.sleep(1)
+        pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
+        time.sleep(1)

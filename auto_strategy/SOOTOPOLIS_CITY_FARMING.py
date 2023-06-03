@@ -63,7 +63,7 @@ class Faming_SOOTOPOLIS_CITY:
         self.pokeMMO.roleController.use_teleport()
         self.pokeMMO.roleController.talk_to_nurse()
 
-    def run(self):
+    def run(self, repeat_times=10):
         # 首先要确认是否能飞走
         time.sleep(1)
 
@@ -81,7 +81,7 @@ class Faming_SOOTOPOLIS_CITY:
 
         # 检测是否回城补给
         # 开始刷怪
-
+        farming_times = 0
         while True:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
@@ -93,6 +93,9 @@ class Faming_SOOTOPOLIS_CITY:
                 if (game_status["sprite_dict"]["Sweet Scent"]["pp"] == 0) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
                 ):
+                    farming_times += 1
+                    if farming_times >= repeat_times:
+                        return
                     self.teleport_and_heal(city="SOOTOPOLIS_CITY")
                     self.leave_pc_center_and_go_farm(
                         city="SOOTOPOLIS_CITY"
