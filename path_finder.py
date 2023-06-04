@@ -5,6 +5,7 @@ import threading
 import time
 from typing import TYPE_CHECKING
 
+from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
 from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
 
 if TYPE_CHECKING:
@@ -294,6 +295,9 @@ class PathFinder:
             game_status = self.pokeMMO.get_game_status()
             if city == "PETALBURG_CITY":
                 game_status = add_x_y_coords_offset_PETALBURG_CITY(game_status)
+
+            elif city == "FALLARBOR_TOWN":
+                game_status = add_x_y_coords_offset_FALLARBOR_TOWN(game_status)
 
             if (
                 game_status["x_coords"] == end_point[1]

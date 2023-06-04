@@ -393,8 +393,8 @@ if __name__ == "__main__":
     #     pokeMMO.roleController.close_pokemon_summary(pokeMMO.get_game_status())
     #     time.sleep(1)
 
-    while True:
-        pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
-        time.sleep(1)
-        pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
-        time.sleep(1)
+    # while True:
+    #     pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
+    #     time.sleep(1)
+    #     pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
+    #     time.sleep(1)

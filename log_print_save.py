@@ -87,7 +87,7 @@ class LogPrintSave:
                 # print("\n".join(map(str, self.logs[-1])))
                 # os.system("cls" if os.name == "nt" else "clear")  # Clear the terminal
                 print(f"\033[31mgame_status: {self.logs[-1]['game_status']}\033[31m")
-                print(f"\033[32menemy_status: {self.logs[-1]['enemy_status']}\033[32m")
+                # print(f"\033[32menemy_status: {self.logs[-1]['enemy_status']}\033[32m")
                 # print(f"state_dict: {self.logs[-1]['state_dict']}")
                 # print(f"memory_coords: {self.logs[-1]['memory_coords']}")
                 # print(f'memory_battle_status: {self.logs[-1]["memory_battle_status"]}')
@@ -95,6 +95,6 @@ class LogPrintSave:
                 #     f'memory_my_sprits_status: {self.logs[-1]["memory_my_sprits_status"]}'
                 # )
 
-                time.sleep(10)
+                time.sleep(1)
             except Exception as e:
                 pass
