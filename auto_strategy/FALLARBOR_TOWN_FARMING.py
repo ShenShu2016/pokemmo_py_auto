@@ -8,14 +8,15 @@ if TYPE_CHECKING:
 
 
 def add_x_y_coords_offset_FALLARBOR_TOWN(game_status):
-    if game_status["map_number_tuple"][1] == 28:
-        game_status["x_coords"] = game_status["x_coords"] + 20
-    elif game_status["map_number_tuple"][1] == 29:
-        game_status["x_coords"] = game_status["x_coords"] - 40
+    game_status_copy = game_status.copy()  # Create a copy of the game_status
+    if game_status_copy["map_number_tuple"][1] == 28:
+        game_status_copy["x_coords"] = game_status_copy["x_coords"] + 20
+    elif game_status_copy["map_number_tuple"][1] == 29:
+        game_status_copy["x_coords"] = game_status_copy["x_coords"] - 40
 
     else:
         pass
-    return game_status
+    return game_status_copy  # Return the modified copy
 
 
 class Faming_FALLARBOR_TOWN:
@@ -81,7 +82,8 @@ class Faming_FALLARBOR_TOWN:
                     game_status["y_coords"],
                 ) in self.marked_coords:
                     # Trigger the desired operation
-                    self.pokeMMO.roleController.use_sweet_sent()
+                    # self.pokeMMO.roleController.use_sweet_sent()
+                    pass
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,

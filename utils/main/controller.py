@@ -41,12 +41,12 @@ class Controller:
 
     def key_press(self, key: str, delay: float = 0.2):
         self.window.set_focus()
-        print(f"Pressing {key} for {delay} seconds")
+        # print(f"Pressing {key} for {delay} seconds")
 
         keyboard.send_keys("{" + key + " down}")
         time.sleep(delay)
         keyboard.send_keys("{" + key + " up}")
-        print(f"Finished pressing {key} for {delay} seconds")
+        # print(f"Finished pressing {key} for {delay} seconds")
 
 
 if __name__ == "__main__":

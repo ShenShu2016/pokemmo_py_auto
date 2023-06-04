@@ -60,7 +60,7 @@ class PathFinder:
                 while curr is not None:
                     path.append(curr)
                     curr = parent[curr]
-                return path[::-1]
+                return path[::-1][:10]  # 限制最大路径长度为8
 
             for next_node in self.neighbors(curr):
                 tentative_g_score = g_score[curr] + 1
@@ -75,34 +75,6 @@ class PathFinder:
 
         return None
 
-    # def path_to_keys_and_delays(self, path, speed=0.1, end_face_dir=None):
-    #     game_state = self.pokeMMO.get_game_status()
-    #     current_face_dir = game_state["face_dir"]
-    #     if path is None:
-    #         return None
-    #     keys_and_delays = []
-    #     for i in range(1, len(path)):
-    #         dy = path[i][0] - path[i - 1][0]
-    #         dx = path[i][1] - path[i - 1][1]
-    #         if dy == 1:
-    #             key = "s"
-    #         elif dy == -1:
-    #             key = "w"
-    #         elif dx == 1:
-    #             key = "d"
-    #         elif dx == -1:
-    #             key = "a"
-    #         else:
-    #             continue
-
-    #         if keys_and_delays and keys_and_delays[-1][0] == key:
-    #             # 如果与上一个方向相同，则增加对应的按键时间
-    #             keys_and_delays[-1] = (key, keys_and_delays[-1][1] + 0.1)
-    #         else:
-    #             # 如果与上一个方向不同，则添加新的按键和延时
-    #             keys_and_delays.append((key, speed))
-
-    #     return keys_and_delays
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
         transport_speed = {"bike": 0.1, "walk": 0.25, "run": 0.2, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.3, "run": 0.0, "surf": 0.0}  # 启动延迟
@@ -200,32 +172,32 @@ class PathFinder:
                 result.append(next_node)
         return result
 
-    def try_to_find_known_grid(self, start_point, end_point):
-        # 以任何方式尝试回到已知的网格，例如，你可以创建一个默认的方向列表
-        default_directions = ["w", "d", "s", "a"]  # 上、右、下、左
-        keys_and_delays = []
+    # def try_to_find_known_grid(self, start_point, end_point):
+    #     # 以任何方式尝试回到已知的网格，例如，你可以创建一个默认的方向列表
+    #     default_directions = ["w", "d", "s", "a"]  # 上、右、下、左
+    #     keys_and_delays = []
 
-        for direction in default_directions:
-            next_point = self.get_next_point(start_point, direction)
-            if 0 <= next_point[0] < self.max_y and 0 <= next_point[1] < self.max_x:
-                # 发现一个可以回到网格的方向
-                keys_and_delays.append((direction, 0.1))  # 假设移动一步需要0.1秒
-                break
-            else:
-                # 如果没有发现可以回到网格的方向，也添加当前方向，希望能找到一个出口
-                keys_and_delays.append((direction, 0.1))
+    #     for direction in default_directions:
+    #         next_point = self.get_next_point(start_point, direction)
+    #         if 0 <= next_point[0] < self.max_y and 0 <= next_point[1] < self.max_x:
+    #             # 发现一个可以回到网格的方向
+    #             keys_and_delays.append((direction, 0.1))  # 假设移动一步需要0.1秒
+    #             break
+    #         else:
+    #             # 如果没有发现可以回到网格的方向，也添加当前方向，希望能找到一个出口
+    #             keys_and_delays.append((direction, 0.1))
 
-        return keys_and_delays
+    #     return keys_and_delays
 
-    def get_next_point(self, start_point, direction):
-        if direction == "w":
-            return (start_point[0] - 1, start_point[1])
-        elif direction == "s":
-            return (start_point[0] + 1, start_point[1])
-        elif direction == "a":
-            return (start_point[0], start_point[1] - 1)
-        elif direction == "d":
-            return (start_point[0], start_point[1] + 1)
+    # def get_next_point(self, start_point, direction):
+    #     if direction == "w":
+    #         return (start_point[0] - 1, start_point[1])
+    #     elif direction == "s":
+    #         return (start_point[0] + 1, start_point[1])
+    #     elif direction == "a":
+    #         return (start_point[0], start_point[1] - 1)
+    #     elif direction == "d":
+    #         return (start_point[0], start_point[1] + 1)
 
     def go_somewhere(
         self,
@@ -258,27 +230,11 @@ class PathFinder:
                 ],
             ] = 1  #!地图上1表示可以farming区域
 
-            # if city == "SOOTOPOLIS_CITY":
-            #     # 定义区域范围
-            #     min_x, max_x, min_y, max_y = 22, 41, 46, 55
-            #     # 随机选择一个满足条件的mark为1的记录
-
-            # elif city == "PETALBURG_CITY":
-            #     min_x, max_x, min_y, max_y = 32, 40, 12, 17
-
-            # else:
             random_row = df[df["mark"] == 66].sample(n=1)
-            # 获取y_coords和x_coords的值
-
-            # filtered_df = df[
-            #     (df["mark"] == 1)
-            #     & (df["x_coords"].between(min_x, max_x))
-            #     & (df["y_coords"].between(min_y, max_y))
-            # ]
-            # random_row = filtered_df.sample(n=1)
             y = random_row["y_coords"].values[0]
             x = random_row["x_coords"].values[0]
             end_point = (y, x)
+
         else:
             # 设置可走的区域
             self.grid[
@@ -290,28 +246,45 @@ class PathFinder:
                 ],
             ] = 1
 
-        while end_point:
-            print("end_point", end_point)
+        while True:
+            print("\033[33m" + "-----------------开始寻找路径-----------------" + "\033[33m")
             game_status = self.pokeMMO.get_game_status()
             if city == "PETALBURG_CITY":
-                game_status = add_x_y_coords_offset_PETALBURG_CITY(game_status)
+                game_status_with_offset = add_x_y_coords_offset_PETALBURG_CITY(
+                    game_status
+                )
 
             elif city == "FALLARBOR_TOWN":
-                game_status = add_x_y_coords_offset_FALLARBOR_TOWN(game_status)
-
+                game_status_with_offset = add_x_y_coords_offset_FALLARBOR_TOWN(
+                    game_status
+                )
             if (
-                game_status["x_coords"] == end_point[1]
-                and game_status["y_coords"] == end_point[0]
+                game_status_with_offset["x_coords"] == end_point[1]
+                and game_status_with_offset["y_coords"] == end_point[0]
             ):
                 break
-            if style == "farming" and game_status["return_status"] >= 20:  # 进入战斗了
+            if (
+                style == "farming" and game_status_with_offset["return_status"] >= 20
+            ):  # 进入战斗了
                 break
-            start_point = (game_status["y_coords"], game_status["x_coords"])
-            print("start_point", start_point)
+
+            start_point = (
+                game_status_with_offset["y_coords"],
+                game_status_with_offset["x_coords"],
+            )
+
+            print(
+                "start_point",
+                (start_point[1], start_point[0]),
+                "end_point",
+                (end_point[1], end_point[0]),
+            )
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
+                print("self.path", self.path, "\033[0m")
                 self.pf_move(end_face_dir=end_face_dir)
-            time.sleep(0.1)
+            time.sleep(0.5)
+            print("\033[33m" + "-----------------寻找路径结束-----------------" + "\033[0m")
 
         # return self.try_to_find_known_grid(start_point, end_point)
 
@@ -402,6 +375,6 @@ if __name__ == "__main__":
     pokeMMO.pf.go_somewhere(
         end_point=None,
         end_face_dir=None,
-        city="SOOTOPOLIS_CITY",
+        city="FALLARBOR_TOWN",
         style="farming",
     )

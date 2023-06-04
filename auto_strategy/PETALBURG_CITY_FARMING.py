@@ -8,13 +8,14 @@ if TYPE_CHECKING:
 
 
 def add_x_y_coords_offset_PETALBURG_CITY(game_status):
-    if game_status["map_number_tuple"][1] == 17:
-        game_status["x_coords"] = game_status["x_coords"] + 30
-        game_status["y_coords"] = game_status["y_coords"] + 10
+    game_status_copy = game_status.copy()  # Create a copy of the game_status
+    if game_status_copy["map_number_tuple"][1] == 17:
+        game_status_copy["x_coords"] = game_status_copy["x_coords"] + 30
+        game_status_copy["y_coords"] = game_status_copy["y_coords"] + 10
 
     else:
         pass
-    return game_status
+    return game_status_copy  # Return the modified copy
 
 
 class Faming_PETALBURG_CITY:
