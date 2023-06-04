@@ -74,15 +74,15 @@ class PokeMMO:
         self.word_recognizer = Word_Recognizer()
         self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
-        self.memory_injector = MemoryInjector()
-        self.memory_my_sprits = MemoryInjector_MySprites()
-        self.memory_battle = MemoryInjectorSolidAOB(
-            name="Battle_Memory_Injector",
-            pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # \\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # 45 8B 9A 98 00 00 00 45 8b
-            offset=0,
-            json_file_path="battle_memory_injector.json",
-            aob_hex_list_len=7,
-        )
+        # self.memory_injector = MemoryInjector()
+        # self.memory_my_sprits = MemoryInjector_MySprites()
+        # self.memory_battle = MemoryInjectorSolidAOB(
+        #     name="Battle_Memory_Injector",
+        #     pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # \\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # 45 8B 9A 98 00 00 00 45 8b
+        #     offset=0,
+        #     json_file_path="battle_memory_injector.json",
+        #     aob_hex_list_len=7,
+        # )
         self.stop_threads_flag = False
 
         self.PETALBURG_CITY_FARMING = Faming_PETALBURG_CITY(self)
@@ -95,9 +95,9 @@ class PokeMMO:
         threading.Thread(target=self.update_game_status).start()
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
-        threading.Thread(target=self.update_memory_coords).start()
-        threading.Thread(target=self.update_memory_my_sprits_status).start()
-        threading.Thread(target=self.update_memory_battle_status).start()
+        # threading.Thread(target=self.update_memory_coords).start()
+        # threading.Thread(target=self.update_memory_my_sprits_status).start()
+        # threading.Thread(target=self.update_memory_battle_status).start()
         threading.Thread(target=self.log_print_save.update_logs).start()
         threading.Thread(target=self.log_print_save.print_logs).start()
         threading.Thread(target=self.log_print_save.save_logs).start()
@@ -379,7 +379,21 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
 
+    # hp_BRG_x_y_list = pokeMMO.find_items(
+    #     temp_BRG=pokeMMO.hp_BRG,
+    #     threshold=0.995,
+    #     max_matches=10,
+    #     top_l=(0, 70),
+    #     bottom_r=(1080, 170),
+    #     display=True,
+    # )
+ 
+    time.sleep(6)
     while True:
+        pokeMMO.roleController.close_pokemon_summary(pokeMMO.get_game_status())
+        time.sleep(1)
+
+    while False:
         pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
         time.sleep(1)
         pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)

@@ -23,8 +23,12 @@ class Controller:
         """Click at the current mouse position or at a specific position if provided."""
         self.window.set_focus()
         if x is not None and y is not None:
+            self.window.click_input(
+                button="move", coords=(int(x) + tolerance, int(y) + tolerance)
+            )
+            sleep(0.5)
             self.window.click_input(coords=(int(x) + tolerance, int(y) + tolerance))
-            sleep(0.02)
+            sleep(0.03)
         else:
             self.window.click_input()
 

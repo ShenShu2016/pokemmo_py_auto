@@ -69,7 +69,7 @@ class GameStatus:
             top_l=(316, 7),
             temp_BRG=self.pokeMMO.pokemon_summary_BRG,  # self.pokeMMO.Pokemon_Summary_Exit_Button_BRG,
             threshold=0.99,
-            max_matches=2,
+            max_matches=5,
         )
         return (len(pokemon_summary_coords_list) > 0, pokemon_summary_coords_list)
 

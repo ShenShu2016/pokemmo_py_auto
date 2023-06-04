@@ -121,19 +121,27 @@ class RoleController:
 
     @synchronized
     def close_pokemon_summary(self, game_status):
-        for i in game_status["check_battle_end_pokemon_caught"][
-            1
-        ]:  # [(814, 262, 936, 277)]
-            exit_button_x = (i[0] + i[2]) / 2 + 103
-            exit_button_y = (i[1] + i[3]) / 2 + 0
-            print(exit_button_x, exit_button_y)
+        while True:
+            coords_list = game_status["check_battle_end_pokemon_caught"][1]
+            for i in coords_list:  # [(814, 262, 936, 277)]
+                exit_button_x = (i[0] + i[2]) / 2 + 17
+                exit_button_y = (i[1] + i[3]) / 2 - 2
+                print(exit_button_x, exit_button_y)
 
-            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=0)
-            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=3)
-            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=3)
-            sleep(0.1)
-            self.my_recent_actions_list.append(("close_pokemon_summary", time.time()))
-            print("Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y))
+                self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=0)
+                sleep(0.1)
+                self.my_recent_actions_list.append(
+                    ("close_pokemon_summary", time.time())
+                )
+                print(
+                    "Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y)
+                )
+            (
+                result,
+                coords_list,
+            ) = self.pokeMMO.game_status_checker.check_battle_end_pokemon_caught()
+            if result == False:
+                break
 
     @synchronized
     def restart_from_hospital(self):

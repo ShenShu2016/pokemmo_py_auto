@@ -273,6 +273,7 @@ class MemoryInjector_MySprites:
                 except Exception as e:
                     print(e)
                     name = "unknown"
+                    new_shellcode = b"\x81\x00"
                 # print("name", name, "new_shellcode", new_shellcode)
 
                 self.team_dict[i] = {

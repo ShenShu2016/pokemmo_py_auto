@@ -31,13 +31,21 @@ special_cases = [
     {"coords": [(329, 137), (345, 150)], "enemy_count": 5},
     {"coords": [(849, 137), (865, 150)], "enemy_count": 5},
 ]
+# enemy_hp_bar_coords = {
+#     1: [(274, 151), (471, 155)],  # Enemy 1 HP coordinates
+#     2: [(349, 101), (502, 105)],  # Enemy 2 HP coordinates
+#     3: [(609, 101), (757, 105)],  # Enemy 3 HP coordinates
+#     4: [(870, 101), (1020, 105)],  # Enemy 4 HP coordinates
+#     5: [(349, 141), (503, 145)],  # Enemy 5 HP coordinates
+#     6: [(869, 141), (1020, 145)],  # Enemy 6 HP coordinates
+# }
 enemy_hp_bar_coords = {
-    1: [(274, 151), (471, 155)],  # Enemy 1 HP coordinates
-    2: [(349, 101), (502, 105)],  # Enemy 2 HP coordinates
-    3: [(609, 101), (757, 105)],  # Enemy 3 HP coordinates
-    4: [(870, 101), (1020, 105)],  # Enemy 4 HP coordinates
-    5: [(349, 141), (503, 145)],  # Enemy 5 HP coordinates
-    6: [(869, 141), (1020, 145)],  # Enemy 6 HP coordinates
+    1: [(273, 152), (472, 153)],  # Enemy 1 HP coordinates
+    2: [(349, 102), (498, 103)],  # Enemy 2 HP coordinates
+    3: [(609, 102), (758, 103)],  # Enemy 3 HP coordinates
+    4: [(869, 102), (1018, 103)],  # Enemy 4 HP coordinates
+    5: [(349, 142), (498, 143)],  # Enemy 5 HP coordinates
+    6: [(869, 142), (1018, 143)],  # Enemy 6 HP coordinates
 }
 enemy_name_coords = {
     1: [(251, 129), (492, 147)],
@@ -82,7 +90,7 @@ class EnemyStatus:
         ] and self.enemy_status_dict.get("enemy_count") in [0, None]:
             hp_BRG_x_y_list = self.pokeMMO.find_items(
                 temp_BRG=self.pokeMMO.hp_BRG,
-                threshold=0.99,
+                threshold=0.995,
                 max_matches=5,
                 top_l=(0, 70),
                 bottom_r=(1080, 170),
