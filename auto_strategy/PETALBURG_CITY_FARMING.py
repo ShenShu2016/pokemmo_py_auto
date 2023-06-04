@@ -67,7 +67,7 @@ class Faming_PETALBURG_CITY:
                     if farming_times >= repeat_times:
                         return
                     self.teleport_and_heal(city="PETALBURG_CITY")
-                    self.leave_pc_center_and_go_farm(city="PETALBURG_CITY")  # 应该已经到了湖里了
+                    self.leave_pc_center_and_go_farm(city="PETALBURG_CITY")
 
                 min_x, max_x, min_y, max_y = 22, 41, 12, 16
 
@@ -83,7 +83,7 @@ class Faming_PETALBURG_CITY:
                     end_point=None,
                     end_face_dir=None,
                     city="PETALBURG_CITY",
-                    style="farming",
+                    style="farming",  # 编号66
                 )
 
             while True:

@@ -121,27 +121,15 @@ class RoleController:
 
     @synchronized
     def close_pokemon_summary(self, game_status):
-        while True:
-            coords_list = game_status["check_battle_end_pokemon_caught"][1]
-            for i in coords_list:  # [(814, 262, 936, 277)]
-                exit_button_x = (i[0] + i[2]) / 2 + 17
-                exit_button_y = (i[1] + i[3]) / 2 - 2
-                print(exit_button_x, exit_button_y)
-
-                self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=0)
-                sleep(0.1)
-                self.my_recent_actions_list.append(
-                    ("close_pokemon_summary", time.time())
-                )
-                print(
-                    "Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y)
-                )
-            (
-                result,
-                coords_list,
-            ) = self.pokeMMO.game_status_checker.check_battle_end_pokemon_caught()
-            if result == False:
-                break
+        coords_list = game_status["check_battle_end_pokemon_caught"][1]
+        for i in coords_list:  # [(814, 262, 936, 277)]
+            exit_button_x = (i[0] + i[2]) / 2 + 17
+            exit_button_y = (i[1] + i[3]) / 2 - 2
+            print(exit_button_x, exit_button_y)
+            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=0)
+            sleep(0.1)
+            self.my_recent_actions_list.append(("close_pokemon_summary", time.time()))
+            print("Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y))
 
     @synchronized
     def restart_from_hospital(self):
@@ -164,13 +152,12 @@ class RoleController:
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.pokeMMO.controller.key_press("7")
         sleep(0.5)
-        for i in range(3):
-            self.pokeMMO.controller.click(
-                city_info[city]["town_map_coords"][0],
-                city_info[city]["town_map_coords"][1],
-                tolerance=0,
-            )
-            sleep(0.05)
+
+        self.pokeMMO.controller.click(
+            city_info[city]["town_map_coords"][0],
+            city_info[city]["town_map_coords"][1],
+            tolerance=0,
+        )
         sleep(5)
         # check if in right city
         print("Checking if in %s" % city)

@@ -249,28 +249,32 @@ class PathFinder:
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
         if style == "farming":
             self.grid[
-                df[(df["mark"] == 1) | (df["mark"] == 2)]["y_coords"],
-                df[(df["mark"] == 1) | (df["mark"] == 2)]["x_coords"],
+                df[(df["mark"] == 1) | (df["mark"] == 2) | (df["mark"] == 66)][
+                    "y_coords"
+                ],
+                df[(df["mark"] == 1) | (df["mark"] == 2) | (df["mark"] == 66)][
+                    "x_coords"
+                ],
             ] = 1  #!地图上1表示可以farming区域
 
-            if city == "SOOTOPOLIS_CITY":
-                # 定义区域范围
-                min_x, max_x, min_y, max_y = 22, 41, 46, 55
-                # 随机选择一个满足条件的mark为1的记录
+            # if city == "SOOTOPOLIS_CITY":
+            #     # 定义区域范围
+            #     min_x, max_x, min_y, max_y = 22, 41, 46, 55
+            #     # 随机选择一个满足条件的mark为1的记录
 
-            elif city == "PETALBURG_CITY":
-                min_x, max_x, min_y, max_y = 32, 40, 12, 17
+            # elif city == "PETALBURG_CITY":
+            #     min_x, max_x, min_y, max_y = 32, 40, 12, 17
 
-            else:
-                random_row = df[df["mark"] == 1].sample(n=1)
-                # 获取y_coords和x_coords的值
+            # else:
+            random_row = df[df["mark"] == 66].sample(n=1)
+            # 获取y_coords和x_coords的值
 
-            filtered_df = df[
-                (df["mark"] == 1)
-                & (df["x_coords"].between(min_x, max_x))
-                & (df["y_coords"].between(min_y, max_y))
-            ]
-            random_row = filtered_df.sample(n=1)
+            # filtered_df = df[
+            #     (df["mark"] == 1)
+            #     & (df["x_coords"].between(min_x, max_x))
+            #     & (df["y_coords"].between(min_y, max_y))
+            # ]
+            # random_row = filtered_df.sample(n=1)
             y = random_row["y_coords"].values[0]
             x = random_row["x_coords"].values[0]
             end_point = (y, x)
@@ -286,12 +290,10 @@ class PathFinder:
             ] = 1
 
         while end_point:
-            game_status=self.pokeMMO.get_game_status()
+            print("end_point", end_point)
+            game_status = self.pokeMMO.get_game_status()
             if city == "PETALBURG_CITY":
-                game_status = add_x_y_coords_offset_PETALBURG_CITY(
-                    game_status
-                )
-
+                game_status = add_x_y_coords_offset_PETALBURG_CITY(game_status)
 
             if (
                 game_status["x_coords"] == end_point[1]
@@ -301,6 +303,7 @@ class PathFinder:
             if style == "farming" and game_status["return_status"] >= 20:  # 进入战斗了
                 break
             start_point = (game_status["y_coords"], game_status["x_coords"])
+            print("start_point", start_point)
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
                 self.pf_move(end_face_dir=end_face_dir)
