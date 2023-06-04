@@ -380,7 +380,7 @@ if __name__ == "__main__":
     # pokeMMO.start_ui()
 
     while True:
-        pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
-        time.sleep(1)
         pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
+        time.sleep(1)
+        pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
         time.sleep(1)

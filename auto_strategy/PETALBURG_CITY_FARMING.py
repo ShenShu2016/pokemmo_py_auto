@@ -59,7 +59,7 @@ class Faming_PETALBURG_CITY:
                     "check_battle_end_pokemon_caught"
                 )[0]:
                     self.pokeMMO.roleController.close_pokemon_summary(game_status)
-                if (game_status["sprite_dict"]["Sweet Scent"]["pp"] == 0) and (
+                if (game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
                     or game_status["sprite_dict"]["Spore"]["pp"] <= 2
                 ):

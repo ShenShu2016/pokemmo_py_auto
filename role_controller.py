@@ -149,18 +149,20 @@ class RoleController:
     @synchronized
     def use_sweet_sent(self):
         game_status = self.pokeMMO.get_game_status()
-        if game_status["sprite_dict"]["Sweet Scent"]["pp"] > 0:
+        if game_status["sprite_dict"]["Sweet Scent"]["pp"] >= 5:
             self.pokeMMO.controller.key_press("2")
             sleep(3)
 
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.pokeMMO.controller.key_press("7")
         sleep(0.5)
-        self.pokeMMO.controller.click(
-            city_info[city]["town_map_coords"][0],
-            city_info[city]["town_map_coords"][1],
-            tolerance=3,
-        )
+        for i in range(3):
+            self.pokeMMO.controller.click(
+                city_info[city]["town_map_coords"][0],
+                city_info[city]["town_map_coords"][1],
+                tolerance=0,
+            )
+            sleep(0.05)
         sleep(5)
         # check if in right city
         print("Checking if in %s" % city)
