@@ -1,5 +1,10 @@
-import json
 import os
+import sys
+
+root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_path)
+
+import json
 import struct
 import time
 
@@ -81,6 +86,10 @@ def process_shellcode(shellcode):
 
 
 class MemoryInjector_MySprites:
+    """return: {'pokedex': 64, 'hp': 138, 'happiness': 100.0, 'name': 'Hodson', 'skill_0': {'id': 94, 'pp': 10}, 'skill_1': {'id': 347, 'pp': 20}, 'skill_2': {'id': 100, 'pp': 20}, 'skill_3': {'id': 351, 'pp': 20}},
+    5: {'pokedex': 611, 'hp': 122, 'happiness': 83.0, 'name': 'ChenXuanRan', 'skill_0': {'id': 337, 'pp': 15}, 'skill_1': {'id': 530, 'pp': 15}, 'skill_2': {'id': 14, 'pp': 20}, 'skill_3': {'id': 349, 'pp': 20}}}
+    """
+
     def __init__(self):
         self.target_process = "javaw.exe"
         self.pattern = b"\\x8B\\x5B\\x0C\\x3B\\xD8"

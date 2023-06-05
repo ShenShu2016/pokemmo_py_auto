@@ -1,6 +1,9 @@
-import json
 import os
-import re
+import sys
+
+root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_path)
+import json
 import struct
 import time
 
@@ -68,19 +71,24 @@ def analyze_shellcode(battle_instance_data, chunk_size):
         )
 
 
-class MemoryInjector:
-    def __init__(self, name, pattern, offset, json_file_path, aob_hex_list_len):
+class MemoryInjector_BattleInfo:
+    """This is a class for injecting memory into the target process.
+    return: {'enemy_count': 1, 'enemy_1_sleeping': False, 'enemy_1_hp_pct': 2.0, 'enemy_1_name_Lv': '129Lv33\n', 'enemy_1_info':
+    {'No': 129, 'Pokemon': 'Magikarp', 'Hp': 20, 'Gender': 1, 'CatchRate': 255, 'Types': 'Water/', 'CatchMethod': 1, 'Chinese': '鲤鱼王'}}
+    """
+
+    def __init__(self):
         self.target_process = "javaw.exe"
-        self.pattern = pattern
-        self.process_name = name
-        self.offset = offset
+        self.pattern = b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00"
+        self.process_name = "Battle_Memory_Injector"
+        self.offset = 0
         self.pm = pymem.Pymem(self.target_process)
         self.window_id = Window_Manager().get_window_id()
         self.memory_info_dict = {}
 
         # Adding a path to your json file
-        self.json_file_path = json_file_path
-        self.aob_hex_list_len = aob_hex_list_len  # 注入那条指令的长度
+        self.json_file_path = "battle_memory_injector.json"
+        self.aob_hex_list_len = 7  # 注入那条指令的长度
         self.aob_address_list = []
         self.aob_hex_list = []
         self.aob_address = 0
@@ -364,12 +372,6 @@ class MemoryInjector:
 
 
 if __name__ == "__main__":
-    injector = MemoryInjector(
-        name="Battle_Memory_Injector",
-        pattern=b"\\x45\\x8B\\x9A\\x98\\x00\\x00\\x00",  # \\x45\\x8B.\\xAC\\x00\\x00\\x00\\x4D\\x8B\\xD3",  # 45 8B 9A 98 00 00 00
-        offset=0,
-        json_file_path="battle_memory_injector.json",
-        aob_hex_list_len=7,
-    )
+    injector = MemoryInjector_BattleInfo()
     injector.read_data()
     print(injector.memory_info_dict)

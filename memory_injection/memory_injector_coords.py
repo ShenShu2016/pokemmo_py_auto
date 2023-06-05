@@ -1,5 +1,10 @@
-import json
 import os
+import sys
+
+root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_path)
+
+import json
 import re
 import struct
 import time
@@ -61,7 +66,7 @@ def split_bytes_to_int(data, start, end):
     return converted
 
 
-class MemoryInjector:
+class MemoryInjector_Coords:
     def __init__(self):
         self.target_process = "javaw.exe"
         self.pm = pymem.Pymem(self.target_process)
@@ -264,6 +269,6 @@ class MemoryInjector:
 
 
 if __name__ == "__main__":
-    injector = MemoryInjector()
+    injector = MemoryInjector_Coords()
     injector.read_data()
     print(injector.memory_info_dict)
