@@ -155,9 +155,10 @@ class EnemyStatus:
                 numeric_string = "".join(filter(str.isdigit, name_Lv_ORC))
                 total_int = int(numeric_string)
 
-                if total_int >= 9999 and enemy_count == 1:  # 闪光
+                if total_int >= 99999 and enemy_count == 1:  # 闪光
                     pass
-                elif total_int >= 9999 and enemy_count > 1:
+                elif total_int >= 99999 and enemy_count > 1:
+                    print("闪光宠出现", name_Lv_ORC, total_int)
                     import os
 
                     os.system("taskkill /f /im python.exe")

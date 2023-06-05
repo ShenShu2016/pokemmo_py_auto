@@ -398,6 +398,9 @@ if __name__ == "__main__":
     while True:
         pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
         time.sleep(1)
+        pokeMMO.FALLARBOR_TOWN_FARMING.run(repeat_times=1)
+        time.sleep(1)
         pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
         time.sleep(1)
         pokeMMO.FALLARBOR_TOWN_FARMING.run(repeat_times=1)
+        time.sleep(1)
