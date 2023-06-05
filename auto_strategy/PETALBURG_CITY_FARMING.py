@@ -18,7 +18,7 @@ def add_x_y_coords_offset_PETALBURG_CITY(game_status):
     return game_status_copy  # Return the modified copy
 
 
-class Faming_PETALBURG_CITY:
+class Farming_PETALBURG_CITY:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
         self.my_df = self.pokeMMO.df_dict["PETALBURG_CITY_coords_tracking_csv"]
@@ -159,5 +159,5 @@ if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-    farming = Faming_PETALBURG_CITY(pokeMMO)
+    farming = Farming_PETALBURG_CITY(pokeMMO)
     farming.run()

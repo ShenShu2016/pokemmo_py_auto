@@ -19,7 +19,7 @@ def add_x_y_coords_offset_FALLARBOR_TOWN(game_status):
     return game_status_copy  # Return the modified copy
 
 
-class Faming_FALLARBOR_TOWN:
+class Farming_FALLARBOR_TOWN:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
         self.my_df = self.pokeMMO.df_dict["FALLARBOR_TOWN_coords_tracking_csv"]
@@ -164,5 +164,5 @@ if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-    farming = Faming_FALLARBOR_TOWN(pokeMMO)
+    farming = Farming_FALLARBOR_TOWN(pokeMMO)
     farming.run()

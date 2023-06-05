@@ -352,7 +352,6 @@
     "star-light_path": "asserts/template/atlas\\star-light.png",
     "status_ailment_path": "asserts/template/atlas\\status_ailment.png",
     "status_ailment_large_path": "asserts/template/atlas\\status_ailment_large.png",
-    "FALLARBOR TOWN coordinates_path": "asserts/coords_tracking\\FALLARBOR TOWN coordinates.csv",
     "FALLARBOR_TOWN_coords_tracking_path": "asserts/coords_tracking\\FALLARBOR_TOWN_coords_tracking.csv",
     "PETALBURG_CITY_coords_tracking_path": "asserts/coords_tracking\\PETALBURG_CITY_coords_tracking.csv",
     "SOOTOPOLIS_CITY_coords_tracking_path": "asserts/coords_tracking\\SOOTOPOLIS_CITY_coords_tracking.csv"

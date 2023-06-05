@@ -10,8 +10,9 @@ import numpy as np
 import pandas as pd
 import pytesseract
 
-from auto_strategy.PETALBURG_CITY_FARMING import Faming_PETALBURG_CITY
-from auto_strategy.SOOTOPOLIS_CITY_FARMING import Faming_SOOTOPOLIS_CITY
+from auto_strategy.FALLARBOR_TOWN_FARMING import Farming_FALLARBOR_TOWN
+from auto_strategy.PETALBURG_CITY_FARMING import Farming_PETALBURG_CITY
+from auto_strategy.SOOTOPOLIS_CITY_FARMING import Farming_SOOTOPOLIS_CITY
 from enemy_status import EnemyStatus
 from game_status import GameStatus
 from log_print_save import LogPrintSave
@@ -85,8 +86,9 @@ class PokeMMO:
         )
         self.stop_threads_flag = False
 
-        self.PETALBURG_CITY_FARMING = Faming_PETALBURG_CITY(self)
-        self.SOOTOPOLIS_CITY_FARMING = Faming_SOOTOPOLIS_CITY(self)
+        self.PETALBURG_CITY_FARMING = Farming_PETALBURG_CITY(self)
+        self.SOOTOPOLIS_CITY_FARMING = Farming_SOOTOPOLIS_CITY(self)
+        self.FALLARBOR_TOWN_FARMING = Farming_FALLARBOR_TOWN(self)
 
         self.start_threads()
 
@@ -393,8 +395,9 @@ if __name__ == "__main__":
     #     pokeMMO.roleController.close_pokemon_summary(pokeMMO.get_game_status())
     #     time.sleep(1)
 
-    # while True:
-    #     pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
-    #     time.sleep(1)
-    #     pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
-    #     time.sleep(1)
+    while True:
+        pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
+        time.sleep(1)
+        pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
+        time.sleep(1)
+        pokeMMO.FALLARBOR_TOWN_FARMING.run(repeat_times=1)

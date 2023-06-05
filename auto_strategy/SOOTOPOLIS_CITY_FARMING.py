@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 
-class Faming_SOOTOPOLIS_CITY:
+class Farming_SOOTOPOLIS_CITY:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
         self.my_df = self.pokeMMO.df_dict["SOOTOPOLIS_CITY_coords_tracking_csv"]
@@ -182,5 +182,5 @@ if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-    farming = Faming_SOOTOPOLIS_CITY(pokeMMO)
+    farming = Farming_SOOTOPOLIS_CITY(pokeMMO)
     farming.run()

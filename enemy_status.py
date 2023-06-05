@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from main import PokeMMO
 
+import threading
 
 enemy_hp_coords = [
     [(329, 97), (346, 110)],
@@ -115,82 +116,185 @@ class EnemyStatus:
     def _check_enemy_name_lv(self):
         # start_time = time.time()
         enemy_count = self.enemy_status_dict["enemy_count"]
-        if enemy_count not in [0, None]:
-            for i in range(1, enemy_count + 1):
-                if (
-                    f"enemy_{i}_hp_pct" in self.enemy_status_dict
-                    and f"enemy_{i}_name_Lv" not in self.enemy_status_dict
-                    and self.enemy_status_dict[f"enemy_{i}_hp_pct"] is not None
-                ):
+
+        def _process_i(self, i):
+            if (
+                f"enemy_{i}_hp_pct" in self.enemy_status_dict
+                and f"enemy_{i}_name_Lv" not in self.enemy_status_dict
+                and self.enemy_status_dict[f"enemy_{i}_hp_pct"] is not None
+            ):
+                sex_coords = self.pokeMMO.find_items(
+                    temp_BRG=self.pokeMMO.enemy_male_BRG,
+                    top_l=enemy_name_coords[i][0],
+                    bottom_r=enemy_name_coords[i][1],
+                    img_BRG=self.img_BRG,
+                    threshold=0.99,
+                    max_matches=1,
+                )
+                if not sex_coords:
                     sex_coords = self.pokeMMO.find_items(
-                        temp_BRG=self.pokeMMO.enemy_male_BRG,
+                        temp_BRG=self.pokeMMO.enemy_female_BRG,
                         top_l=enemy_name_coords[i][0],
                         bottom_r=enemy_name_coords[i][1],
                         img_BRG=self.img_BRG,
                         threshold=0.99,
                         max_matches=1,
                     )
-                    if not sex_coords:
-                        sex_coords = self.pokeMMO.find_items(
-                            temp_BRG=self.pokeMMO.enemy_female_BRG,
-                            top_l=enemy_name_coords[i][0],
-                            bottom_r=enemy_name_coords[i][1],
-                            img_BRG=self.img_BRG,
-                            threshold=0.99,
-                            max_matches=1,
-                        )
-                    if sex_coords:
-                        enemy_name_coords[i] = (
-                            enemy_name_coords[i][0],
-                            (sex_coords[0][0], enemy_name_coords[i][1][1]),
-                        )
-                    name_Lv_ORC = self.pokeMMO.get_text_from_box_coords(
-                        top_l=enemy_name_coords[i][0],
-                        bottom_r=enemy_name_coords[i][1],
-                        img_BRG=self.img_BRG,
-                        config="--psm 7 --oem 3 -c tessedit_char_whitelist=Lv1234567890",  #
+                if sex_coords:
+                    enemy_name_coords[i] = (
+                        enemy_name_coords[i][0],
+                        (sex_coords[0][0], enemy_name_coords[i][1][1]),
                     )
-                    # print("name_Lv_ORC 使用时间:", time.time() - start_time)
+                name_Lv_ORC = self.pokeMMO.get_text_from_box_coords(
+                    top_l=enemy_name_coords[i][0],
+                    bottom_r=enemy_name_coords[i][1],
+                    img_BRG=self.img_BRG,
+                    config="--psm 7 --oem 3 -c tessedit_char_whitelist=Lv1234567890",
+                )
 
-                    numeric_string = "".join(filter(str.isdigit, name_Lv_ORC))
-                    total_int = int(numeric_string)
+                numeric_string = "".join(filter(str.isdigit, name_Lv_ORC))
+                total_int = int(numeric_string)
 
-                    if total_int >= 9999:  # 闪光
-                        pass
-                    elif total_int >= 9999 and enemy_count > 1:
-                        # close all python
-                        import os
+                if total_int >= 9999 and enemy_count == 1:  # 闪光
+                    pass
+                elif total_int >= 9999 and enemy_count > 1:
+                    import os
 
-                        os.system("taskkill /f /im python.exe")
-                    # print("Shiny 检测时间:", time.time() - start_time)
+                    os.system("taskkill /f /im python.exe")
 
-                    if "Lv" in name_Lv_ORC:
-                        self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_ORC
-                        # go self.pokedex to get the pokemon info
-                        name_ORC = name_Lv_ORC.split("Lv")[0].strip()
-                        lv_orc = name_Lv_ORC.split("Lv")[1].strip()
-                        print("name_ORC:", name_ORC)
-                        # print("lv_orc:", lv_orc)
+                if "Lv" in name_Lv_ORC:
+                    self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_ORC
+                    name_ORC = name_Lv_ORC.split("Lv")[0].strip()
+                    lv_orc = name_Lv_ORC.split("Lv")[1].strip()
+                    info = self.pokeMMO.pokedex_csv.loc[
+                        self.pokeMMO.pokedex_csv["No"] == int(name_ORC)
+                    ]
+
+                    if info.empty == False:
+                        info_dict = info.to_dict(orient="records")
+                        self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+
+                    else:
                         info = self.pokeMMO.pokedex_csv.loc[
-                            self.pokeMMO.pokedex_csv["No"] == int(name_ORC)
+                            self.pokeMMO.pokedex_csv["No"] == int(999)
                         ]
+                        info_dict = info.to_dict(orient="records")
+                        self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
 
-                        if info.empty == False:
-                            info_dict = info.to_dict(orient="records")
-                            # Print the dictionary
-                            self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
-                            print(info_dict[0])
+                        print(f"{name_ORC} 有可能是闪光")
 
-                        else:  # 闪光宠直接变成999 当普通宠来抓
-                            info = self.pokeMMO.pokedex_csv.loc[
-                                self.pokeMMO.pokedex_csv["No"] == int(999)
-                            ]
-                            info_dict = info.to_dict(orient="records")
-                            # Print the dictionary
-                            self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+        threads = []
+        enemy_count = self.enemy_status_dict["enemy_count"]
+        if enemy_count not in [0, None]:
+            if enemy_count == 1:
+                i = 1
+                t = threading.Thread(
+                    target=_process_i,
+                    args=(
+                        self,
+                        i,
+                    ),
+                )
+                t.start()
+                threads.append(t)
+            else:
+                for i in range(2, enemy_count + 2):
+                    t = threading.Thread(
+                        target=_process_i,
+                        args=(
+                            self,
+                            i,
+                        ),
+                    )
+                    t.start()
+                    threads.append(t)
 
-                            print(f"{name_ORC} 有可能是闪光")
-                    # print("检查名字与等级使用时间:", time.time() - start_time)
+        for t in threads:
+            t.join()  # 等待所有线程完成
+        # enemy_count = self.enemy_status_dict["enemy_count"]
+        # if enemy_count not in [0, None]:
+        #     for i in range(1, enemy_count + 2):
+        #         # print("i-----------------------------------------------------", i)
+        #         if (
+        #             f"enemy_{i}_hp_pct" in self.enemy_status_dict
+        #             and f"enemy_{i}_name_Lv" not in self.enemy_status_dict
+        #             and self.enemy_status_dict[f"enemy_{i}_hp_pct"] is not None
+        #         ):
+        #             sex_coords = self.pokeMMO.find_items(
+        #                 temp_BRG=self.pokeMMO.enemy_male_BRG,
+        #                 top_l=enemy_name_coords[i][0],
+        #                 bottom_r=enemy_name_coords[i][1],
+        #                 img_BRG=self.img_BRG,
+        #                 threshold=0.99,
+        #                 max_matches=1,
+        #             )
+        #             if not sex_coords:
+        #                 sex_coords = self.pokeMMO.find_items(
+        #                     temp_BRG=self.pokeMMO.enemy_female_BRG,
+        #                     top_l=enemy_name_coords[i][0],
+        #                     bottom_r=enemy_name_coords[i][1],
+        #                     img_BRG=self.img_BRG,
+        #                     threshold=0.99,
+        #                     max_matches=1,
+        #                 )
+        #             if sex_coords:
+        #                 enemy_name_coords[i] = (
+        #                     enemy_name_coords[i][0],
+        #                     (sex_coords[0][0], enemy_name_coords[i][1][1]),
+        #                 )
+        #             name_Lv_ORC = self.pokeMMO.get_text_from_box_coords(
+        #                 top_l=enemy_name_coords[i][0],
+        #                 bottom_r=enemy_name_coords[i][1],
+        #                 img_BRG=self.img_BRG,
+        #                 config="--psm 7 --oem 3 -c tessedit_char_whitelist=Lv1234567890",  #
+        #             )
+        #             # print(
+        #             #     "i-----------------------------------------------------",
+        #             #     i,
+        #             #     name_Lv_ORC,
+        #             # )
+
+        #             # print("name_Lv_ORC 使用时间:", time.time() - start_time)
+
+        #             numeric_string = "".join(filter(str.isdigit, name_Lv_ORC))
+        #             total_int = int(numeric_string)
+
+        #             if total_int >= 9999:  # 闪光
+        #                 pass
+        #             elif total_int >= 9999 and enemy_count > 1:
+        #                 # close all python
+        #                 import os
+
+        #                 os.system("taskkill /f /im python.exe")
+        #             # print("Shiny 检测时间:", time.time() - start_time)
+
+        #             if "Lv" in name_Lv_ORC:
+        #                 self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_ORC
+        #                 # go self.pokedex to get the pokemon info
+        #                 name_ORC = name_Lv_ORC.split("Lv")[0].strip()
+        #                 lv_orc = name_Lv_ORC.split("Lv")[1].strip()
+        #                 # print("name_ORC:", name_ORC)
+        #                 # print("lv_orc:", lv_orc)
+        #                 info = self.pokeMMO.pokedex_csv.loc[
+        #                     self.pokeMMO.pokedex_csv["No"] == int(name_ORC)
+        #                 ]
+
+        #                 if info.empty == False:
+        #                     info_dict = info.to_dict(orient="records")
+        #                     # Print the dictionary
+        #                     self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+        #                     print(info_dict[0])
+
+        #                 else:  # 闪光宠直接变成999 当普通宠来抓
+        #                     info = self.pokeMMO.pokedex_csv.loc[
+        #                         self.pokeMMO.pokedex_csv["No"] == int(999)
+        #                     ]
+        #                     info_dict = info.to_dict(orient="records")
+        #                     # Print the dictionary
+        #                     self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+
+        #                     print(f"{name_ORC} 有可能是闪光")
+        #             # print("检查名字与等级使用时间:", time.time() - start_time)
 
     def check_enemy_sleep(self):
         if self.game_status_dict.get("return_status") in [

@@ -249,6 +249,7 @@ class PathFinder:
         while True:
             print("\033[33m" + "-----------------开始寻找路径-----------------" + "\033[33m")
             game_status = self.pokeMMO.get_game_status()
+
             if city == "PETALBURG_CITY":
                 game_status_with_offset = add_x_y_coords_offset_PETALBURG_CITY(
                     game_status
@@ -258,6 +259,9 @@ class PathFinder:
                 game_status_with_offset = add_x_y_coords_offset_FALLARBOR_TOWN(
                     game_status
                 )
+            else:
+                game_status_with_offset = game_status
+
             if (
                 game_status_with_offset["x_coords"] == end_point[1]
                 and game_status_with_offset["y_coords"] == end_point[0]
