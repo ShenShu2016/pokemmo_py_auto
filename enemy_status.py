@@ -1,22 +1,11 @@
 # enemy_status.py
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from main import PokeMMO
-
-import subprocess
-
-# Constants
-MP3_FILE_PATH = "unravel.mp3"
-DEBUG = True
-BATTLE_OPTION_STATUS = 21
-ENEMY_FOUND_STATUSES = [20, 21, 22, 23]
-
-
-def _play_mp3(file_path=MP3_FILE_PATH):
-    subprocess.run(["wmplayer", file_path])
 
 
 enemy_hp_coords = [
@@ -99,24 +88,7 @@ class EnemyStatus:
             # print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
             if not hp_BRG_x_y_list:
                 return
-
-            tolerance = 10
-            enemy_count = 0
-
-            for special_case in special_cases:
-                for found_hp in hp_BRG_x_y_list:
-                    if self._match_coords(special_case["coords"], tolerance, found_hp):
-                        self.enemy_status_dict["enemy_count"] = special_case[
-                            "enemy_count"
-                        ]
-                        return
-
-            for enemy_hp in enemy_hp_coords:
-                for found_hp in hp_BRG_x_y_list:
-                    if self._match_coords(enemy_hp, tolerance, found_hp):
-                        enemy_count += 1
-                self.enemy_status_dict["enemy_count"] = enemy_count
-        # print("enemy_count:", self.enemy_status_dict["enemy_count"])
+            self.enemy_status_dict["enemy_count"] = len(hp_BRG_x_y_list)
 
     def _check_enemy_hp(self):
         if self.game_status_dict.get("return_status") in [
@@ -124,8 +96,7 @@ class EnemyStatus:
             21,
             22,
             23,
-        ]:  # battle_option
-            # Define the enemy hp bar coordinates
+        ]:
             enemy_count = self.enemy_status_dict["enemy_count"]
             if enemy_count in [3, 5]:
                 for i in range(2, enemy_count + 2):
@@ -142,6 +113,7 @@ class EnemyStatus:
                 self.enemy_status_dict["enemy_1_hp_pct"] = hp_pct
 
     def _check_enemy_name_lv(self):
+        # start_time = time.time()
         enemy_count = self.enemy_status_dict["enemy_count"]
         if enemy_count not in [0, None]:
             for i in range(1, enemy_count + 1):
@@ -176,23 +148,21 @@ class EnemyStatus:
                         top_l=enemy_name_coords[i][0],
                         bottom_r=enemy_name_coords[i][1],
                         img_BRG=self.img_BRG,
-                        config="--psm 7 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",  #
+                        config="--psm 7 --oem 3 -c tessedit_char_whitelist=Lv1234567890",  #
                     )
-                    if self.pokeMMO.word_recognizer.compare_with_target(
-                        recognized_ORC=name_Lv_ORC.lower(), target_words=["shiny"]
-                    )[0]:
-                        _play_mp3()
-                    elif (
-                        self.pokeMMO.word_recognizer.compare_with_target(
-                            recognized_ORC=name_Lv_ORC.lower(), target_words=["shiny"]
-                        )[0]
-                        and self.enemy_status_dict["enemy_count"] > 1
-                    ):
-                        _play_mp3()
+                    # print("name_Lv_ORC 使用时间:", time.time() - start_time)
+
+                    numeric_string = "".join(filter(str.isdigit, name_Lv_ORC))
+                    total_int = int(numeric_string)
+
+                    if total_int >= 9999:  # 闪光
+                        pass
+                    elif total_int >= 9999 and enemy_count > 1:
                         # close all python
                         import os
 
                         os.system("taskkill /f /im python.exe")
+                    # print("Shiny 检测时间:", time.time() - start_time)
 
                     if "Lv" in name_Lv_ORC:
                         self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_ORC
@@ -202,22 +172,56 @@ class EnemyStatus:
                         print("name_ORC:", name_ORC)
                         # print("lv_orc:", lv_orc)
                         info = self.pokeMMO.pokedex_csv.loc[
-                            self.pokeMMO.pokedex_csv["Pokemon"] == name_ORC
+                            self.pokeMMO.pokedex_csv["No"] == int(name_ORC)
                         ]
+
                         if info.empty == False:
                             info_dict = info.to_dict(orient="records")
                             # Print the dictionary
                             self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
                             print(info_dict[0])
 
-                        else:
-                            print(f"{name_ORC} info not found")
+                        else:  # 闪光宠直接变成999 当普通宠来抓
+                            info = self.pokeMMO.pokedex_csv.loc[
+                                self.pokeMMO.pokedex_csv["No"] == int(999)
+                            ]
+                            info_dict = info.to_dict(orient="records")
+                            # Print the dictionary
+                            self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+
+                            print(f"{name_ORC} 有可能是闪光")
+                    # print("检查名字与等级使用时间:", time.time() - start_time)
+
+    def check_enemy_sleep(self):
+        if self.game_status_dict.get("return_status") in [
+            20,
+            21,
+            22,
+            23,
+        ]:
+            # print("检查敌人睡眠状态")
+            sleeping_sign_coords_list = self.pokeMMO.find_items(
+                temp_BRG=self.pokeMMO.battle_bar_sleep_sign_BRG,
+                top_l=(220, 120),
+                bottom_r=(492, 150),
+                img_BRG=self.img_BRG,
+                threshold=0.99,
+                max_matches=1,
+            )
+            # print("sleeping_sign_coords_list", sleeping_sign_coords_list)
+            if len(sleeping_sign_coords_list) > 0:
+                self.enemy_status_dict["enemy_1_sleeping"] = True
+            else:
+                self.enemy_status_dict["enemy_1_sleeping"] = False
 
     def check_enemy_status(self):
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         self.game_status_dict = self.pokeMMO.get_game_status()
         self._check_enemy_number()
         self._check_enemy_hp()
+        # start_time = time.time()
         self._check_enemy_name_lv()
+        # print("检查敌人名字与等级使用时间:", time.time() - start_time)
+        self.check_enemy_sleep()
         # print("enemy_status_dict", self.enemy_status_dict)
         return self.enemy_status_dict

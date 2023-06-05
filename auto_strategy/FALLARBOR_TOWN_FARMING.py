@@ -68,7 +68,7 @@ class Faming_FALLARBOR_TOWN:
                     self.pokeMMO.roleController.close_pokemon_summary(game_status)
                 if (game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
-                    or game_status["sprite_dict"]["Spore"]["pp"] <= 2
+                    or game_status["sprite_dict"]["Spore"]["pp"] <= 3
                 ):
                     farming_times += 1
                     if farming_times >= repeat_times:
@@ -82,8 +82,8 @@ class Faming_FALLARBOR_TOWN:
                     game_status["y_coords"],
                 ) in self.marked_coords:
                     # Trigger the desired operation
-                    # self.pokeMMO.roleController.use_sweet_sent()
-                    pass
+                    self.pokeMMO.roleController.use_sweet_sent()
+                    # pass
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,
@@ -104,19 +104,52 @@ class Faming_FALLARBOR_TOWN:
                 if (
                     game_status["return_status"] == 21
                     and enemy_status.get("enemy_1_info") is not None
-                ):  # 当血量不够低的时候，就用技能1
-                    # print("当血量不够低的时候，就用技能1")
-                    if enemy_status.get("enemy_1_hp_pct") >= 20:
-                        self.pokeMMO.roleController.fight_skill_1_from_s21()
+                ):
+                    if enemy_status.get("enemy_1_info")["CatchMethod"] == 1:
+                        if enemy_status.get("enemy_1_hp_pct") >= 20:
+                            self.pokeMMO.roleController.fight_skill_1_from_s21()
 
-                    elif enemy_status.get("enemy_1_hp_pct") < 20:
-                        self.pokeMMO.roleController.throw_pokeball()
+                        elif enemy_status.get("enemy_1_hp_pct") < 20:
+                            self.pokeMMO.roleController.throw_pokeball()
+
+                    elif enemy_status.get("enemy_1_info")["CatchMethod"] == 2:
+                        if enemy_status.get("enemy_1_hp_pct") >= 20:
+                            self.pokeMMO.roleController.fight_skill_1_from_s21()
+
+                        elif (
+                            enemy_status.get("enemy_1_hp_pct") < 20
+                            and enemy_status.get("enemy_1_sleeping") == False
+                        ):
+                            self.pokeMMO.roleController.fight_skill_2_from_s21()  # Spore
+
+                        elif (
+                            enemy_status.get("enemy_1_hp_pct") < 20
+                            and enemy_status.get("enemy_1_sleeping") == True
+                        ):
+                            self.pokeMMO.roleController.throw_pokeball()
+                    elif enemy_status.get("enemy_1_info")["CatchMethod"] == 0:
+                        self.pokeMMO.roleController.run_from_s21()
 
                 elif (
                     game_status["return_status"] == 21
-                    and enemy_status.get("enemy_count") > 1
+                    and enemy_status.get("enemy_count") == 3
+                    and enemy_status.get("enemy_2_info") is not None
+                    and enemy_status.get("enemy_3_info") is not None
+                    and enemy_status.get("enemy_4_info") is not None
                 ):
                     self.pokeMMO.roleController.run_from_s21()
+
+                elif (
+                    game_status["return_status"] == 21
+                    and enemy_status.get("enemy_count") == 5
+                    and enemy_status.get("enemy_2_info") is not None
+                    and enemy_status.get("enemy_3_info") is not None
+                    and enemy_status.get("enemy_4_info") is not None
+                    and enemy_status.get("enemy_5_info") is not None
+                    and enemy_status.get("enemy_6_info") is not None
+                ):
+                    self.pokeMMO.roleController.run_from_s21()
+
                 if game_status["return_status"] == 1:
                     break
 

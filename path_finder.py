@@ -283,7 +283,7 @@ class PathFinder:
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
                 print("self.path", self.path, "\033[0m")
                 self.pf_move(end_face_dir=end_face_dir)
-            time.sleep(0.5)
+            time.sleep(0.1)
             print("\033[33m" + "-----------------寻找路径结束-----------------" + "\033[0m")
 
         # return self.try_to_find_known_grid(start_point, end_point)

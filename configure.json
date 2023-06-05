@@ -1,6 +1,7 @@
 {
     "tesseract": "C:/Program Files/Tesseract-OCR/tesseract.exe",
     "pokedex_path": "asserts/clean_pokedex.csv",
+    "battle_bar_sleep_sign_path": "asserts/template\\battle_bar_sleep_sign.png",
     "enemy_female_path": "asserts/template\\enemy_female.png",
     "enemy_hp_white_path": "asserts/template\\enemy_hp_white.png",
     "enemy_male_path": "asserts/template\\enemy_male.png",
@@ -351,6 +352,7 @@
     "star-light_path": "asserts/template/atlas\\star-light.png",
     "status_ailment_path": "asserts/template/atlas\\status_ailment.png",
     "status_ailment_large_path": "asserts/template/atlas\\status_ailment_large.png",
+    "FALLARBOR TOWN coordinates_path": "asserts/coords_tracking\\FALLARBOR TOWN coordinates.csv",
     "FALLARBOR_TOWN_coords_tracking_path": "asserts/coords_tracking\\FALLARBOR_TOWN_coords_tracking.csv",
     "PETALBURG_CITY_coords_tracking_path": "asserts/coords_tracking\\PETALBURG_CITY_coords_tracking.csv",
     "SOOTOPOLIS_CITY_coords_tracking_path": "asserts/coords_tracking\\SOOTOPOLIS_CITY_coords_tracking.csv"

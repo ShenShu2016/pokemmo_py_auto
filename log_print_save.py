@@ -95,6 +95,6 @@ class LogPrintSave:
                 #     f'memory_my_sprits_status: {self.logs[-1]["memory_my_sprits_status"]}'
                 # )
 
-                time.sleep(10)
+                time.sleep(5)
             except Exception as e:
                 pass
