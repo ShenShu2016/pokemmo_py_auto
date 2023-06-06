@@ -22,6 +22,7 @@ def add_x_y_coords_offset_FALLARBOR_TOWN(game_status):
 class Farming_FALLARBOR_TOWN:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
+        self.city = "FALLARBOR_TOWN"
         self.my_df = self.pokeMMO.df_dict["FALLARBOR_TOWN_coords_tracking_csv"]
         self.marked_coords = [
             (x, y)
@@ -31,8 +32,8 @@ class Farming_FALLARBOR_TOWN:
             if mark == 66
         ]
 
-    def leave_pc_center_and_go_farm(self, city="FALLARBOR_TOWN"):
-        self.pokeMMO.pf.leave_pc_center(city=city)
+    def leave_pc_center_and_go_farm(self):
+        self.pokeMMO.pf.leave_pc_center(city=self.city)
 
     def teleport_and_heal(self, city: str):
         self.pokeMMO.roleController.use_teleport()
@@ -44,11 +45,11 @@ class Farming_FALLARBOR_TOWN:
 
         if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
             result = self.pokeMMO.roleController.fly_to_city(
-                "FALLARBOR_TOWN", locate_teleport=True
+                self.city, locate_teleport=True
             )
             if result:
                 print("飞走成功")
-                self.leave_pc_center_and_go_farm(city="FALLARBOR_TOWN")
+                self.leave_pc_center_and_go_farm()
             else:
                 raise Exception("飞不走")
         else:
@@ -73,8 +74,8 @@ class Farming_FALLARBOR_TOWN:
                     farming_times += 1
                     if farming_times >= repeat_times:
                         return
-                    self.teleport_and_heal(city="FALLARBOR_TOWN")
-                    self.leave_pc_center_and_go_farm(city="FALLARBOR_TOWN")
+                    self.teleport_and_heal(city=self.city)
+                    self.leave_pc_center_and_go_farm(city=self.city)
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
                 if (
@@ -88,7 +89,7 @@ class Farming_FALLARBOR_TOWN:
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,
                     end_face_dir=None,
-                    city="FALLARBOR_TOWN",
+                    city=self.city,
                     style="farming",  # 编号66
                 )
 

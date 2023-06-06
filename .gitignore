@@ -165,6 +165,6 @@ screenshot/*
 
 logs/*
 
-battle_memory_injector.json
-injector_memory.json
-mj_my_sprites.json
+utils/memory_injection/memory_injector_battle_info.json
+utils/memory_injection/memory_injector_coords.json
+utils/memory_injection/memory_injector_my_sprites.json

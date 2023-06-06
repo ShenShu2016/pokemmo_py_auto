@@ -16,15 +16,15 @@ from auto_strategy.SOOTOPOLIS_CITY_FARMING import Farming_SOOTOPOLIS_CITY
 from enemy_status import EnemyStatus
 from game_status import GameStatus
 from log_print_save import LogPrintSave
-from memory_injection.memory_injector_battle_info import MemoryInjector_BattleInfo
-from memory_injection.memory_injector_coords import MemoryInjector_Coords
-from memory_injection.memory_injector_my_sprites import MemoryInjector_MySprites
 from path_finder import PathFinder
 from pokemmoUI import PokemmoUI
 from role_controller import RoleController
-from utils.main.controller import Controller
-from utils.main.window_manager import Window_Manager
-from utils.main.word_recognizer import Word_Recognizer
+from utils.controller import Controller
+from utils.memory_injection.memory_injector_battle_info import MemoryInjector_BattleInfo
+from utils.memory_injection.memory_injector_coords import MemoryInjector_Coords
+from utils.memory_injection.memory_injector_my_sprites import MemoryInjector_MySprites
+from utils.window_manager import Window_Manager
+from utils.word_recognizer import Word_Recognizer
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)

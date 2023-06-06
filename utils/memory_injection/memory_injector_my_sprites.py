@@ -1,7 +1,7 @@
 import os
 import sys
 
-root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root_path)
 
 import json
@@ -12,7 +12,7 @@ import pymem
 from capstone import *
 from pymem.pattern import pattern_scan_all
 
-from utils.main.window_manager import Window_Manager
+from utils.window_manager import Window_Manager
 
 
 def format_address(address, length=8):
@@ -93,14 +93,14 @@ class MemoryInjector_MySprites:
     def __init__(self):
         self.target_process = "javaw.exe"
         self.pattern = b"\\x8B\\x5B\\x0C\\x3B\\xD8"
-        self.process_name = "mj_my_sprites"
+        self.process_name = "memory_injector_my_sprites"
         self.offset = 0
         self.window_id = Window_Manager().get_window_id()
         self.pm = pymem.Pymem(self.target_process)
         self.team_dict = {}
 
         # Adding a path to your json file
-        self.json_file_path = r"mj_my_sprites.json"
+        self.json_file_path = r"utils\memory_injection\memory_injector_my_sprites.json"
         self.aob_hex_list_len = 5  # 注入那条指令的长度
         self.aob_address_list = []
         self.aob_hex_list = []

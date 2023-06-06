@@ -1,7 +1,7 @@
 import os
 import sys
 
-root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root_path)
 
 import json
@@ -73,7 +73,7 @@ class MemoryInjector_Coords:
         self.memory_info_dict = {}
 
         # Adding a path to your json file
-        self.json_file_path = "injector_memory.json"
+        self.json_file_path = r"utils\memory_injection\memory_injector_coords.json"
 
         self.aob_address_list = []
         self.aob_hex_list = []
