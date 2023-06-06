@@ -238,7 +238,9 @@ class Action_Controller:
     @synchronized
     def use_teleport(self):
         game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"][2] == 50:
+        if game_status["map_number_tuple"][2] == 50 or game_status[
+            "map_number_tuple"
+        ] == (1, 14, 76):
             self.pokeMMO.controller.key_press("8")
             sleep(3)
         game_status = self.pokeMMO.get_game_status()

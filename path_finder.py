@@ -345,9 +345,10 @@ class PathFinder:
         game_status = self.pokeMMO.get_game_status()
 
         transport = None
-        if game_status["map_number_tuple"][2] == [50, 76] and game_status[
-            "transport"
-        ] not in [1, 11]:
+        if (
+            game_status["map_number_tuple"][2] == 50
+            or game_status["map_number_tuple"] == ((1, 14, 76))
+        ) and game_status["transport"] not in [1, 11]:
             transport = "bike"
             if game_status["transport"] != 10:
                 self.pokeMMO.controller.key_press("3", 0.1)

@@ -67,7 +67,7 @@ class Farming_BATTLE_FRONTINER:
         # 冲浪
         self.pokeMMO.action_controller.use_surf()
 
-    def teleport_and_heal(self, city: str):
+    def teleport_and_heal(self):
         self.pokeMMO.action_controller.use_teleport()
         self.pokeMMO.action_controller.talk_to_nurse()
 
@@ -102,8 +102,8 @@ class Farming_BATTLE_FRONTINER:
                     farming_times += 1
                     if farming_times >= repeat_times:
                         return
-                    self.teleport_and_heal(city=self.city)
-                    self.leave_pc_center_and_go_farm(city=self.city)  # 应该已经到了湖里了
+                    self.teleport_and_heal()
+                    self.leave_pc_center_and_go_farm()  # 应该已经到了湖里了
 
                 self.pokeMMO.action_controller.use_sweet_sent()
 
