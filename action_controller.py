@@ -27,7 +27,7 @@ def calculate_catch_rate(
     return final_catch_rate
 
 
-class RoleController:
+class Action_Controller:
     def __init__(self, pokeMMO: PokeMMO):
         self.pokeMMO = pokeMMO
         self.my_recent_actions_list = deque(maxlen=1000)
@@ -241,4 +241,4 @@ if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-    pokeMMO.roleController.talk_to_nurse()
+    pokeMMO.action_controller.talk_to_nurse()

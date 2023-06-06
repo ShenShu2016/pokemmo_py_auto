@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pytesseract
 
+from action_controller import Action_Controller
 from auto_strategy.FALLARBOR_TOWN_FARMING import Farming_FALLARBOR_TOWN
 from auto_strategy.PETALBURG_CITY_FARMING import Farming_PETALBURG_CITY
 from auto_strategy.SOOTOPOLIS_CITY_FARMING import Farming_SOOTOPOLIS_CITY
@@ -18,7 +19,6 @@ from game_status import GameStatus
 from log_print_save import LogPrintSave
 from path_finder import PathFinder
 from pokemmoUI import PokemmoUI
-from role_controller import RoleController
 from utils.controller import Controller
 from utils.memory_injection.memory_injector_battle_info import MemoryInjector_BattleInfo
 from utils.memory_injection.memory_injector_coords import MemoryInjector_Coords
@@ -71,7 +71,7 @@ class PokeMMO:
 
         self.controller = Controller(handle=self.handle)
 
-        self.roleController = RoleController(self)
+        self.action_controller = Action_Controller(self)
         self.word_recognizer = Word_Recognizer()
         self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
@@ -386,7 +386,7 @@ if __name__ == "__main__":
 
     # time.sleep(6)
     # while True:
-    #     pokeMMO.roleController.close_pokemon_summary(pokeMMO.get_game_status())
+    #     pokeMMO.action_controller.close_pokemon_summary(pokeMMO.get_game_status())
     #     time.sleep(1)
 
     # while True:

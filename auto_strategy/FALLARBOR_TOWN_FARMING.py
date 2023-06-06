@@ -36,15 +36,15 @@ class Farming_FALLARBOR_TOWN:
         self.pokeMMO.pf.leave_pc_center(city=self.city)
 
     def teleport_and_heal(self, city: str):
-        self.pokeMMO.roleController.use_teleport()
-        self.pokeMMO.roleController.talk_to_nurse()  # teleport 就直接面对护士了
+        self.pokeMMO.action_controller.use_teleport()
+        self.pokeMMO.action_controller.talk_to_nurse()  # teleport 就直接面对护士了
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
         time.sleep(1)
 
         if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
-            result = self.pokeMMO.roleController.fly_to_city(
+            result = self.pokeMMO.action_controller.fly_to_city(
                 self.city, locate_teleport=True
             )
             if result:
@@ -66,7 +66,7 @@ class Farming_FALLARBOR_TOWN:
                     self.pokeMMO.get_game_status()
                 )
                 if game_status.get("check_battle_end_pokemon_caught")[0]:
-                    self.pokeMMO.roleController.close_pokemon_summary(game_status)
+                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
                 if (game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
                     or game_status["sprite_dict"]["Spore"]["pp"] <= 3
@@ -83,7 +83,7 @@ class Farming_FALLARBOR_TOWN:
                     game_status["y_coords"],
                 ) in self.marked_coords:
                     # Trigger the desired operation
-                    self.pokeMMO.roleController.use_sweet_sent()
+                    self.pokeMMO.action_controller.use_sweet_sent()
                     # pass
 
                 self.pokeMMO.pf.go_somewhere(
@@ -100,7 +100,7 @@ class Farming_FALLARBOR_TOWN:
                 if self.pokeMMO.get_game_status().get(
                     "check_battle_end_pokemon_caught"
                 )[0]:
-                    self.pokeMMO.roleController.close_pokemon_summary(game_status)
+                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
 
                 if (
                     game_status["return_status"] == 21
@@ -108,28 +108,28 @@ class Farming_FALLARBOR_TOWN:
                 ):
                     if enemy_status.get("enemy_1_info")["CatchMethod"] == 1:
                         if enemy_status.get("enemy_1_hp_pct") >= 20:
-                            self.pokeMMO.roleController.fight_skill_1_from_s21()
+                            self.pokeMMO.action_controller.fight_skill_1_from_s21()
 
                         elif enemy_status.get("enemy_1_hp_pct") < 20:
-                            self.pokeMMO.roleController.throw_pokeball()
+                            self.pokeMMO.action_controller.throw_pokeball()
 
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 2:
                         if enemy_status.get("enemy_1_hp_pct") >= 20:
-                            self.pokeMMO.roleController.fight_skill_1_from_s21()
+                            self.pokeMMO.action_controller.fight_skill_1_from_s21()
 
                         elif (
                             enemy_status.get("enemy_1_hp_pct") < 20
                             and enemy_status.get("enemy_1_sleeping") == False
                         ):
-                            self.pokeMMO.roleController.fight_skill_2_from_s21()  # Spore
+                            self.pokeMMO.action_controller.fight_skill_2_from_s21()  # Spore
 
                         elif (
                             enemy_status.get("enemy_1_hp_pct") < 20
                             and enemy_status.get("enemy_1_sleeping") == True
                         ):
-                            self.pokeMMO.roleController.throw_pokeball()
+                            self.pokeMMO.action_controller.throw_pokeball()
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 0:
-                        self.pokeMMO.roleController.run_from_s21()
+                        self.pokeMMO.action_controller.run_from_s21()
 
                 elif (
                     game_status["return_status"] == 21
@@ -138,7 +138,7 @@ class Farming_FALLARBOR_TOWN:
                     and enemy_status.get("enemy_3_info") is not None
                     and enemy_status.get("enemy_4_info") is not None
                 ):
-                    self.pokeMMO.roleController.run_from_s21()
+                    self.pokeMMO.action_controller.run_from_s21()
 
                 elif (
                     game_status["return_status"] == 21
@@ -149,7 +149,7 @@ class Farming_FALLARBOR_TOWN:
                     and enemy_status.get("enemy_5_info") is not None
                     and enemy_status.get("enemy_6_info") is not None
                 ):
-                    self.pokeMMO.roleController.run_from_s21()
+                    self.pokeMMO.action_controller.run_from_s21()
 
                 if game_status["return_status"] == 1:
                     break
