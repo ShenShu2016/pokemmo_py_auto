@@ -68,4 +68,12 @@ city_info = {
             (6, 8, 0),
         ],
     },
+    "BATTLE_FRONTIER": {
+        "town_map_coords": (860, 530),
+        "map_number": (1, 14, 76),
+        "112": (3, 52, 1),
+        "112_map_number": (1, 53, 76),
+        "112_nurse": (7, 4, 1),  # x,y,dir
+        "112_out": [(7, 8, 0), (6, 8, 0)],
+    },
 }

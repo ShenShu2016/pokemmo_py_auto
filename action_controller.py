@@ -66,6 +66,17 @@ class Action_Controller:
         print("Using False Swipe")
 
     @synchronized
+    def multi_fight_skill_1_from_s21(self):  # 地震
+        self.pokeMMO.controller.click(314, 508, tolerance=0)
+        self.pokeMMO.controller.key_press("z", 0.2)
+        self.pokeMMO.controller.key_press("z", 0.2)
+        self.my_recent_actions_list.append(
+            ("multi_fight_skill_1_from_s21", time.time())
+        )
+        sleep(5)
+        print("Using Earthquake")
+
+    @synchronized
     def fight_skill_2_from_s21(self):  # Spore
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("d", 0.2)
@@ -211,7 +222,7 @@ class Action_Controller:
     @synchronized
     def use_bike(self):
         game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"][2] == 50 and game_status[
+        if game_status["map_number_tuple"][2] in [50, 76] and game_status[
             "transport"
         ] not in [
             1,

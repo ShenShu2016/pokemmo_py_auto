@@ -17,6 +17,7 @@
     "Pokemon_Summary_Exit_Button_path": "asserts/template\\Pokemon_Summary_Exit_Button.png",
     "poke_ball_path": "asserts/template\\poke_ball.png",
     "ultra_ball_path": "asserts/template\\ultra_ball.png",
+    "BATTLE_FRONTIER_coords_tracking_path": "asserts/coords_tracking\\BATTLE_FRONTIER_coords_tracking.csv",
     "FALLARBOR_TOWN_coords_tracking_path": "asserts/coords_tracking\\FALLARBOR_TOWN_coords_tracking.csv",
     "PETALBURG_CITY_coords_tracking_path": "asserts/coords_tracking\\PETALBURG_CITY_coords_tracking.csv",
     "SOOTOPOLIS_CITY_coords_tracking_path": "asserts/coords_tracking\\SOOTOPOLIS_CITY_coords_tracking.csv"
