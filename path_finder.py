@@ -182,81 +182,53 @@ class PathFinder:
         return result
 
     def go_somewhere(
-        self,
-        end_point=None,
-        city="SOOTOPOLIS_CITY",
-        style=None,
-        end_face_dir=None,
+        self, end_point=None, city="SOOTOPOLIS_CITY", style=None, end_face_dir=None
     ):  # style random_end_point,solid_end_point
-        # Reset the index if it's not a continuous integer sequence starting from 0
-
         df = self.pokeMMO.df_dict[f"{city}_coords_tracking_csv"]
-        # print(df)
-
         df = df.reset_index(drop=True)
+
+        # Convert coords to integer and shift to non-negative range
         df["x_coords"] = df["x_coords"].astype(int)
         df["y_coords"] = df["y_coords"].astype(int)
-
-        print(df)
-        # 计算最小坐标值
         min_x = df["x_coords"].min()
         min_y = df["y_coords"].min()
-        # 将所有坐标转换为非负数
         df["x_coords"] -= min_x
         df["y_coords"] -= min_y
 
-        # 确定网格的大小
+        # Define grid size
         self.max_x = df["x_coords"].max() + 1
         self.max_y = df["y_coords"].max() + 1
-
-        # 创建网格，所有元素默认为障碍物（0表示障碍物）
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
-        if style == "farming":
-            self.grid[
-                df[(df["mark"] == 1) | (df["mark"] == 2) | (df["mark"] == 66)][
-                    "y_coords"
-                ],
-                df[(df["mark"] == 1) | (df["mark"] == 2) | (df["mark"] == 66)][
-                    "x_coords"
-                ],
-            ] = 1  #!地图上1表示可以farming区域
 
-        else:
-            # 设置可走的区域
-            self.grid[
-                df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)][
-                    "y_coords"
-                ],
-                df[(df["mark"] == 3) | (df["mark"] == 4) | (df["mark"] == 112)][
-                    "x_coords"
-                ],
-            ] = 1
-        print("网格数据：")
-        print(self.grid)
+        # Set walkable area based on style
+        walkable_markers = [1, 2, 66] if style == "farming" else [3, 4, 112]
+        for marker in walkable_markers:
+            mask = df["mark"] == marker
+            self.grid[df[mask]["y_coords"], df[mask]["x_coords"]] = 1
+
+        print("网格数据：\n", self.grid)
+
+        offset_func_mapping = {
+            "PETALBURG_CITY": add_x_y_coords_offset_PETALBURG_CITY,
+            "FALLARBOR_TOWN": add_x_y_coords_offset_FALLARBOR_TOWN,
+            "VERDANTURF_TOWN": add_x_y_coords_offset_VERDANTURF_TOWN,
+        }
+        offset_func = offset_func_mapping.get(city, lambda x: x)
 
         while True:
             game_status = self.pokeMMO.get_game_status()
-
-            if city == "PETALBURG_CITY":
-                game_status_with_offset = add_x_y_coords_offset_PETALBURG_CITY(
-                    game_status
+            game_status_with_offset = offset_func(game_status)
+            if style == "farming":
+                random_row = df[df["mark"] == 66].sample(n=1)
+                end_point = (
+                    random_row["y_coords"].values[0],
+                    random_row["x_coords"].values[0],
                 )
 
-            elif city == "FALLARBOR_TOWN":
-                game_status_with_offset = add_x_y_coords_offset_FALLARBOR_TOWN(
-                    game_status
-                )
-            elif city == "VERDANTURF_TOWN":
-                print("进来了吗")
-                game_status_with_offset = add_x_y_coords_offset_VERDANTURF_TOWN(
-                    game_status
-                )
-            else:
-                game_status_with_offset = game_status
-
+            # If end_point is reached or enters battle, break the loop
             if (
-                game_status_with_offset["x_coords"] == end_point[1]
-                and game_status_with_offset["y_coords"] == end_point[0]
+                game_status_with_offset["x_coords"] - min_x == end_point[1]
+                and game_status_with_offset["y_coords"] - min_y == end_point[0]
             ):
                 break
             if (
@@ -264,22 +236,16 @@ class PathFinder:
             ):  # 进入战斗了
                 break
 
+            # Update start_point and end_point if farming
             start_point = (
                 game_status_with_offset["y_coords"] - min_y,
                 game_status_with_offset["x_coords"] - min_x,
             )
-            if style == "farming":
-                random_row = df[df["mark"] == 66].sample(n=1)
-                y = random_row["y_coords"].values[0]
-                x = random_row["x_coords"].values[0]
-                end_point = (y, x)
+
             print(f"当前开始坐标: {start_point}, 网格大小: {(self.max_y, self.max_x)}")
-            print(
-                "start_point",
-                (start_point[1], start_point[0]),
-                "end_point",
-                (end_point[1], end_point[0]),
-            )
+            print("start_point", start_point, "end_point", end_point)
+
+            # Find path if start_point is within grid
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
                 print("开始坐标在网格范围内，开始寻找路径...")
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
@@ -288,8 +254,6 @@ class PathFinder:
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
             time.sleep(0.1)
-
-        # return self.try_to_find_known_grid(start_point, end_point)
 
     def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
         while True:

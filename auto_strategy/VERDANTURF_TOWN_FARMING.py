@@ -21,12 +21,14 @@ def add_x_y_coords_offset_VERDANTURF_TOWN(game_status):
 class Farming_VERDANTURF_TOWN:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
+        self.city = "VERDANTURF_TOWN"
         self.my_df = self.pokeMMO.df_dict["VERDANTURF_TOWN_coords_tracking_csv"]
 
-    def leave_pc_center_and_go_farm(self, city="VERDANTURF_TOWN"):
-        self.pokeMMO.pf.leave_pc_center(city=city)
+    def leave_pc_center_and_go_farm(self):
+        self.pokeMMO.pf.leave_pc_center(city=self.city)
 
-    def teleport_and_heal(self, city: str):
+    def teleport_and_heal(self):
+        self.pokeMMO.action_controller.use_dig()
         self.pokeMMO.action_controller.use_teleport()
         self.pokeMMO.action_controller.talk_to_nurse()  # teleport 就直接面对护士了
 
@@ -36,11 +38,11 @@ class Farming_VERDANTURF_TOWN:
 
         if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
             result = self.pokeMMO.action_controller.fly_to_city(
-                "VERDANTURF_TOWN", locate_teleport=True
+                self.city, locate_teleport=True
             )
             if result:
                 print("飞走成功")
-                self.leave_pc_center_and_go_farm(city="VERDANTURF_TOWN")
+                self.leave_pc_center_and_go_farm()
             else:
                 raise Exception("飞不走")
         else:
@@ -83,7 +85,7 @@ class Farming_VERDANTURF_TOWN:
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,
                     end_face_dir=None,
-                    city="VERDANTURF_TOWN",
+                    city=self.city,
                     style="farming",  # 编号66
                 )
 
