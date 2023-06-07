@@ -22,7 +22,14 @@ class Farming_VERDANTURF_TOWN:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
         self.city = "VERDANTURF_TOWN"
-        self.my_df = self.pokeMMO.df_dict["VERDANTURF_TOWN_coords_tracking_csv"]
+        self.my_df = self.pokeMMO.df_dict[f"{self.city}_coords_tracking_csv"]
+        self.farming_coords = [
+            (x, y)
+            for x, y, mark in zip(
+                self.my_df["x_coords"], self.my_df["y_coords"], self.my_df["mark"]
+            )
+            if mark == 66
+        ]
 
     def leave_pc_center_and_go_farm(self):
         self.pokeMMO.pf.leave_pc_center(city=self.city)
@@ -72,15 +79,14 @@ class Farming_VERDANTURF_TOWN:
                     self.teleport_and_heal(city="VERDANTURF_TOWN")
                     self.leave_pc_center_and_go_farm(city="VERDANTURF_TOWN")
 
-                min_x, max_x, min_y, max_y = 22, 41, 12, 16
-
+                # Check if there are any rows where both x_coords and y_coords are equal to 66
                 if (
-                    (game_status["x_coords"] >= min_x)
-                    and (game_status["x_coords"] <= max_x)
-                    and (game_status["y_coords"] >= min_y)
-                    and (game_status["y_coords"] <= max_y)
-                ):
+                    game_status["x_coords"],
+                    game_status["y_coords"],
+                ) in self.farming_coords:
+                    # Trigger the desired operation
                     self.pokeMMO.action_controller.use_sweet_sent()
+                    # pass
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,

@@ -8,10 +8,16 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 
+def add_x_y_coords_offset_SOOTOPOLIS_CITY(game_status):
+    game_status_copy = game_status.copy()  # Create a copy of the game_status
+    return game_status_copy  # Return the modified copy
+
+
 class Farming_SOOTOPOLIS_CITY:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
-        self.my_df = self.pokeMMO.df_dict["SOOTOPOLIS_CITY_coords_tracking_csv"]
+        self.city = "SOOTOPOLIS_CITY"
+        self.my_df = self.pokeMMO.df_dict[f"{self.city}_coords_tracking_csv"]
         self.lake_edge_df = self.my_df[
             self.my_df["mark"] == 3
         ].copy()  # Create a copy of the filtered DataFrame
@@ -46,20 +52,20 @@ class Farming_SOOTOPOLIS_CITY:
                 return face_dir
         return None  # Return None if no lake is around
 
-    def leave_pc_center_and_go_farm(self, city="SOOTOPOLIS_CITY"):
-        self.pokeMMO.pf.leave_pc_center(city=city)
+    def leave_pc_center_and_go_farm(self):
+        self.pokeMMO.pf.leave_pc_center(city=self.city)
         # 去湖边
         my_edge_choice = random.choice(self.lake_edge_face_dir_list)
         self.pokeMMO.pf.go_somewhere(
             end_point=(my_edge_choice[0], my_edge_choice[1]),
             end_face_dir=my_edge_choice[2],
-            city=city,
+            city=self.city,
         )
 
         # 冲浪
         self.pokeMMO.action_controller.use_surf()
 
-    def teleport_and_heal(self, city: str):
+    def teleport_and_heal(self):
         self.pokeMMO.action_controller.use_teleport()
         self.pokeMMO.action_controller.talk_to_nurse()
 
@@ -73,7 +79,7 @@ class Farming_SOOTOPOLIS_CITY:
             )
             if result:
                 print("飞走成功")
-                self.leave_pc_center_and_go_farm(city="SOOTOPOLIS_CITY")
+                self.leave_pc_center_and_go_farm()
             else:
                 raise Exception("飞不走")
         else:

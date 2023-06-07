@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
 from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
+from auto_strategy.SOOTOPOLIS_CITY_FARMING import add_x_y_coords_offset_SOOTOPOLIS_CITY
 from auto_strategy.VERDANTURF_TOWN_FARMING import add_x_y_coords_offset_VERDANTURF_TOWN
 
 if TYPE_CHECKING:
@@ -85,7 +86,7 @@ class PathFinder:
         return None
 
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
-        transport_speed = {"bike": 0.1, "walk": 0.25, "run": 0.2, "surf": 0.1}
+        transport_speed = {"bike": 0.08, "walk": 0.25, "run": 0.2, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.3, "run": 0.0, "surf": 0.0}  # 启动延迟
         game_state = self.pokeMMO.get_game_status()
         current_face_dir = game_state["face_dir"]
@@ -194,7 +195,8 @@ class PathFinder:
         min_y = df["y_coords"].min()
         df["x_coords"] -= min_x
         df["y_coords"] -= min_y
-
+        if end_point is not None:
+            end_point = (end_point[0] - min_y, end_point[1] - min_x)
         # Define grid size
         self.max_x = df["x_coords"].max() + 1
         self.max_y = df["y_coords"].max() + 1
@@ -212,6 +214,7 @@ class PathFinder:
             "PETALBURG_CITY": add_x_y_coords_offset_PETALBURG_CITY,
             "FALLARBOR_TOWN": add_x_y_coords_offset_FALLARBOR_TOWN,
             "VERDANTURF_TOWN": add_x_y_coords_offset_VERDANTURF_TOWN,
+            "SOOTOPOLIS_CITY": add_x_y_coords_offset_SOOTOPOLIS_CITY,
         }
         offset_func = offset_func_mapping.get(city, lambda x: x)
 

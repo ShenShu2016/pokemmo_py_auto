@@ -14,6 +14,7 @@ from action_controller import Action_Controller
 from auto_strategy.FALLARBOR_TOWN_FARMING import Farming_FALLARBOR_TOWN
 from auto_strategy.PETALBURG_CITY_FARMING import Farming_PETALBURG_CITY
 from auto_strategy.SOOTOPOLIS_CITY_FARMING import Farming_SOOTOPOLIS_CITY
+from auto_strategy.VERDANTURF_TOWN_FARMING import Farming_VERDANTURF_TOWN
 from enemy_status import EnemyStatus
 from game_status import GameStatus
 from log_print_save import LogPrintSave
@@ -83,6 +84,7 @@ class PokeMMO:
         self.PETALBURG_CITY_FARMING = Farming_PETALBURG_CITY(self)
         self.SOOTOPOLIS_CITY_FARMING = Farming_SOOTOPOLIS_CITY(self)
         self.FALLARBOR_TOWN_FARMING = Farming_FALLARBOR_TOWN(self)
+        self.VERDANTURF_TOWN_FARMING = Farming_VERDANTURF_TOWN(self)
 
         self.start_threads()
 
@@ -389,12 +391,33 @@ if __name__ == "__main__":
     #     pokeMMO.action_controller.close_pokemon_summary(pokeMMO.get_game_status())
     #     time.sleep(1)
 
-    # while True:
-    #     pokeMMO.SOOTOPOLIS_CITY_FARMING.run(repeat_times=1)
-    #     time.sleep(1)
-    #     pokeMMO.FALLARBOR_TOWN_FARMING.run(repeat_times=1)
-    #     time.sleep(1)
-    #     pokeMMO.PETALBURG_CITY_FARMING.run(repeat_times=1)
-    #     time.sleep(1)
-    #     pokeMMO.FALLARBOR_TOWN_FARMING.run(repeat_times=1)
-    #     time.sleep(1)
+    import random
+    import time
+
+    locations = {
+        "SOOTOPOLIS_CITY": 10,
+        "FALLARBOR_TOWN": 30,
+        "PETALBURG_CITY": 10,
+        "VERDANTURF_TOWN": 40,
+    }
+    previous_location = None
+
+    while True:
+        if previous_location is not None:
+            available_locations = locations.copy()
+            del available_locations[previous_location]  # 移除上一次地点
+            total_weight = sum(available_locations.values())
+            probabilities = [
+                weight / total_weight for weight in available_locations.values()
+            ]
+            next_location = random.choices(
+                list(available_locations.keys()), probabilities
+            )[0]
+        else:
+            next_location = random.choices(
+                list(locations.keys()), list(locations.values())
+            )[0]
+
+        getattr(pokeMMO, f"{next_location}_FARMING").run(repeat_times=1)
+        time.sleep(1)
+        previous_location = next_location
