@@ -186,7 +186,7 @@ class Action_Controller:
                 self.pokeMMO.controller.key_press("w", 1)
                 time.sleep(2)
                 print("going to find nurse")
-                self.pokeMMO.pf.go_to_nurse(city="SOOTOPOLIS_CITY")
+                self.pokeMMO.pf.go_to_nurse(city=city)
                 self.talk_to_nurse()
                 return True
             else:

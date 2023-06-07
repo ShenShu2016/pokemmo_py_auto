@@ -75,6 +75,8 @@ class Farming_VERDANTURF_TOWN:
                 ):
                     farming_times += 1
                     if farming_times >= repeat_times:
+                        self.pokeMMO.action_controller.use_dig()
+                        time.sleep(1)
                         return
                     self.teleport_and_heal(city="VERDANTURF_TOWN")
                     self.leave_pc_center_and_go_farm(city="VERDANTURF_TOWN")
