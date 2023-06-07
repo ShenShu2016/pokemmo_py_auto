@@ -198,6 +198,12 @@ class PathFinder:
         df["y_coords"] = df["y_coords"].astype(int)
 
         print(df)
+        # 计算最小坐标值
+        min_x = df["x_coords"].min()
+        min_y = df["y_coords"].min()
+        # 将所有坐标转换为非负数
+        df["x_coords"] -= min_x
+        df["y_coords"] -= min_y
 
         # 确定网格的大小
         self.max_x = df["x_coords"].max() + 1
@@ -214,11 +220,6 @@ class PathFinder:
                     "x_coords"
                 ],
             ] = 1  #!地图上1表示可以farming区域
-
-            random_row = df[df["mark"] == 66].sample(n=1)
-            y = random_row["y_coords"].values[0]
-            x = random_row["x_coords"].values[0]
-            end_point = (y, x)
 
         else:
             # 设置可走的区域
@@ -264,9 +265,14 @@ class PathFinder:
                 break
 
             start_point = (
-                game_status_with_offset["y_coords"],
-                game_status_with_offset["x_coords"],
+                game_status_with_offset["y_coords"] - min_y,
+                game_status_with_offset["x_coords"] - min_x,
             )
+            if style == "farming":
+                random_row = df[df["mark"] == 66].sample(n=1)
+                y = random_row["y_coords"].values[0]
+                x = random_row["x_coords"].values[0]
+                end_point = (y, x)
             print(f"当前开始坐标: {start_point}, 网格大小: {(self.max_y, self.max_x)}")
             print(
                 "start_point",
@@ -281,7 +287,7 @@ class PathFinder:
                 self.pf_move(end_face_dir=end_face_dir)
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
-            time.sleep(30)
+            time.sleep(0.1)
 
         # return self.try_to_find_known_grid(start_point, end_point)
 
