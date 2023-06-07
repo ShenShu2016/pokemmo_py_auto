@@ -20,5 +20,6 @@
     "BATTLE_FRONTIER_coords_tracking_path": "asserts/coords_tracking\\BATTLE_FRONTIER_coords_tracking.csv",
     "FALLARBOR_TOWN_coords_tracking_path": "asserts/coords_tracking\\FALLARBOR_TOWN_coords_tracking.csv",
     "PETALBURG_CITY_coords_tracking_path": "asserts/coords_tracking\\PETALBURG_CITY_coords_tracking.csv",
-    "SOOTOPOLIS_CITY_coords_tracking_path": "asserts/coords_tracking\\SOOTOPOLIS_CITY_coords_tracking.csv"
+    "SOOTOPOLIS_CITY_coords_tracking_path": "asserts/coords_tracking\\SOOTOPOLIS_CITY_coords_tracking.csv",
+    "VERDANTURF_TOWN_coords_tracking_path": "asserts/coords_tracking\\VERDANTURF_TOWN_coords_tracking.csv"
 }

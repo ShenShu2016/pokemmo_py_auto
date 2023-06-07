@@ -51,10 +51,7 @@ city_info = {
         "112": (14, 8, 1),
         "112_map_number": (1, 4, 55),
         "112_nurse": (7, 4, 1),  # x,y,dir
-        "112_out": [
-            (7, 8, 0),
-            (6, 8, 0),
-        ],
+        "112_out": [(7, 8, 0), (6, 8, 0)],
         "coords_tracking_ready": False,
     },
     "PETALBURG_CITY": {
@@ -63,16 +60,21 @@ city_info = {
         "112": (20, 17, 1),
         "112_map_number": (1, 4, 58),
         "112_nurse": (7, 4, 1),  # x,y,dir
-        "112_out": [
-            (7, 8, 0),
-            (6, 8, 0),
-        ],
+        "112_out": [(7, 8, 0), (6, 8, 0)],
     },
     "BATTLE_FRONTIER": {
         "town_map_coords": (860, 530),
         "map_number": (1, 14, 76),
         "112": (3, 52, 1),
         "112_map_number": (1, 53, 76),
+        "112_nurse": (7, 4, 1),  # x,y,dir
+        "112_out": [(7, 8, 0), (6, 8, 0)],
+    },
+    "VERDANTURF_TOWN": {
+        "town_map_coords": (424, 383),
+        "map_number": (1, 14, 50),
+        "112": (16, 4, 1),
+        "112_map_number": (1, 4, 56),
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
     },

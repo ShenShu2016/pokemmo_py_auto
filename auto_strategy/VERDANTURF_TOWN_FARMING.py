@@ -7,33 +7,24 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 
-def add_x_y_coords_offset_FALLARBOR_TOWN(game_status):
+def add_x_y_coords_offset_VERDANTURF_TOWN(game_status):
     game_status_copy = game_status.copy()  # Create a copy of the game_status
-    if game_status_copy["map_number_tuple"][1] == 28:
-        game_status_copy["x_coords"] = game_status_copy["x_coords"] + 20
-    elif game_status_copy["map_number_tuple"][1] == 29:
-        game_status_copy["x_coords"] = game_status_copy["x_coords"] - 40
+    if game_status_copy["map_number_tuple"] == (1, 4, 74):
+        game_status_copy["x_coords"] = game_status_copy["x_coords"] - 21
+        game_status_copy["y_coords"] = game_status_copy["y_coords"] - 16
 
     else:
         pass
     return game_status_copy  # Return the modified copy
 
 
-class Farming_FALLARBOR_TOWN:
+class Farming_VERDANTURF_TOWN:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.pokeMMO = pokeMMO_instance
-        self.city = "FALLARBOR_TOWN"
-        self.my_df = self.pokeMMO.df_dict["FALLARBOR_TOWN_coords_tracking_csv"]
-        self.farming_coords = [
-            (x, y)
-            for x, y, mark in zip(
-                self.my_df["x_coords"], self.my_df["y_coords"], self.my_df["mark"]
-            )
-            if mark == 66
-        ]
+        self.my_df = self.pokeMMO.df_dict["VERDANTURF_TOWN_coords_tracking_csv"]
 
-    def leave_pc_center_and_go_farm(self):
-        self.pokeMMO.pf.leave_pc_center(city=self.city)
+    def leave_pc_center_and_go_farm(self, city="VERDANTURF_TOWN"):
+        self.pokeMMO.pf.leave_pc_center(city=city)
 
     def teleport_and_heal(self, city: str):
         self.pokeMMO.action_controller.use_teleport()
@@ -45,11 +36,11 @@ class Farming_FALLARBOR_TOWN:
 
         if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
             result = self.pokeMMO.action_controller.fly_to_city(
-                self.city, locate_teleport=True
+                "VERDANTURF_TOWN", locate_teleport=True
             )
             if result:
                 print("飞走成功")
-                self.leave_pc_center_and_go_farm()
+                self.leave_pc_center_and_go_farm(city="VERDANTURF_TOWN")
             else:
                 raise Exception("飞不走")
         else:
@@ -62,34 +53,37 @@ class Farming_FALLARBOR_TOWN:
         while True:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
-                game_status = add_x_y_coords_offset_FALLARBOR_TOWN(
+                game_status = add_x_y_coords_offset_VERDANTURF_TOWN(
                     self.pokeMMO.get_game_status()
                 )
-                if game_status.get("check_battle_end_pokemon_caught")[0]:
+                if self.pokeMMO.get_game_status().get(
+                    "check_battle_end_pokemon_caught"
+                )[0]:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
                 if (game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
-                    or game_status["sprite_dict"]["Spore"]["pp"] <= 3
+                    or game_status["sprite_dict"]["Spore"]["pp"] <= 2
                 ):
                     farming_times += 1
                     if farming_times >= repeat_times:
                         return
-                    self.teleport_and_heal(city=self.city)
-                    self.leave_pc_center_and_go_farm(city=self.city)
+                    self.teleport_and_heal(city="VERDANTURF_TOWN")
+                    self.leave_pc_center_and_go_farm(city="VERDANTURF_TOWN")
 
-                # Check if there are any rows where both x_coords and y_coords are equal to 66
+                min_x, max_x, min_y, max_y = 22, 41, 12, 16
+
                 if (
-                    game_status["x_coords"],
-                    game_status["y_coords"],
-                ) in self.farming_coords:
-                    # Trigger the desired operation
+                    (game_status["x_coords"] >= min_x)
+                    and (game_status["x_coords"] <= max_x)
+                    and (game_status["y_coords"] >= min_y)
+                    and (game_status["y_coords"] <= max_y)
+                ):
                     self.pokeMMO.action_controller.use_sweet_sent()
-                    # pass
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,
                     end_face_dir=None,
-                    city=self.city,
+                    city="VERDANTURF_TOWN",
                     style="farming",  # 编号66
                 )
 
@@ -165,5 +159,5 @@ if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-    farming = Farming_FALLARBOR_TOWN(pokeMMO)
+    farming = Farming_VERDANTURF_TOWN(pokeMMO)
     farming.run()

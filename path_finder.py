@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
 from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
+from auto_strategy.VERDANTURF_TOWN_FARMING import add_x_y_coords_offset_VERDANTURF_TOWN
 
 if TYPE_CHECKING:
     from main import PokeMMO
@@ -42,6 +43,9 @@ class PathFinder:
                 and self.grid[next_node] == 1
             ):
                 result.append(next_node)
+            else:
+                # print(f"节点 {next_node} 是障碍物或者超出网格边界")
+                pass
         return result
 
     # A*算法
@@ -55,12 +59,14 @@ class PathFinder:
         while heap:
             curr = heapq.heappop(heap)[1]
 
+            # print(f"当前节点: {curr}")  # 打印当前节点
+
             if curr == end:
                 path = []
                 while curr is not None:
                     path.append(curr)
                     curr = parent[curr]
-                return path[::-1][:10]  # 限制最大路径长度为8
+                return path[::-1][:10]  # 限制最大路径长度为10
 
             for next_node in self.neighbors(curr):
                 tentative_g_score = g_score[curr] + 1
@@ -73,6 +79,9 @@ class PathFinder:
                     if next_node not in [i[1] for i in heap]:
                         heapq.heappush(heap, (f_score[next_node], next_node))
 
+                # print(f"检查相邻节点: {next_node}")  # 打印正在检查的相邻节点
+
+        print("完成，没有找到路径")  # 如果没有找到路径，打印消息
         return None
 
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
@@ -172,33 +181,6 @@ class PathFinder:
                 result.append(next_node)
         return result
 
-    # def try_to_find_known_grid(self, start_point, end_point):
-    #     # 以任何方式尝试回到已知的网格，例如，你可以创建一个默认的方向列表
-    #     default_directions = ["w", "d", "s", "a"]  # 上、右、下、左
-    #     keys_and_delays = []
-
-    #     for direction in default_directions:
-    #         next_point = self.get_next_point(start_point, direction)
-    #         if 0 <= next_point[0] < self.max_y and 0 <= next_point[1] < self.max_x:
-    #             # 发现一个可以回到网格的方向
-    #             keys_and_delays.append((direction, 0.1))  # 假设移动一步需要0.1秒
-    #             break
-    #         else:
-    #             # 如果没有发现可以回到网格的方向，也添加当前方向，希望能找到一个出口
-    #             keys_and_delays.append((direction, 0.1))
-
-    #     return keys_and_delays
-
-    # def get_next_point(self, start_point, direction):
-    #     if direction == "w":
-    #         return (start_point[0] - 1, start_point[1])
-    #     elif direction == "s":
-    #         return (start_point[0] + 1, start_point[1])
-    #     elif direction == "a":
-    #         return (start_point[0], start_point[1] - 1)
-    #     elif direction == "d":
-    #         return (start_point[0], start_point[1] + 1)
-
     def go_somewhere(
         self,
         end_point=None,
@@ -209,10 +191,13 @@ class PathFinder:
         # Reset the index if it's not a continuous integer sequence starting from 0
 
         df = self.pokeMMO.df_dict[f"{city}_coords_tracking_csv"]
+        # print(df)
 
         df = df.reset_index(drop=True)
         df["x_coords"] = df["x_coords"].astype(int)
         df["y_coords"] = df["y_coords"].astype(int)
+
+        print(df)
 
         # 确定网格的大小
         self.max_x = df["x_coords"].max() + 1
@@ -245,9 +230,10 @@ class PathFinder:
                     "x_coords"
                 ],
             ] = 1
+        print("网格数据：")
+        print(self.grid)
 
         while True:
-            print("\033[33m" + "-----------------开始寻找路径-----------------" + "\033[33m")
             game_status = self.pokeMMO.get_game_status()
 
             if city == "PETALBURG_CITY":
@@ -257,6 +243,11 @@ class PathFinder:
 
             elif city == "FALLARBOR_TOWN":
                 game_status_with_offset = add_x_y_coords_offset_FALLARBOR_TOWN(
+                    game_status
+                )
+            elif city == "VERDANTURF_TOWN":
+                print("进来了吗")
+                game_status_with_offset = add_x_y_coords_offset_VERDANTURF_TOWN(
                     game_status
                 )
             else:
@@ -276,7 +267,7 @@ class PathFinder:
                 game_status_with_offset["y_coords"],
                 game_status_with_offset["x_coords"],
             )
-
+            print(f"当前开始坐标: {start_point}, 网格大小: {(self.max_y, self.max_x)}")
             print(
                 "start_point",
                 (start_point[1], start_point[0]),
@@ -284,11 +275,13 @@ class PathFinder:
                 (end_point[1], end_point[0]),
             )
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
+                print("开始坐标在网格范围内，开始寻找路径...")
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
                 print("self.path", self.path, "\033[0m")
                 self.pf_move(end_face_dir=end_face_dir)
-            time.sleep(0.1)
-            print("\033[33m" + "-----------------寻找路径结束-----------------" + "\033[0m")
+            else:
+                print("开始坐标不在网格范围内，跳过寻找路径")
+            time.sleep(30)
 
         # return self.try_to_find_known_grid(start_point, end_point)
 
@@ -378,8 +371,8 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
     sleep(1)
     pokeMMO.pf.go_somewhere(
-        end_point=None,
+        # end_point=(10, 16),
         end_face_dir=None,
-        city="FALLARBOR_TOWN",
+        city="VERDANTURF_TOWN",
         style="farming",
     )

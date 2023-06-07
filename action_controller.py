@@ -249,6 +249,18 @@ class Action_Controller:
         else:
             raise Exception("Not in building,还没做完")
 
+    @synchronized
+    def use_dig(self):
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["map_number_tuple"][2] == 74:
+            self.pokeMMO.controller.key_press("9")
+            sleep(5)
+        game_status = self.pokeMMO.get_game_status()
+        if game_status["map_number_tuple"][2] != 74:
+            return True
+        else:
+            raise Exception("Not in building,还没做完")
+
 
 if __name__ == "__main__":
     from main import PokeMMO
