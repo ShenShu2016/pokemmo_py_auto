@@ -1,7 +1,6 @@
 # enemy_status.py
 from __future__ import annotations
 
-import threading
 import time
 from typing import TYPE_CHECKING
 
@@ -16,7 +15,6 @@ if TYPE_CHECKING:
 import heapq
 
 import numpy as np
-import pandas as pd
 
 from constant import city_info
 
@@ -313,7 +311,7 @@ class PathFinder:
         transport = None
         if (
             game_status["map_number_tuple"][2] == 50
-            or game_status["map_number_tuple"] == ((1, 14, 76))
+            or game_status["map_number_tuple"] in [(1, 14, 76), (1, 4, 74)]
         ) and game_status["transport"] not in [1, 11]:
             transport = "bike"
             if game_status["transport"] != 10:
