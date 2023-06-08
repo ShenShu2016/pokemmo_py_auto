@@ -65,7 +65,7 @@ class PathFinder:
                 while curr is not None:
                     path.append(curr)
                     curr = parent[curr]
-                return path[::-1][:10]  # 限制最大路径长度为10
+                return path[::-1]
 
             for next_node in self.neighbors(curr):
                 tentative_g_score = g_score[curr] + 1
@@ -118,7 +118,7 @@ class PathFinder:
             if keys_and_delays and keys_and_delays[-1][0] == key:
                 keys_and_delays[-1] = (
                     key,
-                    round(keys_and_delays[-1][1], 3) + transport_speed[transport],
+                    round(keys_and_delays[-1][1] + transport_speed[transport], 3),
                 )
             else:
                 keys_and_delays.append(
@@ -136,7 +136,7 @@ class PathFinder:
             elif end_face_dir == 3:
                 keys_and_delays.append(("d", 0.1))
 
-        return keys_and_delays
+        return keys_and_delays[:8]
 
     def a_star_no_obstacle(self, start, end):
         self.max_x = max(start[1], end[1]) + 1
@@ -206,7 +206,7 @@ class PathFinder:
             mask = df["mark"] == marker
             self.grid[df[mask]["y_coords"], df[mask]["x_coords"]] = 1
 
-        print("网格数据：\n", self.grid)
+        # print("网格数据：\n", self.grid)
 
         offset_func_mapping = {
             "PETALBURG_CITY": add_x_y_coords_offset_PETALBURG_CITY,
@@ -243,14 +243,14 @@ class PathFinder:
                 game_status_with_offset["x_coords"] - min_x,
             )
 
-            print(f"当前开始坐标: {start_point}, 网格大小: {(self.max_y, self.max_x)}")
-            print("start_point", start_point, "end_point", end_point)
+            # print(f"当前开始坐标: {start_point}, 网格大小: {(self.max_y, self.max_x)}")
+            # print("start_point", start_point, "end_point", end_point)
 
             # Find path if start_point is within grid
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
-                print("开始坐标在网格范围内，开始寻找路径...")
+                # print("开始坐标在网格范围内，开始寻找路径...")
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
-                print("self.path", self.path, "\033[0m")
+                # print("self.path", self.path, "\033[0m")
                 self.pf_move(end_face_dir=end_face_dir)
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
@@ -293,7 +293,7 @@ class PathFinder:
                     city_info[city]["112_out"][0][0],
                 ),
             )
-            print(self.path)
+            # print(self.path)
 
             self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
             time.sleep(0.5)
@@ -312,12 +312,12 @@ class PathFinder:
         if (
             game_status["map_number_tuple"][2] == 50
             or game_status["map_number_tuple"] in [(1, 14, 76), (1, 4, 74)]
-        ) and game_status["transport"] not in [1, 11, 65, 75]:
+        ) and game_status["transport"] not in [1, 11, 65, 75, 7]:
             transport = "bike"
-            if game_status["transport"] not in [10, 74]:
+            if game_status["transport"] not in [10, 74, 6]:
                 self.pokeMMO.controller.key_press("3", 0.1)
 
-        elif game_status["transport"] in [1, 11, 75, 65]:
+        elif game_status["transport"] in [1, 11, 75, 65, 7]:
             transport = "surf"
 
         elif game_status["map_number_tuple"][2] != 50:

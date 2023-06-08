@@ -95,7 +95,7 @@ class Farming_SOOTOPOLIS_CITY:
                 if self.pokeMMO.get_game_status().get(
                     "check_battle_end_pokemon_caught"
                 )[0]:
-                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+                    self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
                 if (game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5) and (
                     game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
                 ):
@@ -123,7 +123,7 @@ class Farming_SOOTOPOLIS_CITY:
                 if self.pokeMMO.get_game_status().get(
                     "check_battle_end_pokemon_caught"
                 )[0]:
-                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+                    self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
 
                 if (
                     game_status["return_status"] == 21

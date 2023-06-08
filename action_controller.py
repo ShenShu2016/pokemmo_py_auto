@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 import time
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from time import sleep
 from typing import TYPE_CHECKING
 
@@ -143,6 +144,141 @@ class Action_Controller:
             print("Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y))
 
     @synchronized
+    def click_pokemon_summary_IV(self, game_status):
+        coords = game_status["check_battle_end_pokemon_caught"][1][0]
+        iv_icon_x = (coords[0] + coords[2]) / 2 - 386
+        iv_icon_y = (coords[1] + coords[3]) / 2 + 3
+        print(iv_icon_x, iv_icon_y)
+        self.pokeMMO.controller.click(iv_icon_x, iv_icon_y, tolerance=0)
+        print("Clicking Pokemon Summary IV at %s, %s" % (iv_icon_x, iv_icon_y))
+
+    def iv_shiny_check_release(self, game_status):
+        def check_shiny():
+            # ... 这里是检查Shiny的代码
+            shiny_x_y_list = self.pokeMMO.find_items(
+                temp_BRG=self.pokeMMO.shiny_BRG,
+                threshold=0.98,
+                max_matches=10,
+                top_l=shiny_area_top_l,
+                bottom_r=shiny_area_bottom_r,
+                img_BRG=img_BRG,
+                display=False,
+            )
+            print("shiny_x_y_list", shiny_x_y_list)
+            if len(shiny_x_y_list) >= 1:
+                print("Shiny!")
+                self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+            return len(shiny_x_y_list) >= 1
+
+        def check_secret_shiny():
+            # ... 这里是检查Secret Shiny的代码
+            secret_shiny_x_y_list = self.pokeMMO.find_items(
+                temp_BRG=self.pokeMMO.secret_shiny_BRG,
+                threshold=0.99,
+                max_matches=10,
+                top_l=shiny_area_top_l,
+                bottom_r=shiny_area_bottom_r,
+                img_BRG=img_BRG,
+                display=False,
+            )
+            print("secret_shiny_x_y_list", secret_shiny_x_y_list)
+            if len(secret_shiny_x_y_list) >= 1:
+                print("Secret Shiny!")
+                self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+
+            return len(secret_shiny_x_y_list) >= 1
+
+        def check_iv_31():
+            # ... 这里是检查IV 31的代码
+            # Compute IV area coordinates.
+            iv_area_top_l = (
+                close_summary_button_mid_x - 356,
+                close_summary_button_mid_y + 20,
+            )
+            iv_area_bottom_r = (
+                close_summary_button_mid_x - 313,
+                close_summary_button_mid_y + 216,
+            )  # Round down
+
+            iv_31_x_y_list = self.pokeMMO.find_items(
+                temp_BRG=self.pokeMMO.iv_31_BRG,
+                threshold=0.95,
+                max_matches=10,
+                top_l=iv_area_top_l,
+                bottom_r=iv_area_bottom_r,
+                img_BRG=img_BRG,
+                display=False,
+            )
+            print("IV 31 List:", iv_31_x_y_list)
+            return len(iv_31_x_y_list) >= 1
+
+        if game_status["check_battle_end_pokemon_caught"][0]:
+            self.click_pokemon_summary_IV(game_status)
+            coords = game_status["check_battle_end_pokemon_caught"][1][0]
+
+            # Compute common coordinates.
+            close_summary_button_mid_x = int((coords[0] + coords[2]) / 2)
+            close_summary_button_mid_y = int((coords[1] + coords[3]) / 2)
+            shiny_area_top_l = (
+                close_summary_button_mid_x,
+                close_summary_button_mid_y + 40,
+            )
+            shiny_area_bottom_r = (
+                close_summary_button_mid_x + 33,
+                close_summary_button_mid_y + 152,
+            )  # Round down
+            time.sleep(0.3)
+            img_BRG = self.pokeMMO.get_latest_img_BRG()
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                shiny_future = executor.submit(check_shiny)
+                secret_shiny_future = executor.submit(check_secret_shiny)
+                iv_31_future = executor.submit(check_iv_31)
+
+            is_shiny = shiny_future.result()
+            is_secret_shiny = secret_shiny_future.result()
+            is_iv31 = iv_31_future.result()
+
+            if not (is_shiny or is_secret_shiny or is_iv31):
+                print("start releasing pokemon")
+                pc_release_icon_coords = (
+                    close_summary_button_mid_x - 260,
+                    close_summary_button_mid_y + 3,
+                )  # Round up
+                self.pokeMMO.controller.click(*pc_release_icon_coords)
+                time.sleep(0.3)
+
+                confirm_release_area_top_l = (
+                    close_summary_button_mid_x - 418,
+                    close_summary_button_mid_y + 143,
+                )  # Round up
+                confirm_release_area_bottom_r = (
+                    close_summary_button_mid_x - 301,
+                    close_summary_button_mid_y + 168,
+                )  # Round up
+
+                confirm_release_x_y_list = self.pokeMMO.find_items(
+                    temp_BRG=self.pokeMMO.confirm_release_BRG,
+                    threshold=0.99,
+                    top_l=confirm_release_area_top_l,
+                    bottom_r=confirm_release_area_bottom_r,
+                    max_matches=1,
+                    display=False,
+                )
+
+                if len(confirm_release_x_y_list) == 1:
+                    # Click the first two elements of the tuple (x and y coords).
+                    self.pokeMMO.controller.click(
+                        confirm_release_x_y_list[0][0], confirm_release_x_y_list[0][1]
+                    )
+                    time.sleep(0.1)
+                    self.pokeMMO.controller.click(679, 378)
+                else:
+                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+
+            else:
+                self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+
+    @synchronized
     def restart_from_hospital(self):
         self.pokeMMO.controller.key_press("8")
         sleep(4.5)
@@ -213,27 +349,27 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("z", 1.5)
 
         for i in range(10):
-            if self.pokeMMO.get_game_status()["transport"] in [1, 11, 75, 65]:
+            if self.pokeMMO.get_game_status()["transport"] in [1, 11, 75, 65, 7]:
                 return True
             sleep(0.1)
 
         raise Exception("Not in water")
 
-    @synchronized
-    def use_bike(self):
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"][2] in [50, 76] and game_status[
-            "transport"
-        ] not in [
-            1,
-            11,
-        ]:  # 室外
-            self.pokeMMO.controller.key_press("3")
-            sleep(1)
-        if game_status["transport"] == 10:
-            return True
-        else:
-            raise Exception("Not in bike,还没做完")
+    # @synchronized
+    # def use_bike(self):
+    #     game_status = self.pokeMMO.get_game_status()
+    #     if game_status["map_number_tuple"][2] in [50, 76] and game_status[
+    #         "transport"
+    #     ] not in [
+    #         1,
+    #         11,
+    #     ]:  # 室外
+    #         self.pokeMMO.controller.key_press("3")
+    #         sleep(1)
+    #     if game_status["transport"] == 10:
+    #         return True
+    #     else:
+    #         raise Exception("Not in bike,还没做完")
 
     @synchronized
     def use_teleport(self):

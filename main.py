@@ -146,26 +146,26 @@ class PokeMMO:
                 if len(self.imgs_BRG_list) > 10:
                     self.imgs_BRG_list.pop(0)
 
-            time.sleep(0.2)  # wait for 2 seconds
+            time.sleep(0.05)  # wait for 2 seconds
 
     def update_game_status(self):
         while not self.stop_threads_flag:
             new_game_state = self.game_status_checker.check_game_status()
             with self.game_status_lock:
                 self.game_status = new_game_state
-            time.sleep(0.2)  # wait for 3 seconds
+            time.sleep(0.02)  # wait for 3 seconds
 
     def update_enemy_status(self):
         while not self.stop_threads_flag:
             new_enemy_status = self.enemy_status_checker.check_enemy_status()
             with self.enemy_status_lock:
                 self.enemy_status = new_enemy_status
-            time.sleep(0.2)
+            time.sleep(0.02)
 
     def update_state_dict(self):
         while not self.stop_threads_flag:
             # Update every 30 seconds
-            time.sleep(0.5)
+            time.sleep(3)
             my_address = self.get_text_from_box_coords((30, 0), (250, 25))
             my_money = self.get_text_from_box_coords(
                 (37, 30),
@@ -183,14 +183,14 @@ class PokeMMO:
             new_memory_coords = self.memory_injector.read_data()
             with self.memory_coords_status_lock:
                 self.memory_coords_status = new_memory_coords
-            time.sleep(0.05)
+            time.sleep(0.02)
 
     def update_memory_battle_status(self):
         while not self.stop_threads_flag:
             new_memory_coords = self.memory_battle.read_data()
             with self.memory_battle_status_lock:
                 self.memory_battle_status = new_memory_coords
-            time.sleep(0.05)
+            time.sleep(0.02)
 
     def update_memory_my_sprits_status(self):
         while not self.stop_threads_flag:
@@ -376,6 +376,125 @@ class PokeMMO:
 if __name__ == "__main__":
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
+    time.sleep(2)
+
+    # while True:
+    #     game_status = pokeMMO.get_game_status()
+    #     pokeMMO.action_controller.iv_shiny_check_release(game_status)
+
+    #     time.sleep(5)
+
+    # while True:
+    #     game_status = pokeMMO.get_game_status()
+
+    #     if game_status["check_battle_end_pokemon_caught"][0]:
+    #         pokeMMO.action_controller.click_pokemon_summary_IV(game_status)
+    #         coords = game_status["check_battle_end_pokemon_caught"][1][0]
+
+    #         # Compute common coordinates.
+    #         close_summary_button_mid_x = int((coords[0] + coords[2]) / 2)
+    #         close_summary_button_mid_y = int((coords[1] + coords[3]) / 2)
+
+    #         # 检查闪光
+    #         shiny_area_top_l = (
+    #             close_summary_button_mid_x,
+    #             close_summary_button_mid_y + 40,
+    #         )
+    #         shiny_area_bottom_r = (
+    #             close_summary_button_mid_x + 33,
+    #             close_summary_button_mid_y + 152,
+    #         )  # Round down
+    #         shiny_x_y_list = pokeMMO.find_items(
+    #             temp_BRG=pokeMMO.shiny_BRG,
+    #             threshold=0.98,
+    #             max_matches=10,
+    #             top_l=shiny_area_top_l,
+    #             bottom_r=shiny_area_bottom_r,
+    #             display=False,
+    #         )
+    #         print("shiny_x_y_list", shiny_x_y_list)
+    #         if len(shiny_x_y_list) >= 1:
+    #             print("Shiny!")
+    #             pokeMMO.action_controller.close_pokemon_summary(game_status)
+
+    #         secret_shiny_x_y_list = pokeMMO.find_items(
+    #             temp_BRG=pokeMMO.secret_shiny_BRG,
+    #             threshold=0.995,
+    #             max_matches=10,
+    #             top_l=shiny_area_top_l,
+    #             bottom_r=shiny_area_bottom_r,
+    #             display=False,
+    #         )
+    #         print("secret_shiny_x_y_list", secret_shiny_x_y_list)
+    #         if len(secret_shiny_x_y_list) >= 1:
+    #             print("Secret Shiny!")
+    #             pokeMMO.action_controller.close_pokemon_summary(game_status)
+
+    #         # Compute IV area coordinates.
+    #         iv_area_top_l = (
+    #             close_summary_button_mid_x - 346,
+    #             close_summary_button_mid_y + 27,
+    #         )
+    #         iv_area_bottom_r = (
+    #             close_summary_button_mid_x - 312,
+    #             close_summary_button_mid_y + 211,
+    #         )  # Round down
+    #         print("IV area top left:", iv_area_top_l)
+    #         print("IV area bottom right:", iv_area_bottom_r)
+
+    #         iv_31_x_y_list = pokeMMO.find_items(
+    #             temp_BRG=pokeMMO.iv_31_BRG,
+    #             threshold=0.995,
+    #             max_matches=10,
+    #             top_l=iv_area_top_l,
+    #             bottom_r=iv_area_bottom_r,
+    #             display=False,
+    #         )
+    #         print("IV 31 List:", iv_31_x_y_list)
+
+    #         if len(iv_31_x_y_list) == 0:
+    #             print("start releasing pokemon")
+    #             pc_release_icon_coords = (
+    #                 close_summary_button_mid_x - 260,
+    #                 close_summary_button_mid_y + 3,
+    #             )  # Round up
+    #             pokeMMO.controller.click(*pc_release_icon_coords)
+    #             time.sleep(0.3)
+
+    #             confirm_release_area_top_l = (
+    #                 close_summary_button_mid_x - 418,
+    #                 close_summary_button_mid_y + 143,
+    #             )  # Round up
+    #             confirm_release_area_bottom_r = (
+    #                 close_summary_button_mid_x - 301,
+    #                 close_summary_button_mid_y + 168,
+    #             )  # Round up
+    #             print("Confirm release area top left:", confirm_release_area_top_l)
+    #             print(
+    #                 "Confirm release area bottom right:", confirm_release_area_bottom_r
+    #             )
+
+    #             confirm_release_x_y_list = pokeMMO.find_items(
+    #                 temp_BRG=pokeMMO.confirm_release_BRG,
+    #                 threshold=0.995,
+    #                 top_l=confirm_release_area_top_l,
+    #                 bottom_r=confirm_release_area_bottom_r,
+    #                 max_matches=1,
+    #                 display=False,
+    #             )
+    #             print("Confirm release list:", confirm_release_x_y_list)
+
+    #             if len(confirm_release_x_y_list) == 1:
+    #                 # Click the first two elements of the tuple (x and y coords).
+    #                 pokeMMO.controller.click(
+    #                     confirm_release_x_y_list[0][0], confirm_release_x_y_list[0][1]
+    #                 )
+    #                 time.sleep(0.3)
+    #                 pokeMMO.controller.click(679, 378)
+    #         else:
+    #             pokeMMO.action_controller.close_pokemon_summary(game_status)
+
+    #     time.sleep(5)
 
     # hp_BRG_x_y_list = pokeMMO.find_items(
     #     temp_BRG=pokeMMO.hp_BRG,
