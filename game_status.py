@@ -26,6 +26,7 @@ class GameStatus:
         self.memory_battle_status = {}
         self.memory_coords_status = {}
         self.game_status_dict = {}
+        self.skill_pp_dict = {}
         threading.Thread(target=self.save_screenshot_check_status).start()
 
     def save_screenshot_check_status(self):  #! later need to be multi-thread
@@ -91,6 +92,7 @@ class GameStatus:
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         self.memory_coords_status = self.pokeMMO.get_memory_coords_status()
         self.memory_battle_status = self.pokeMMO.get_memory_battle_status()
+        self.skill_pp_dict = self.pokeMMO.action_controller.skill_pp_dict.copy()
         # print("memory_battle_status", self.memory_battle_status)
         # print("memory_coords_status", self.memory_coords_status)
         current_time = time.time()
@@ -117,6 +119,7 @@ class GameStatus:
             "face_dir": self.memory_coords_status.get("face_dir"),
             "transport": self.memory_coords_status.get("transport"),
             "battle_time_passed": self.memory_battle_status.get("battle_time_passed"),
+            "skill_pp": self.skill_pp_dict,
         }
 
         self.recent_status_game_status_dict_list.append(

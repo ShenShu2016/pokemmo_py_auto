@@ -3,6 +3,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from auto_strategy.common_funciton import is_go_pc
+
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -67,10 +69,7 @@ class Farming_FALLARBOR_TOWN:
                 )
                 if game_status.get("check_battle_end_pokemon_caught")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
-                if (self.pokeMMO.action_controller.skill_pp_dict["甜甜香气"] < 5) and (
-                    self.pokeMMO.action_controller.skill_pp_dict["点到为止"] <= 5
-                    or self.pokeMMO.action_controller.skill_pp_dict["蘑菇孢子"] <= 3
-                ):
+                if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
                     farming_times += 1
                     if farming_times >= repeat_times:
                         return
