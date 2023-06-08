@@ -213,7 +213,7 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("z", 1.5)
 
         for i in range(10):
-            if self.pokeMMO.get_game_status()["transport"] in [1, 11]:
+            if self.pokeMMO.get_game_status()["transport"] in [1, 11, 75, 65]:
                 return True
             sleep(0.1)
 

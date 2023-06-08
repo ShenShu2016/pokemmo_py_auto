@@ -101,6 +101,7 @@ class Farming_BATTLE_FRONTINER:
                 if game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5:
                     farming_times += 1
                     if farming_times >= repeat_times:
+                        print("刷怪次数达到上限!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                         return
                     self.teleport_and_heal()
                     self.leave_pc_center_and_go_farm()  # 应该已经到了湖里了
