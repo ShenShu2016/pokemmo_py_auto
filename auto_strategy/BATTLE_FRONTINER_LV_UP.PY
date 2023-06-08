@@ -98,7 +98,7 @@ class Farming_BATTLE_FRONTINER:
                     "check_battle_end_pokemon_caught"
                 )[0]:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
-                if game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5:
+                if self.pokeMMO.action_controller.skill_pp_dict["甜甜香气"] < 5:
                     farming_times += 1
                     if farming_times >= repeat_times:
                         print("刷怪次数达到上限!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

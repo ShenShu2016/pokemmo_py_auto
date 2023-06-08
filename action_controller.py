@@ -37,6 +37,11 @@ class Action_Controller:
         self.my_recent_actions_list = deque(maxlen=1000)
         self.press_down_count = 5
         self.action_lock = threading.Lock()
+        self.skill_pp_dict = {
+            "点到为止": 0,
+            "甜甜香气": 0,
+            "蘑菇孢子": 0,
+        }
 
     @staticmethod
     def synchronized(method):
@@ -66,6 +71,7 @@ class Action_Controller:
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
+        self.skill_pp_dict["点到为止"] = self.skill_pp_dict["点到为止"] - 1
         sleep(5)
         print("Using False Swipe")
 
@@ -86,6 +92,7 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("d", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
+        self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
         sleep(5)
         print("Using Spore")
 
@@ -296,20 +303,18 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("z", 1.5)  # 护士姐姐对话
         self.pokeMMO.controller.key_press("s", 5)
         self.pokeMMO.controller.key_press("z", 1.5)  # 下水
-        self.sweet_scent = 4
-        self.false_swipe = 30
         print("Restarting from hospital")
 
     @synchronized
     def use_sweet_sent(self):
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["sprite_dict"]["Sweet Scent"]["pp"] >= 5:
+        if self.skill_pp_dict["甜甜香气"] >= 5:
             self.pokeMMO.controller.key_press("2")
+            self.skill_pp_dict["甜甜香气"] = self.skill_pp_dict["甜甜香气"] - 5
             sleep(3)
 
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.pokeMMO.controller.key_press("7")
-        sleep(0.5)
+        sleep(0.3)
 
         self.pokeMMO.controller.click(
             city_info[city]["town_map_coords"][0],
@@ -344,16 +349,13 @@ class Action_Controller:
         print("Talking to nurse")
         self.pokeMMO.controller.key_press("z", 2)
         time.sleep(2)
-        game_status = self.pokeMMO.get_game_status()
 
-        if (
-            game_status["sprite_dict"]["Sweet Scent"]["pp"] >= 20
-            and game_status["sprite_dict"]["False Swipe"]["pp"] >= 30
-        ):
-            print("Heal done")
-            return True
-        else:
-            raise Exception("Not enough PP")
+        self.skill_pp_dict = {
+            "点到为止": 30,
+            "甜甜香气": 32,
+            "蘑菇孢子": 15,
+        }
+        return True  #!现在没办法鉴别有没有成功
 
     @synchronized
     def use_surf(self):

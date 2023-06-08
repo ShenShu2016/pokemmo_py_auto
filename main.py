@@ -23,7 +23,6 @@ from pokemmoUI import PokemmoUI
 from utils.controller import Controller
 from utils.memory_injection.memory_injector_battle_info import MemoryInjector_BattleInfo
 from utils.memory_injection.memory_injector_coords import MemoryInjector_Coords
-from utils.memory_injection.memory_injector_my_sprites import MemoryInjector_MySprites
 from utils.window_manager import Window_Manager
 from utils.word_recognizer import Word_Recognizer
 
@@ -45,9 +44,6 @@ class PokeMMO:
 
         pytesseract.pytesseract.tesseract_cmd = self.config["tesseract"]
 
-        # SetForegroundWindow = windll.user32.SetForegroundWindow
-        # SetForegroundWindow(self.handle)
-
         self.imgs_BRG_list_lock = threading.Lock()
         self.latest_img_BRG_lock = threading.Lock()
         self.game_status_lock = threading.Lock()
@@ -55,7 +51,6 @@ class PokeMMO:
         self.state_dict_lock = threading.Lock()
         self.memory_coords_status_lock = threading.Lock()
         self.memory_battle_status_lock = threading.Lock()
-        self.memory_my_sprits_status_lock = threading.Lock()
         self.latest_img_BRG = self.window_manager.get_current_img_BRG()
 
         self.imgs_BRG_list = []
@@ -64,7 +59,6 @@ class PokeMMO:
         self.state_dict = {}
         self.memory_coords_status = {}
         self.memory_battle_status = {}
-        self.memory_my_sprits_status = {}
         self.df_dict = {}
         self.load_assets()
         self.game_status_checker = GameStatus(self)
@@ -77,7 +71,6 @@ class PokeMMO:
         self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
         self.memory_injector = MemoryInjector_Coords()
-        self.memory_my_sprits = MemoryInjector_MySprites()
         self.memory_battle = MemoryInjector_BattleInfo()
         self.stop_threads_flag = False
 
@@ -94,7 +87,6 @@ class PokeMMO:
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
         threading.Thread(target=self.update_memory_coords).start()
-        threading.Thread(target=self.update_memory_my_sprits_status).start()
         threading.Thread(target=self.update_memory_battle_status).start()
         threading.Thread(target=self.log_print_save.update_logs).start()
         threading.Thread(target=self.log_print_save.print_logs).start()
@@ -192,13 +184,6 @@ class PokeMMO:
                 self.memory_battle_status = new_memory_coords
             time.sleep(0.02)
 
-    def update_memory_my_sprits_status(self):
-        while not self.stop_threads_flag:
-            new_memory_coords = self.memory_my_sprits.read_data()
-            with self.memory_my_sprits_status_lock:
-                self.memory_my_sprits_status = new_memory_coords
-            time.sleep(2)
-
     # Use this method to safely access the state_dict variable from other threads
     def get_state_dict(self):
         with self.state_dict_lock:
@@ -224,10 +209,6 @@ class PokeMMO:
     def get_memory_battle_status(self):
         with self.memory_battle_status_lock:
             return self.memory_battle_status
-
-    def get_memory_my_sprits_status(self):
-        with self.memory_my_sprits_status_lock:
-            return self.memory_my_sprits_status
 
     def get_latest_img_BRG(self):
         with self.latest_img_BRG_lock:

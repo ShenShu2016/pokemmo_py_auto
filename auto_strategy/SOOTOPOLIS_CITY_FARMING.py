@@ -96,8 +96,9 @@ class Farming_SOOTOPOLIS_CITY:
                     "check_battle_end_pokemon_caught"
                 )[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
-                if (game_status["sprite_dict"]["Sweet Scent"]["pp"] < 5) and (
-                    game_status["sprite_dict"]["False Swipe"]["pp"] <= 5
+                if (self.pokeMMO.action_controller.skill_pp_dict["甜甜香气"] < 5) and (
+                    self.pokeMMO.action_controller.skill_pp_dict["点到为止"] <= 5
+                    or self.pokeMMO.action_controller.skill_pp_dict["蘑菇孢子"] <= 3
                 ):
                     farming_times += 1
                     if farming_times >= repeat_times:

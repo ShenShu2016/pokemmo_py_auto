@@ -37,7 +37,6 @@ class LogPrintSave:
                 memory_coords = self.pokemmo.get_memory_coords_status()
                 # print(f"memory_coords time: {time.time() - start_time}")
                 memory_battle_status = self.pokemmo.get_memory_battle_status()
-                memory_my_sprits_status = self.pokemmo.get_memory_my_sprits_status()
 
                 new_log = {
                     "game_status": game_status,
@@ -45,7 +44,6 @@ class LogPrintSave:
                     "state_dict": state_dict,
                     "memory_coords": memory_coords,
                     "memory_battle_status": memory_battle_status,
-                    "memory_my_sprits_status": memory_my_sprits_status,
                     "timestamp": time.time(),
                 }
 
