@@ -163,7 +163,9 @@ cython_debug/
 # ignore all files under screenshot folder
 screenshot/*
 
-logs/*
+logs/*.csv
+logs/old
+pic_sprite_released/*.png
 
 utils/memory_injection/memory_injector_battle_info.json
 utils/memory_injection/memory_injector_coords.json

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import os
 import random
 import time
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
 from typing import TYPE_CHECKING
+
+import cv2
 
 if TYPE_CHECKING:
     from main import PokeMMO
@@ -239,6 +242,14 @@ class Action_Controller:
             is_iv31 = iv_31_future.result()
 
             if not (is_shiny or is_secret_shiny or is_iv31):
+                timestamp_str = time.strftime(
+                    "%Y%m%d%H%M%S", time.localtime(time.time())
+                )
+                folder_path = "pic_sprite_released"
+                if not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
+                filename = os.path.join(folder_path, f"image_{timestamp_str}.png")
+                cv2.imwrite(filename, img_BRG)
                 print("start releasing pokemon")
                 pc_release_icon_coords = (
                     close_summary_button_mid_x - 260,
