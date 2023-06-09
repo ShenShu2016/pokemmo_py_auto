@@ -157,7 +157,7 @@
 	<theme name="battle-button-confirm" ref="battle-button-return" allowWildcard="true">
 		<param name=""><image>battle-button-confirm.*</image></param>
 	</theme>
-
+	
 	<!-- Used for Battle Monster Switch buttons @ Battle Frame -->
 	<theme name="battle-button" ref="-defaults" allowWildcard="true">
 		<param name=""><image>battle-button-switch.*</image></param>
@@ -189,12 +189,13 @@
 	</theme>
 
 	<theme name="battle-frame" ref="-defaults" allowWildcard="true">
-		<param name="background"><image>label1.background</image></param>
+		<param name="background"><image>battle-area-frame</image></param>
 	</theme>
 
 	<!-- Theme used by various battle windows including the main window, skill learn dialog and item selection dialog -->
 	<theme name="battle-panel" ref="-defaults" allowWildcard="true">
-		<param name="background"><image>label1.background</image></param>
+
+		<param name="background"><image>battle-area</image></param>
 		<param name="border"><border>7</border></param>
 		<param name="defaultGap"><dimension>2,2</dimension></param>
 		<param name="smallGap"><dimension>8,8</dimension></param>
