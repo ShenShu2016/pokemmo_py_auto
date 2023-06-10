@@ -322,7 +322,7 @@ class PathFinder:
 
             self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
             time.sleep(0.5)
-            self.pokeMMO.controller.key_press("s", 0.2)
+            self.pokeMMO.controller.key_press("s", 1)
             time.sleep(2)
             game_status = self.pokeMMO.get_game_status()
             if game_status["map_number_tuple"] == city_info[city]["map_number"]:

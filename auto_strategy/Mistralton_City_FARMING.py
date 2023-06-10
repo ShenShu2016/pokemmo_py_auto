@@ -204,7 +204,9 @@ class Farming_Mistralton_City:
                     elif (
                         enemy_status.get("enemy_1_info")["CatchMethod"] == 11
                     ):  # 直接睡了扔球
-                        if enemy_status.get("enemy_1_hp_pct") >= 80:
+                        if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
+                            self.pokeMMO.action_controller.run_from_s21()
+                        elif enemy_status.get("enemy_1_hp_pct") >= 80:
                             self.pokeMMO.action_controller.fight_skill_4_from_s21()  # 龙之怒
                         elif enemy_status.get("enemy_1_sleeping") == False:
                             self.pokeMMO.action_controller.fight_skill_2_from_s21()
@@ -213,7 +215,9 @@ class Farming_Mistralton_City:
                     # elif (
                     #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
                     # ):  # 直接睡了扔球
-                    #     if enemy_status.get("enemy_1_sleeping") == False:
+                    #     if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
+                    #         self.pokeMMO.action_controller.run_from_s21()
+                    #     elif enemy_status.get("enemy_1_sleeping") == False:
                     #         self.pokeMMO.action_controller.fight_skill_2_from_s21()
                     #     elif enemy_status.get("enemy_1_sleeping") == True:
                     #         self.pokeMMO.action_controller.throw_pokeball()
@@ -248,7 +252,7 @@ if __name__ == "__main__":
     import sys
 
     sys.path.append(
-        r"C:\Users\SS\Documents\GitHub\pokemmo_py_auto"
+        r"C:\Users\shush\文档\Git\pokemmo_py_auto"
     )  # 将 main.py 所在的文件夹路径添加到模块搜索路径中
 
     from main import PokeMMO
