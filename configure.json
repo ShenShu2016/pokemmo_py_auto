@@ -25,6 +25,7 @@
     "ultra_ball_path": "asserts/template\\ultra_ball.png",
     "BATTLE_FRONTIER_coords_tracking_path": "asserts/coords_tracking\\BATTLE_FRONTIER_coords_tracking.csv",
     "FALLARBOR_TOWN_coords_tracking_path": "asserts/coords_tracking\\FALLARBOR_TOWN_coords_tracking.csv",
+    "Mistralton_City_coords_tracking_path": "asserts/coords_tracking\\Mistralton_City_coords_tracking.csv",
     "PETALBURG_CITY_coords_tracking_path": "asserts/coords_tracking\\PETALBURG_CITY_coords_tracking.csv",
     "SOOTOPOLIS_CITY_coords_tracking_path": "asserts/coords_tracking\\SOOTOPOLIS_CITY_coords_tracking.csv",
     "VERDANTURF_TOWN_coords_tracking_path": "asserts/coords_tracking\\VERDANTURF_TOWN_coords_tracking.csv"

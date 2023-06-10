@@ -5,6 +5,7 @@ import time
 from typing import TYPE_CHECKING
 
 from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
+from auto_strategy.Mistralton_City_FARMING import add_x_y_coords_offset_Mistralton_City
 from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
 from auto_strategy.SOOTOPOLIS_CITY_FARMING import add_x_y_coords_offset_SOOTOPOLIS_CITY
 from auto_strategy.VERDANTURF_TOWN_FARMING import add_x_y_coords_offset_VERDANTURF_TOWN
@@ -84,8 +85,8 @@ class PathFinder:
         return None
 
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
-        transport_speed = {"bike": 0.08, "walk": 0.25, "run": 0.2, "surf": 0.1}
-        start_delay = {"bike": 0.0, "walk": 0.3, "run": 0.0, "surf": 0.0}  # 启动延迟
+        transport_speed = {"bike": 0.08, "walk": 0.25, "run": 0.16, "surf": 0.1}
+        start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
         game_state = self.pokeMMO.get_game_status()
         current_face_dir = game_state["face_dir"]
         if path is None:
@@ -136,6 +137,19 @@ class PathFinder:
             elif end_face_dir == 3:
                 keys_and_delays.append(("d", 0.1))
 
+        total_delay = 0
+        keys_and_delays_two_seconds = []
+        for key_and_delay in keys_and_delays:
+            if total_delay + key_and_delay[1] > 2:
+                # 如果加上当前的延迟会超过2秒，那么就只加上足够的延迟以达到2秒
+                keys_and_delays_two_seconds.append((key_and_delay[0], 2 - total_delay))
+                break
+            else:
+                total_delay += key_and_delay[1]
+                keys_and_delays_two_seconds.append(key_and_delay)
+
+        return keys_and_delays_two_seconds
+
         return keys_and_delays[:8]
 
     def a_star_no_obstacle(self, start, end):
@@ -181,8 +195,14 @@ class PathFinder:
         return result
 
     def go_somewhere(
-        self, end_point=None, city="SOOTOPOLIS_CITY", style=None, end_face_dir=None
+        self,
+        end_point=None,
+        city="SOOTOPOLIS_CITY",
+        style=None,
+        end_face_dir=None,
+        transport=None,
     ):  # style random_end_point,solid_end_point
+        """end_point: (y, x)"""
         df = self.pokeMMO.df_dict[f"{city}_coords_tracking_csv"]
         df = df.reset_index(drop=True)
 
@@ -213,6 +233,7 @@ class PathFinder:
             "FALLARBOR_TOWN": add_x_y_coords_offset_FALLARBOR_TOWN,
             "VERDANTURF_TOWN": add_x_y_coords_offset_VERDANTURF_TOWN,
             "SOOTOPOLIS_CITY": add_x_y_coords_offset_SOOTOPOLIS_CITY,
+            "Mistralton_City": add_x_y_coords_offset_Mistralton_City,
         }
         offset_func = offset_func_mapping.get(city, lambda x: x)
 
@@ -233,8 +254,10 @@ class PathFinder:
             ):
                 break
             if (
-                style == "farming" and game_status_with_offset["return_status"] >= 20
-            ):  # 进入战斗了
+                style == "farming" or style == "ignore_sprite"
+            ) and game_status_with_offset[
+                "return_status"
+            ] >= 20:  # 进入战斗了
                 break
 
             # Update start_point and end_point if farming
@@ -251,7 +274,7 @@ class PathFinder:
                 # print("开始坐标在网格范围内，开始寻找路径...")
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
                 # print("self.path", self.path, "\033[0m")
-                self.pf_move(end_face_dir=end_face_dir)
+                self.pf_move(end_face_dir=end_face_dir, transport=transport)
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
             time.sleep(0.1)
@@ -305,23 +328,28 @@ class PathFinder:
             else:
                 raise Exception("Failed to leave pc center")
 
-    def pf_move(self, end_face_dir=None):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
+    def pf_move(
+        self, end_face_dir=None, transport=None
+    ):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
         game_status = self.pokeMMO.get_game_status()
 
-        transport = None
-        if (
-            game_status["map_number_tuple"][2] == 50
-            or game_status["map_number_tuple"] in [(1, 14, 76), (1, 4, 74)]
-        ) and game_status["transport"] not in [1, 11, 65, 75, 7]:
-            transport = "bike"
-            if game_status["transport"] not in [10, 74, 6]:
+        if transport == None:
+            if (
+                game_status["map_number_tuple"][2] == 50
+                or game_status["map_number_tuple"]
+                in [(1, 14, 76), (1, 4, 74), (2, 0, 107), (2, 1, 81)]
+            ) and game_status["transport"] not in [1, 11, 65, 75, 7]:
+                transport = "bike"
+                if game_status["transport"] not in [10, 74, 6, 2]:
+                    self.pokeMMO.controller.key_press("3", 0.1)
+
+            elif game_status["transport"] in [1, 11, 75, 65, 7]:
+                transport = "surf"
+            else:
+                transport = "run"
+        elif transport == "walk" or transport == "run":
+            if game_status["transport"] in [10, 74, 6, 2]:
                 self.pokeMMO.controller.key_press("3", 0.1)
-
-        elif game_status["transport"] in [1, 11, 75, 65, 7]:
-            transport = "surf"
-
-        elif game_status["map_number_tuple"][2] != 50:
-            transport = "walk"
 
         self.keys_and_delays = self.path_to_keys_and_delays(
             self.path, transport=transport, end_face_dir=end_face_dir
@@ -329,9 +357,13 @@ class PathFinder:
         # start move
         print(self.keys_and_delays)
         if self.keys_and_delays is not None:
+            if transport == "run":
+                self.pokeMMO.controller.key_down("x")
             for key, delay in self.keys_and_delays:
                 self.pokeMMO.controller.key_press(key, delay)
                 time.sleep(0.1)
+            if transport == "run":
+                self.pokeMMO.controller.key_up("x")
 
 
 if __name__ == "__main__":

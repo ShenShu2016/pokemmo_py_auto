@@ -48,6 +48,17 @@ class Controller:
         keyboard.send_keys("{" + key + " up}")
         # print(f"Finished pressing {key} for {delay} seconds")
 
+    def key_down(
+        self,
+        key: str,
+    ):
+        self.window.set_focus()
+        keyboard.send_keys("{" + key + " down}")
+
+    def key_up(self, key: str):
+        self.window.set_focus()
+        keyboard.send_keys("{" + key + " up}")
+
 
 if __name__ == "__main__":
     from main import PokeMMO

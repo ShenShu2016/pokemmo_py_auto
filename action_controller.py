@@ -315,18 +315,20 @@ class Action_Controller:
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.pokeMMO.controller.key_press("7")
         sleep(0.3)
+        for i in range(2):
+            self.pokeMMO.controller.click(
+                city_info[city]["town_map_coords"][0],
+                city_info[city]["town_map_coords"][1],
+                tolerance=0,
+            )
+        sleep(0.05)
 
-        self.pokeMMO.controller.click(
-            city_info[city]["town_map_coords"][0],
-            city_info[city]["town_map_coords"][1],
-            tolerance=0,
-        )
-        sleep(5)
+        sleep(7)
         # check if in right city
         print("Checking if in %s" % city)
         game_status = self.pokeMMO.get_game_status()
         if game_status["map_number_tuple"] == city_info[city]["map_number"]:
-            print("Flying to %s" % city)
+            print("Flied to %s" % city)
         else:
             raise Exception("Not in %s" % city)
 
@@ -342,13 +344,13 @@ class Action_Controller:
                 self.talk_to_nurse()
                 return True
             else:
-                raise Exception("Not in front of teleport")
+                raise Exception("Not in front of hospital")
 
     @synchronized
     def talk_to_nurse(self):
         print("Talking to nurse")
-        self.pokeMMO.controller.key_press("z", 2)
-        time.sleep(2)
+        self.pokeMMO.controller.key_press("z", 5)  # 合众 比较久
+        time.sleep(1)
 
         self.skill_pp_dict = {
             "点到为止": 30,
@@ -389,7 +391,7 @@ class Action_Controller:
         game_status = self.pokeMMO.get_game_status()
         if game_status["map_number_tuple"][2] == 50 or game_status[
             "map_number_tuple"
-        ] == (1, 14, 76):
+        ] in [(1, 14, 76), (2, 1, 81)]:
             self.pokeMMO.controller.key_press("8")
             sleep(3)
         game_status = self.pokeMMO.get_game_status()

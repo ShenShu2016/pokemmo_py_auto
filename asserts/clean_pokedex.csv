@@ -605,7 +605,7 @@ No,Pokemon,Hp,Gender,CatchRate,Types,CatchMethod,Chinese
 604,Eelektross,85,1,30,Electric/,3,麻麻鳗鱼王
 605,Elgyem,55,1,255,Psychic/,1,小灰怪
 606,Beheeyem,75,1,90,Psychic/,3,大宇怪
-607,Litwick,50,1,190,Ghost/Fire,1,烛光灵
+607,Litwick,50,1,190,Ghost/Fire,11,烛光灵
 608,Lampent,60,1,90,Ghost/Fire,3,灯火幽灵
 609,Chandelure,60,1,45,Ghost/Fire,3,水晶灯火灵
 610,Axew,46,1,75,Dragon/,3,牙牙
