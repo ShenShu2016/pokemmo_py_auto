@@ -221,7 +221,9 @@ class PathFinder:
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
 
         # Set walkable area based on style
-        walkable_markers = [1, 2, 66] if style == "farming" else [3, 4, 112]
+        walkable_markers = (
+            [1, 2, 66] if style in ["farming", "ignore_sprite"] else [3, 4, 112]
+        )
         for marker in walkable_markers:
             mask = df["mark"] == marker
             self.grid[df[mask]["y_coords"], df[mask]["x_coords"]] = 1

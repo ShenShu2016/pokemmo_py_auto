@@ -103,7 +103,7 @@ class Farming_Mistralton_City:
                             city=self.city,
                             style="ignore_sprite",  # 编号66
                         )
-                        if self.pokeMMO.get_game_status()["return_status"] == 21:
+                        if self.pokeMMO.get_game_status()["return_status"] >= 20:
                             break
                         game_status = self.pokeMMO.get_game_status()
                         if (
@@ -125,7 +125,7 @@ class Farming_Mistralton_City:
                         city=self.city,
                         style="ignore_sprite",  # 编号66
                     )
-                    if self.pokeMMO.get_game_status()["return_status"] == 21:
+                    if self.pokeMMO.get_game_status()["return_status"] >= 20:
                         break  # break 出，因为要战斗了
                     game_status = self.pokeMMO.get_game_status()
                     if game_status["x_coords"] == 16 and game_status["y_coords"] == 25:
@@ -141,6 +141,9 @@ class Farming_Mistralton_City:
                             raise Exception("出毛病咯噢噢噢噢")
                     self.teleport_and_heal()
                     self.leave_pc_center_and_go_farm()
+                    self.step_1_go_bridge()
+                    self.step_2_pass_bridge()
+                    self.step_3_go_tower()
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
                 if (

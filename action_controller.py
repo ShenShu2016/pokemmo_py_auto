@@ -328,7 +328,10 @@ class Action_Controller:
         print("Checking if in %s" % city)
         game_status = self.pokeMMO.get_game_status()
         if game_status["map_number_tuple"] == city_info[city]["map_number"]:
-            print("Flied to %s" % city)
+            print(
+                "Flied to %s" % city,
+                f'当前坐标：{game_status["map_number_tuple"]},应该是{city_info[city]["map_number"]}',
+            )
         else:
             raise Exception("Not in %s" % city)
 
