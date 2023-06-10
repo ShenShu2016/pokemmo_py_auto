@@ -37,11 +37,7 @@ class Action_Controller:
         self.my_recent_actions_list = deque(maxlen=1000)
         self.press_down_count = 5
         self.action_lock = threading.Lock()
-        self.skill_pp_dict = {
-            "点到为止": 0,
-            "甜甜香气": 0,
-            "蘑菇孢子": 0,
-        }
+        self.skill_pp_dict = {"点到为止": 0, "甜甜香气": 0, "蘑菇孢子": 0, "skill_4": 12}
 
     @staticmethod
     def synchronized(method):
@@ -69,6 +65,8 @@ class Action_Controller:
     @synchronized
     def fight_skill_1_from_s21(self):  # False Swipe
         self.pokeMMO.controller.click(314, 508, tolerance=15)
+        self.pokeMMO.controller.key_press("w", 0.2)
+        self.pokeMMO.controller.key_press("a", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
         self.skill_pp_dict["点到为止"] = self.skill_pp_dict["点到为止"] - 1
@@ -90,6 +88,7 @@ class Action_Controller:
     def fight_skill_2_from_s21(self):  # Spore
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("d", 0.2)
+        self.pokeMMO.controller.key_press("w", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
         self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
@@ -100,6 +99,7 @@ class Action_Controller:
     def fight_skill_3_from_s21(self):
         self.pokeMMO.controller.click(314, 508, tolerance=15)
         self.pokeMMO.controller.key_press("s", 0.2)
+        self.pokeMMO.controller.key_press("a", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_3_from_s21", time.time()))
         sleep(5)
@@ -111,6 +111,7 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("d", 0.2)
         self.pokeMMO.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(("fight_skill_4_from_s21", time.time()))
+        self.skill_pp_dict["skill_4"] = self.skill_pp_dict["skill_4"] - 1
         sleep(5)
 
     @synchronized
@@ -355,11 +356,7 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("z", 5)  # 合众 比较久
         time.sleep(1)
 
-        self.skill_pp_dict = {
-            "点到为止": 30,
-            "甜甜香气": 32,
-            "蘑菇孢子": 15,
-        }
+        self.skill_pp_dict = {"点到为止": 30, "甜甜香气": 32, "蘑菇孢子": 15, "skill_4": 12}
         return True  #!现在没办法鉴别有没有成功
 
     @synchronized

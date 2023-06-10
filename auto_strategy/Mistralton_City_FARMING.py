@@ -204,11 +204,19 @@ class Farming_Mistralton_City:
                     elif (
                         enemy_status.get("enemy_1_info")["CatchMethod"] == 11
                     ):  # 直接睡了扔球
-                        if enemy_status.get("enemy_1_sleeping") == False:
+                        if enemy_status.get("enemy_1_hp_pct") >= 80:
+                            self.pokeMMO.action_controller.fight_skill_4_from_s21()  # 龙之怒
+                        elif enemy_status.get("enemy_1_sleeping") == False:
                             self.pokeMMO.action_controller.fight_skill_2_from_s21()
                         elif enemy_status.get("enemy_1_sleeping") == True:
                             self.pokeMMO.action_controller.throw_pokeball()
-
+                    # elif (
+                    #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
+                    # ):  # 直接睡了扔球
+                    #     if enemy_status.get("enemy_1_sleeping") == False:
+                    #         self.pokeMMO.action_controller.fight_skill_2_from_s21()
+                    #     elif enemy_status.get("enemy_1_sleeping") == True:
+                    #         self.pokeMMO.action_controller.throw_pokeball()
                     else:
                         raise Exception("闪光，有问题！！！")
 

@@ -1,6 +1,7 @@
 # enemy_status.py
 from __future__ import annotations
 
+import random
 import time
 from typing import TYPE_CHECKING
 
@@ -34,6 +35,7 @@ class PathFinder:
     # 获取邻居节点
     def neighbors(self, node):
         directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        random.shuffle(directions)
         result = []
         for direction in directions:
             next_node = (node[0] + direction[0], node[1] + direction[1])
@@ -149,8 +151,6 @@ class PathFinder:
                 keys_and_delays_two_seconds.append(key_and_delay)
 
         return keys_and_delays_two_seconds
-
-        return keys_and_delays[:8]
 
     def a_star_no_obstacle(self, start, end):
         self.max_x = max(start[1], end[1]) + 1
