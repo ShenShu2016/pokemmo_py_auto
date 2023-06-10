@@ -156,12 +156,12 @@ class Farming_PETALBURG_CITY:
 
 
 if __name__ == "__main__":
+    import os
     import sys
 
-    sys.path.append(
-        r"C:\Users\SS\Documents\GitHub\pokemmo_py_auto"
-    )  # 将 main.py 所在的文件夹路径添加到模块搜索路径中
-
+    current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+    package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
+    sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
