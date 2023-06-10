@@ -201,17 +201,25 @@ class Farming_Mistralton_City:
                         and int(enemy_status.get("enemy_1_info")["No"]) != 999
                     ):
                         self.pokeMMO.action_controller.run_from_s21()
-                    elif (
-                        enemy_status.get("enemy_1_info")["CatchMethod"] == 11
-                    ):  # 直接睡了扔球
+
+                    elif enemy_status.get("enemy_1_info")["CatchMethod"] == 11:
                         if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
                             self.pokeMMO.action_controller.run_from_s21()
                         elif enemy_status.get("enemy_1_hp_pct") >= 80:
-                            self.pokeMMO.action_controller.fight_skill_4_from_s21()  # 龙之怒
-                        elif enemy_status.get("enemy_1_sleeping") == False:
-                            self.pokeMMO.action_controller.fight_skill_2_from_s21()
-                        elif enemy_status.get("enemy_1_sleeping") == True:
+                            self.pokeMMO.action_controller.fight_skill_3_from_s21()
+                        else:
                             self.pokeMMO.action_controller.throw_pokeball()
+                    # elif (
+                    #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
+                    # ):  # 直接睡了扔球
+                    #     if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
+                    #         self.pokeMMO.action_controller.run_from_s21()
+                    #     elif enemy_status.get("enemy_1_hp_pct") >= 80:
+                    #         self.pokeMMO.action_controller.fight_skill_4_from_s21()  # 龙之怒
+                    #     elif enemy_status.get("enemy_1_sleeping") == False:
+                    #         self.pokeMMO.action_controller.fight_skill_2_from_s21()
+                    #     elif enemy_status.get("enemy_1_sleeping") == True:
+                    #         self.pokeMMO.action_controller.throw_pokeball()
                     # elif (
                     #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
                     # ):  # 直接睡了扔球

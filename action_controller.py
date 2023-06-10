@@ -37,7 +37,13 @@ class Action_Controller:
         self.my_recent_actions_list = deque(maxlen=1000)
         self.press_down_count = 5
         self.action_lock = threading.Lock()
-        self.skill_pp_dict = {"点到为止": 0, "甜甜香气": 0, "蘑菇孢子": 0, "skill_4": 12}
+        self.skill_pp_dict = {
+            "点到为止": 0,
+            "甜甜香气": 0,
+            "蘑菇孢子": 0,
+            "黑夜魔影": 18,
+            "skill_4": 12,
+        }
 
     @staticmethod
     def synchronized(method):
@@ -64,10 +70,9 @@ class Action_Controller:
 
     @synchronized
     def fight_skill_1_from_s21(self):  # False Swipe
-        self.pokeMMO.controller.click(314, 508, tolerance=15)
-        self.pokeMMO.controller.key_press("w", 0.2)
-        self.pokeMMO.controller.key_press("a", 0.2)
-        self.pokeMMO.controller.key_press("z", 0.2)
+        self.pokeMMO.controller.click(314, 508, tolerance=5)
+        sleep(0.08)
+        self.pokeMMO.controller.click(312, 507, tolerance=5)
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
         self.skill_pp_dict["点到为止"] = self.skill_pp_dict["点到为止"] - 1
         sleep(5)
@@ -86,10 +91,9 @@ class Action_Controller:
 
     @synchronized
     def fight_skill_2_from_s21(self):  # Spore
-        self.pokeMMO.controller.click(314, 508, tolerance=15)
-        self.pokeMMO.controller.key_press("d", 0.2)
-        self.pokeMMO.controller.key_press("w", 0.2)
-        self.pokeMMO.controller.key_press("z", 0.2)
+        self.pokeMMO.controller.click(314, 508, tolerance=10)
+        sleep(0.08)
+        self.pokeMMO.controller.click(526, 508, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
         self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
         sleep(5)
@@ -97,19 +101,18 @@ class Action_Controller:
 
     @synchronized
     def fight_skill_3_from_s21(self):
-        self.pokeMMO.controller.click(314, 508, tolerance=15)
-        self.pokeMMO.controller.key_press("s", 0.2)
-        self.pokeMMO.controller.key_press("a", 0.2)
-        self.pokeMMO.controller.key_press("z", 0.2)
+        self.pokeMMO.controller.click(314, 508, tolerance=10)
+        sleep(0.08)
+        self.pokeMMO.controller.click(312, 561, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_3_from_s21", time.time()))
+        self.skill_pp_dict["黑夜魔影"] = self.skill_pp_dict["黑夜魔影"] - 1
         sleep(5)
 
     @synchronized
     def fight_skill_4_from_s21(self):
-        self.pokeMMO.controller.click(314, 508, tolerance=15)
-        self.pokeMMO.controller.key_press("s", 0.2)
-        self.pokeMMO.controller.key_press("d", 0.2)
-        self.pokeMMO.controller.key_press("z", 0.2)
+        self.pokeMMO.controller.click(314, 508, tolerance=10)
+        sleep(0.08)
+        self.pokeMMO.controller.click(528, 558, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_4_from_s21", time.time()))
         self.skill_pp_dict["skill_4"] = self.skill_pp_dict["skill_4"] - 1
         sleep(5)
