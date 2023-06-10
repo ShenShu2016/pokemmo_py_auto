@@ -41,8 +41,8 @@ class Action_Controller:
             "点到为止": 0,
             "甜甜香气": 0,
             "蘑菇孢子": 0,
-            "黑夜魔影": 18,
-            "skill_4": 12,
+            "黑夜魔影": 0,
+            "skill_4": 0,
         }
 
     @staticmethod
@@ -359,7 +359,13 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("z", 5)  # 合众 比较久
         time.sleep(1)
 
-        self.skill_pp_dict = {"点到为止": 30, "甜甜香气": 32, "蘑菇孢子": 15, "skill_4": 12}
+        self.skill_pp_dict = {
+            "点到为止": 30,
+            "甜甜香气": 32,
+            "蘑菇孢子": 15,
+            "黑夜魔影": 18,
+            "skill_4": 12,
+        }
         return True  #!现在没办法鉴别有没有成功
 
     @synchronized
