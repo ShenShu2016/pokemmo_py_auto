@@ -25,6 +25,12 @@ class Window_Manager:
         self.DeleteObject = windll.gdi32.DeleteObject
         self.ReleaseDC = windll.user32.ReleaseDC
         self.handle = None
+        self.r = RECT()
+        self.total_bytes = None
+        self.buffer = None
+        self.byte_array = None
+        self.image_normal = None
+        self.img_BRG = None
 
     def get_window_name(self):
         """Get the window name of the PokeMMO game."""
@@ -53,35 +59,27 @@ class Window_Manager:
 
     def get_current_img_BRG(self):
         """Capture a screenshot of the PokeMMO game."""
-        self.GetClientRect = windll.user32.GetClientRect
-        self.GetDC = windll.user32.GetDC
-        self.CreateCompatibleDC = windll.gdi32.CreateCompatibleDC
-        self.CreateCompatibleBitmap = windll.gdi32.CreateCompatibleBitmap
-        self.SelectObject = windll.gdi32.SelectObject
-        self.BitBlt = windll.gdi32.BitBlt
-        self.GetBitmapBits = windll.gdi32.GetBitmapBits
-        self.DeleteObject = windll.gdi32.DeleteObject
-        self.ReleaseDC = windll.user32.ReleaseDC
-        self.SRCCOPY = 0xCC0020
-
-        r = RECT()
-        self.GetClientRect(self.handle, byref(r))
-        width, height = r.right, r.bottom
+        self.GetClientRect(self.handle, byref(self.r))
+        width, height = self.r.right, self.r.bottom
         dc = self.GetDC(self.handle)
         cdc = self.CreateCompatibleDC(dc)
         bitmap = self.CreateCompatibleBitmap(dc, width, height)
         self.SelectObject(cdc, bitmap)
         self.BitBlt(cdc, 0, 0, width, height, dc, 0, 0, self.SRCCOPY)
-        total_bytes = width * height * 4
-        buffer = bytearray(total_bytes)
-        byte_array = c_ubyte * total_bytes
-        self.GetBitmapBits(bitmap, total_bytes, byte_array.from_buffer(buffer))
+        self.total_bytes = width * height * 4
+        self.buffer = bytearray(self.total_bytes)
+        self.byte_array = c_ubyte * self.total_bytes
+        self.GetBitmapBits(
+            bitmap, self.total_bytes, self.byte_array.from_buffer(self.buffer)
+        )
         self.DeleteObject(bitmap)
         self.DeleteObject(cdc)
         self.ReleaseDC(self.handle, dc)
-        image_normal = np.frombuffer(buffer, dtype=np.uint8).reshape(height, width, 4)
-        img_BRG = cv2.cvtColor(image_normal, cv2.COLOR_BGRA2BGR)
-        return img_BRG  # return img_BRG
+        self.image_normal = np.frombuffer(self.buffer, dtype=np.uint8).reshape(
+            height, width, 4
+        )
+        self.img_BRG = cv2.cvtColor(self.image_normal, cv2.COLOR_BGRA2BGR)
+        return self.img_BRG  # return img_BRG
 
     def get_window_id(self):
         """Get the unique ID of the PokeMMO game window."""
