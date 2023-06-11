@@ -4,7 +4,7 @@ import time
 from typing import TYPE_CHECKING
 
 # from auto_strategy.common_funciton import is_go_pc
-from common_funciton import is_go_pc
+from auto_strategy.common_funciton import is_go_pc
 
 if TYPE_CHECKING:
     from main import PokeMMO

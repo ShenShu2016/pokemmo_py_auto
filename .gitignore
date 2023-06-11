@@ -170,3 +170,6 @@ pic_sprite_released/*.png
 utils/memory_injection/memory_injector_battle_info.json
 utils/memory_injection/memory_injector_coords.json
 utils/memory_injection/memory_injector_my_sprites.json
+
+
+*.sqlite

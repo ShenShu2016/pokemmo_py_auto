@@ -23,6 +23,7 @@ from pokemmoUI import PokemmoUI
 from utils.controller import Controller
 from utils.memory_injection.memory_injector_battle_info import MemoryInjector_BattleInfo
 from utils.memory_injection.memory_injector_coords import MemoryInjector_Coords
+from utils.SQLiteDB import SQLiteDB
 from utils.window_manager import Window_Manager
 from utils.word_recognizer import Word_Recognizer
 
@@ -70,8 +71,9 @@ class PokeMMO:
         self.word_recognizer = Word_Recognizer()
         self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
+        self.db = SQLiteDB("pokemmo.sqlite")
         self.memory_injector = MemoryInjector_Coords()
-        self.memory_battle = MemoryInjector_BattleInfo()
+        # self.memory_battle = MemoryInjector_BattleInfo()
         self.stop_threads_flag = False
 
         self.PETALBURG_CITY_FARMING = Farming_PETALBURG_CITY(self)
@@ -87,10 +89,9 @@ class PokeMMO:
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
         threading.Thread(target=self.update_memory_coords).start()
-        threading.Thread(target=self.update_memory_battle_status).start()
+        # threading.Thread(target=self.update_memory_battle_status).start()
         threading.Thread(target=self.log_print_save.update_logs).start()
         threading.Thread(target=self.log_print_save.print_logs).start()
-        threading.Thread(target=self.log_print_save.save_logs).start()
 
     def stop_threads(self):
         self.stop_threads_flag = True
@@ -502,7 +503,7 @@ if __name__ == "__main__":
     }
     previous_location = None
 
-    while True:
+    while False:
         if previous_location is not None:
             available_locations = locations.copy()
             del available_locations[previous_location]  # 移除上一次地点
