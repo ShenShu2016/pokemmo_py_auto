@@ -1,6 +1,7 @@
 # enemy_status.py
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -214,11 +215,37 @@ class EnemyStatus:
     def check_enemy_status(self):
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         self.game_status_dict = self.pokeMMO.get_game_status()
+        start_time = time.time()
         self._check_enemy_number()
+        check_enemy_number_time = time.time() - start_time
+        # print("检查敌人数量使用时间:", time.time() - start_time)
+        start_time = time.time()
         self._check_enemy_hp()
-        # start_time = time.time()
+        check_enemy_hp_time = time.time() - start_time
+        # print("检查敌人血量使用时间:", time.time() - start_time)
+        start_time = time.time()
         self._check_enemy_name_lv()
+        check_enemy_name_lv_time = time.time() - start_time
         # print("检查敌人名字与等级使用时间:", time.time() - start_time)
+        start_time = time.time()
         self.check_enemy_sleep()
+        check_enemy_sleep_time = time.time() - start_time
         # print("enemy_status_dict", self.enemy_status_dict)
+        if (
+            check_enemy_number_time > 0.1
+            or check_enemy_hp_time > 0.1
+            or check_enemy_name_lv_time > 0.1
+            or check_enemy_sleep_time > 0.1
+        ):
+            print(
+                "检查敌人状态使用时间:",
+                "check_enemy_number_time",
+                check_enemy_number_time,
+                "check_enemy_hp_time",
+                check_enemy_hp_time,
+                "check_enemy_name_lv_time",
+                check_enemy_name_lv_time,
+                "check_enemy_sleep_time",
+                check_enemy_sleep_time,
+            )
         return self.enemy_status_dict

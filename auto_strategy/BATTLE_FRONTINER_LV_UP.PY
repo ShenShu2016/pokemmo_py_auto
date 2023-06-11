@@ -110,7 +110,7 @@ class Farming_BATTLE_FRONTINER:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
-                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
+                if game_status.get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
 
                 if (
@@ -140,6 +140,7 @@ class Farming_BATTLE_FRONTINER:
 
                 if game_status["return_status"] == 1:
                     break
+                time.sleep(0.05)
 
 
 if __name__ == "__main__":

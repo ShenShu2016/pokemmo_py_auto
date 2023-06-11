@@ -118,7 +118,7 @@ class Farming_SOOTOPOLIS_CITY:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
-                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
+                if game_status.get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
 
                 if (
@@ -172,6 +172,7 @@ class Farming_SOOTOPOLIS_CITY:
 
                 if game_status["return_status"] == 1:
                     break
+                time.sleep(0.05)
 
 
 if __name__ == "__main__":

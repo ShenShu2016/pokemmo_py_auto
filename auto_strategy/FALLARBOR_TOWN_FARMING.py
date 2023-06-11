@@ -150,6 +150,7 @@ class Farming_FALLARBOR_TOWN:
 
                 if game_status["return_status"] == 1:
                     break
+                time.sleep(0.05)
 
 
 if __name__ == "__main__":

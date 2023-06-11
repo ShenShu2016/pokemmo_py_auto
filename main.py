@@ -115,12 +115,17 @@ class PokeMMO:
     def update_latest_img_BRG(self):  # only image will be captured
         while not self.stop_threads_flag:
             # Add the current image, timestamp, and name to the list
-
+            start_time = time.time()
             current_img_BRG = self.window_manager.get_current_img_BRG()
             with self.latest_img_BRG_lock:
                 self.latest_img_BRG = current_img_BRG
-            # If the list size has exceeded 10, remove the oldest image
 
+            time_passed = time.time() - start_time
+            if time_passed >= 0.05:
+                print(
+                    "time to get image--------------------------------------------",
+                    time_passed,
+                )
             time.sleep(0.05)  # wait for 2 seconds
 
     def update_game_status(self):
@@ -328,7 +333,7 @@ class PokeMMO:
 if __name__ == "__main__":
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
-    time.sleep(2)
+    # time.sleep(2)
 
     # while True:
     #     game_status = pokeMMO.get_game_status()
@@ -492,3 +497,6 @@ if __name__ == "__main__":
         getattr(pokeMMO, f"{next_location}_FARMING").run(repeat_times=1)
         time.sleep(1)
         previous_location = next_location
+
+    while True:
+        time.sleep(1)
