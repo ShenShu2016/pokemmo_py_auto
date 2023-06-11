@@ -124,30 +124,30 @@ class EnemyStatus:
                         enemy_name_coords[i][0],
                         (sex_coords[0][0], enemy_name_coords[i][1][1]),
                     )
-                name_Lv_ORC = self.pokeMMO.get_text_from_box_coords(
+                name_Lv_OCR = self.pokeMMO.get_text_from_box_coords(
                     top_l=enemy_name_coords[i][0],
                     bottom_r=enemy_name_coords[i][1],
                     img_BRG=self.img_BRG,
                     config="--psm 7 --oem 3 -c tessedit_char_whitelist=Lv1234567890",
                 )
 
-                numeric_string = "".join(filter(str.isdigit, name_Lv_ORC))
+                numeric_string = "".join(filter(str.isdigit, name_Lv_OCR))
                 total_int = int(numeric_string)
 
                 if total_int >= 99999 and enemy_count == 1:  # 闪光
                     pass
                 elif total_int >= 99999 and enemy_count > 1:
-                    print("闪光宠出现", name_Lv_ORC, total_int)
+                    print("闪光宠出现", name_Lv_OCR, total_int)
                     import os
 
                     os.system("taskkill /f /im python.exe")
 
-                if "Lv" in name_Lv_ORC:
-                    self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_ORC
-                    name_ORC = name_Lv_ORC.split("Lv")[0].strip()
-                    lv_orc = name_Lv_ORC.split("Lv")[1].strip()
+                if "Lv" in name_Lv_OCR:
+                    self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_OCR
+                    name_OCR = name_Lv_OCR.split("Lv")[0].strip()
+                    lv_orc = name_Lv_OCR.split("Lv")[1].strip()
                     info = self.pokeMMO.pokedex_csv.loc[
-                        self.pokeMMO.pokedex_csv["No"] == int(name_ORC)
+                        self.pokeMMO.pokedex_csv["No"] == int(name_OCR)
                     ]
                     if info.empty == False:
                         info_dict = info.to_dict(orient="records")
@@ -159,7 +159,7 @@ class EnemyStatus:
                         info_dict = info.to_dict(orient="records")
                         self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
 
-                        print(f"{name_ORC} 有可能是闪光")
+                        print(f"{name_OCR} 有可能是闪光")
 
         threads = []
         enemy_count = self.enemy_status_dict["enemy_count"]
