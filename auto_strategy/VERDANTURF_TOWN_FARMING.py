@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import time
+from time import sleep
 from typing import TYPE_CHECKING
 
 from auto_strategy.common_funciton import is_go_pc
@@ -43,7 +43,7 @@ class Farming_VERDANTURF_TOWN:
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
-        time.sleep(1)
+        sleep(1)
 
         if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
             result = self.pokeMMO.action_controller.fly_to_city(
@@ -73,7 +73,7 @@ class Farming_VERDANTURF_TOWN:
                     farming_times += 1
                     if farming_times >= repeat_times:
                         self.pokeMMO.action_controller.use_dig()
-                        time.sleep(1)
+                        sleep(1)
                         return
                     self.teleport_and_heal(city="VERDANTURF_TOWN")
                     self.leave_pc_center_and_go_farm(city="VERDANTURF_TOWN")
@@ -152,7 +152,7 @@ class Farming_VERDANTURF_TOWN:
 
                 if game_status["return_status"] == 1:
                     break
-                time.sleep(0.05)
+                sleep(0.05)
 
 
 if __name__ == "__main__":

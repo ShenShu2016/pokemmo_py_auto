@@ -3,11 +3,11 @@ import sys
 
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root_path)
-
 import json
 import re
 import struct
 import time
+from time import sleep
 
 import pymem
 from capstone import *
@@ -130,7 +130,7 @@ class MemoryInjector_Coords:
                 return
             if len(self.aob_address_list) < 1:
                 print(f"{i} try, retrying...")
-                time.sleep(1)
+                sleep(1)
         raise Exception("No aob found")
 
     def try_the_aob(self):
@@ -146,7 +146,7 @@ class MemoryInjector_Coords:
 
             try:
                 self.inject_memory()
-                time.sleep(1)
+                sleep(1)
                 self.read_data()
                 with open(self.json_file_path, "w") as json_file:
                     json.dump(

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import random
-import time
+from time import sleep
 from typing import TYPE_CHECKING
 
 from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
@@ -279,7 +279,7 @@ class PathFinder:
                 self.pf_move(end_face_dir=end_face_dir, transport=transport)
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
-            time.sleep(0.1)
+            sleep(0.1)
 
     def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
         while True:
@@ -298,7 +298,7 @@ class PathFinder:
 
             self.pf_move(end_face_dir=city_info[city]["112_nurse"][2])
 
-            time.sleep(0.5)  # 等一会儿才能知道到底到了没到
+            sleep(0.5)  # 等一会儿才能知道到底到了没到
         print("到达了护士那里")
         return True
 
@@ -321,9 +321,9 @@ class PathFinder:
             # print(self.path)
 
             self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
-            time.sleep(0.5)
+            sleep(0.5)
             self.pokeMMO.controller.key_press("s", 1)
-            time.sleep(2)
+            sleep(2)
             game_status = self.pokeMMO.get_game_status()
             if game_status["map_number_tuple"] == city_info[city]["map_number"]:
                 return True
@@ -363,7 +363,7 @@ class PathFinder:
                 self.pokeMMO.controller.key_down("x")
             for key, delay in self.keys_and_delays:
                 self.pokeMMO.controller.key_press(key, delay)
-                time.sleep(0.1)
+                sleep(0.1)
             if transport == "run":
                 self.pokeMMO.controller.key_up("x")
 

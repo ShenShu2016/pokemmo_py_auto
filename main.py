@@ -1,9 +1,9 @@
-import datetime
 import json
 import logging
 import threading
 import time
 from ctypes import windll
+from time import sleep
 
 import cv2
 import numpy as np
@@ -126,26 +126,26 @@ class PokeMMO:
                     "time to get image--------------------------------------------",
                     time_passed,
                 )
-            time.sleep(0.05)  # wait for 2 seconds
+            sleep(0.05)  # wait for 2 seconds
 
     def update_game_status(self):
         while not self.stop_threads_flag:
             new_game_state = self.game_status_checker.check_game_status()
             with self.game_status_lock:
                 self.game_status = new_game_state
-            time.sleep(0.02)  # wait for 3 seconds
+            sleep(0.02)  # wait for 3 seconds
 
     def update_enemy_status(self):
         while not self.stop_threads_flag:
             new_enemy_status = self.enemy_status_checker.check_enemy_status()
             with self.enemy_status_lock:
                 self.enemy_status = new_enemy_status
-            time.sleep(0.02)
+            sleep(0.02)
 
     def update_state_dict(self):
         while not self.stop_threads_flag:
             # Update every 30 seconds
-            time.sleep(3)
+            sleep(3)
             img_BRG = self.get_latest_img_BRG()
             my_address = self.get_text_from_box_coords(
                 (30, 0), (250, 25), img_BRG=img_BRG
@@ -167,7 +167,7 @@ class PokeMMO:
             new_memory_coords = self.memory_injector.read_data()
             with self.memory_coords_status_lock:
                 self.memory_coords_status = new_memory_coords
-            time.sleep(0.02)
+            sleep(0.02)
 
     # Use this method to safely access the state_dict variable from other threads
     def get_state_dict(self):
@@ -333,13 +333,13 @@ class PokeMMO:
 if __name__ == "__main__":
     pokeMMO = PokeMMO()
     # pokeMMO.start_ui()
-    # time.sleep(2)
+    # sleep(2)
 
     # while True:
     #     game_status = pokeMMO.get_game_status()
     #     pokeMMO.action_controller.iv_shiny_check_release(game_status)
 
-    #     time.sleep(5)
+    #     sleep(5)
 
     # while True:
     #     game_status = pokeMMO.get_game_status()
@@ -416,7 +416,7 @@ if __name__ == "__main__":
     #                 close_summary_button_mid_y + 3,
     #             )  # Round up
     #             pokeMMO.controller.click(*pc_release_icon_coords)
-    #             time.sleep(0.3)
+    #             sleep(0.3)
 
     #             confirm_release_area_top_l = (
     #                 close_summary_button_mid_x - 418,
@@ -446,12 +446,12 @@ if __name__ == "__main__":
     #                 pokeMMO.controller.click(
     #                     confirm_release_x_y_list[0][0], confirm_release_x_y_list[0][1]
     #                 )
-    #                 time.sleep(0.3)
+    #                 sleep(0.3)
     #                 pokeMMO.controller.click(679, 378)
     #         else:
     #             pokeMMO.action_controller.close_pokemon_summary(game_status)
 
-    #     time.sleep(5)
+    #     sleep(5)
 
     # hp_BRG_x_y_list = pokeMMO.find_items(
     #     temp_BRG=pokeMMO.hp_BRG,
@@ -462,10 +462,10 @@ if __name__ == "__main__":
     #     display=True,
     # )
 
-    # time.sleep(6)
+    # sleep(6)
     # while True:
     #     pokeMMO.action_controller.close_pokemon_summary(pokeMMO.get_game_status())
-    #     time.sleep(1)
+    #     sleep(1)
 
     import random
     import time
@@ -495,8 +495,8 @@ if __name__ == "__main__":
             )[0]
 
         getattr(pokeMMO, f"{next_location}_FARMING").run(repeat_times=1)
-        time.sleep(1)
+        sleep(1)
         previous_location = next_location
 
     while True:
-        time.sleep(1)
+        sleep(1)

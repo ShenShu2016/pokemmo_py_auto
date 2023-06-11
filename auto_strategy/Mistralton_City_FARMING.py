@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import time
+from time import sleep
 from typing import TYPE_CHECKING
 
 # from auto_strategy.common_funciton import is_go_pc
@@ -54,7 +54,7 @@ class Farming_Mistralton_City:
     def step_3_go_tower(self):
         self.pokeMMO.pf.go_somewhere(end_point=(233, 107), city=self.city)
         self.pokeMMO.controller.key_press("w", 0.7)
-        time.sleep(2)
+        sleep(2)
 
     def teleport_and_heal(self):
         self.pokeMMO.action_controller.use_teleport()
@@ -65,7 +65,7 @@ class Farming_Mistralton_City:
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
-        time.sleep(1)
+        sleep(1)
 
         result = self.pokeMMO.action_controller.fly_to_city(
             self.city, locate_teleport=True
@@ -250,7 +250,7 @@ class Farming_Mistralton_City:
 
                 if game_status["return_status"] == 1:
                     break
-                time.sleep(0.05)
+                sleep(0.05)
 
 
 if __name__ == "__main__":

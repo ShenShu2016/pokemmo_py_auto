@@ -1,12 +1,7 @@
 from __future__ import annotations
 
-import os
-import sys
-
-root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(root_path)
 import random
-import time
+from time import sleep
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -73,7 +68,7 @@ class Farming_BATTLE_FRONTINER:
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
-        time.sleep(1)
+        sleep(1)
 
         if self.pokeMMO.get_game_status()["map_number_tuple"][2] in [50, 76]:
             result = self.pokeMMO.action_controller.fly_to_city(
@@ -140,10 +135,15 @@ class Farming_BATTLE_FRONTINER:
 
                 if game_status["return_status"] == 1:
                     break
-                time.sleep(0.05)
+                sleep(0.05)
 
 
 if __name__ == "__main__":
+    import os
+    import sys
+
+    root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.append(root_path)
     current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
     package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
     sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中

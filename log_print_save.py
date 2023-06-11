@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import threading
 import time
+from time import sleep
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -78,7 +79,7 @@ class LogPrintSave:
                         self.logs.pop(0)
 
                 # 等待0.1秒再次执行
-                time.sleep(0.1)
+                sleep(0.1)
             except Exception as e:
                 print(f"An error occurred in update_logs: {e}")
 
@@ -98,6 +99,6 @@ class LogPrintSave:
                 #     f'memory_my_sprits_status: {self.logs[-1]["memory_my_sprits_status"]}'
                 # )
 
-                time.sleep(5)
+                sleep(5)
             except Exception as e:
                 pass

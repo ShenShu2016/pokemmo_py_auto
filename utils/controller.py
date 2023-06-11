@@ -1,4 +1,3 @@
-import time
 from ctypes.wintypes import HWND
 from time import sleep
 
@@ -44,7 +43,7 @@ class Controller:
         # print(f"Pressing {key} for {delay} seconds")
 
         keyboard.send_keys("{" + key + " down}")
-        time.sleep(delay)
+        sleep(delay)
         keyboard.send_keys("{" + key + " up}")
         # print(f"Finished pressing {key} for {delay} seconds")
 
@@ -67,7 +66,7 @@ if __name__ == "__main__":
 
     controller = Controller(pokeMMO.handle)
     # controller.move_to(589, 771)
-    # time.sleep(3)
+    # sleep(3)
     # controller.click(589, 771)
     controller.key_press("a", 0.5)
     controller.key_press("d", 0.5)

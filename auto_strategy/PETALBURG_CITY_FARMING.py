@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import time
+from time import sleep
 from typing import TYPE_CHECKING
 
 from auto_strategy.common_funciton import is_go_pc
@@ -42,7 +42,7 @@ class Farming_PETALBURG_CITY:
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
-        time.sleep(1)
+        sleep(1)
 
         if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
             result = self.pokeMMO.action_controller.fly_to_city(
@@ -149,7 +149,7 @@ class Farming_PETALBURG_CITY:
 
                 if game_status["return_status"] == 1:
                     break
-                time.sleep(0.05)
+                sleep(0.05)
 
 
 if __name__ == "__main__":

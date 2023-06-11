@@ -241,7 +241,7 @@ class Action_Controller:
                 close_summary_button_mid_x + 33,
                 close_summary_button_mid_y + 152,
             )  # Round down
-            time.sleep(0.3)
+            sleep(0.3)
             img_BRG = self.pokeMMO.get_latest_img_BRG()
             with ThreadPoolExecutor(max_workers=3) as executor:
                 shiny_future = executor.submit(check_shiny)
@@ -267,7 +267,7 @@ class Action_Controller:
                     close_summary_button_mid_y + 3,
                 )  # Round up
                 self.pokeMMO.controller.click(*pc_release_icon_coords)
-                time.sleep(0.3)
+                sleep(0.3)
 
                 confirm_release_area_top_l = (
                     close_summary_button_mid_x - 418,
@@ -292,7 +292,7 @@ class Action_Controller:
                     self.pokeMMO.controller.click(
                         confirm_release_x_y_list[0][0], confirm_release_x_y_list[0][1]
                     )
-                    time.sleep(0.1)
+                    sleep(0.1)
                     self.pokeMMO.controller.click(679, 378)
                 else:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
@@ -345,7 +345,7 @@ class Action_Controller:
                 city_info[city]["112"][1],
             ):
                 self.pokeMMO.controller.key_press("w", 1)
-                time.sleep(2)
+                sleep(2)
                 print("going to find nurse")
                 self.pokeMMO.pf.go_to_nurse(city=city)
                 self.talk_to_nurse()
@@ -357,7 +357,7 @@ class Action_Controller:
     def talk_to_nurse(self):
         print("Talking to nurse")
         self.pokeMMO.controller.key_press("z", 5)  # 合众 比较久
-        time.sleep(1)
+        sleep(1)
 
         self.skill_pp_dict = {
             "点到为止": 30,
