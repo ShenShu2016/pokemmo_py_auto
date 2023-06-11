@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 from collections import deque
+from datetime import datetime
 
 import pandas as pd
 
@@ -39,6 +40,9 @@ class LogPrintSave:
 
                 # 获取当前时间戳
                 timestamp = time.time()
+                formatted_timestamp = datetime.fromtimestamp(timestamp).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
 
                 # 创建新的日志
                 new_log = {
@@ -46,7 +50,6 @@ class LogPrintSave:
                     "enemy_status": enemy_status,
                     "state_dict": state_dict,
                     "memory_coords": memory_coords,
-                    "memory_battle_status": memory_battle_status,
                     "timestamp": timestamp,
                 }
 
@@ -57,14 +60,13 @@ class LogPrintSave:
 
                 # 比较新旧日志，如果有变化，将新日志插入数据库，并更新last_log
                 if self.last_log is None or new_log_without_timestamp != self.last_log:
-                    columns = "game_status, enemy_status, state_dict, memory_coords, memory_battle_status, timestamp"
+                    columns = "game_status, enemy_status, state_dict, memory_coords,  timestamp"
                     values = (
                         str(new_log["game_status"]),
                         str(new_log["enemy_status"]),
                         str(new_log["state_dict"]),
                         str(new_log["memory_coords"]),
-                        str(new_log["memory_battle_status"]),
-                        str(new_log["timestamp"]),
+                        str(formatted_timestamp),
                     )
                     self.pokemmo.db.insert_data("general_status", columns, values)
                     self.last_log = new_log_without_timestamp

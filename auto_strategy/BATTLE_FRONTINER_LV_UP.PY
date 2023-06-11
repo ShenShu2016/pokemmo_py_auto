@@ -94,9 +94,7 @@ class Farming_BATTLE_FRONTINER:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
                 game_status = self.pokeMMO.get_game_status()
-                if self.pokeMMO.get_game_status().get(
-                    "check_battle_end_pokemon_caught"
-                )[0]:
+                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
                 if self.pokeMMO.action_controller.skill_pp_dict["甜甜香气"] < 5:
                     farming_times += 1
@@ -112,9 +110,7 @@ class Farming_BATTLE_FRONTINER:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
-                if self.pokeMMO.get_game_status().get(
-                    "check_battle_end_pokemon_caught"
-                )[0]:
+                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
 
                 if (

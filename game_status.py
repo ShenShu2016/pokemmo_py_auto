@@ -1,14 +1,8 @@
 from __future__ import annotations
 
-import copy
-import os
-import time
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
-
-import cv2
-
-from constant import target_words_dict
 
 if TYPE_CHECKING:
     from main import PokeMMO
@@ -23,45 +17,33 @@ class GameStatus:
         self.recent_images = deque(maxlen=5)
         self.last_image_save_time = 0
         self.img_BRG = None
-        self.memory_battle_status = {}
         self.memory_coords_status = {}
         self.game_status_dict = {}
         self.skill_pp_dict = {}
-        threading.Thread(target=self.save_screenshot_check_status).start()
 
-    def save_screenshot_check_status(self):  #! later need to be multi-thread
-        if time.time() - self.last_image_save_time >= 15:
-            img_BRG = self.pokeMMO.get_latest_img_BRG()
-            print("Saving screenshot")
-            self.last_image_save_time = time.time()
-            gray_image = cv2.cvtColor(img_BRG, cv2.COLOR_BGR2GRAY)
+    def is_battle_in_progress(self):
+        battle_in_progress_coords_list = self.pokeMMO.find_items(
+            img_BRG=self.img_BRG,
+            top_l=(726, 581),
+            bottom_r=(797, 591),
+            temp_BRG=self.pokeMMO.battle_in_progress_BRG,
+            threshold=0.99,
+            max_matches=5,
+        )
+        return len(battle_in_progress_coords_list) > 0
 
-            timestamp_str = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
-            folder_path = "screenshot"
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
+    def is_battle_option_ready(self):
+        battle_option_ready_coords_list = self.pokeMMO.find_items(
+            img_BRG=self.img_BRG,
+            top_l=(504, 488),
+            bottom_r=(547, 508),
+            temp_BRG=self.pokeMMO.battle_option_BRG,
+            threshold=0.99,
+            max_matches=5,
+        )
+        return len(battle_option_ready_coords_list) > 0
 
-            filename = os.path.join(folder_path, f"image_{timestamp_str}.png")
-            cv2.imwrite(filename, gray_image)
-
-            if self.recent_images:
-                _, last_filename, _ = self.recent_images[-1]
-                last_image = cv2.imread(last_filename, cv2.IMREAD_GRAYSCALE)
-
-                result = cv2.matchTemplate(last_image, gray_image, cv2.TM_CCOEFF_NORMED)
-                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                self.game_status_dict["image_match_ratio"] = round(max_val, 2)
-                self.recent_images.append((time.time(), filename, max_val))
-
-                if all(
-                    image_data[2] is not None and image_data[2] >= 0.2
-                    for image_data in self.recent_images
-                ):
-                    raise Exception("Game is stuck")
-            else:
-                self.recent_images.append((time.time(), filename, None))
-
-    def check_battle_end_pokemon_caught(self):
+    def check_pokemon_summary(self):
         # print("check_battle_end_pokemon_caught")
         pokemon_summary_coords_list = self.pokeMMO.find_items(
             img_BRG=self.img_BRG,
@@ -85,46 +67,40 @@ class GameStatus:
             "map_number_tuple": (None, None, None),
             "face_dir": None,
             "transport": None,
-            "battle_time_passed": 0,
         }
         return_status = 0
 
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
         self.memory_coords_status = self.pokeMMO.get_memory_coords_status()
-        self.memory_battle_status = self.pokeMMO.get_memory_battle_status()
+        # self.check_pokemon_summary_status = self.check_pokemon_summary()
         self.skill_pp_dict = self.pokeMMO.action_controller.skill_pp_dict.copy()
-        # print("memory_battle_status", self.memory_battle_status)
-        # print("memory_coords_status", self.memory_coords_status)
-        current_time = time.time()
 
-        if self.memory_battle_status.get("battle_instance_address") in [None, 0]:
-            return_status = 1
-        elif self.memory_battle_status.get("battle_option_ready") == 1:
-            return_status = 20
-        elif self.memory_battle_status.get("battle_option_ready") == 0:
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            battle_in_progress_future = executor.submit(self.is_battle_in_progress)
+            battle_option_ready_future = executor.submit(self.is_battle_option_ready)
+            check_pokemon_summary_future = executor.submit(self.check_pokemon_summary)
+
+            self.is_battle_in_progress_status = battle_in_progress_future.result()
+            self.is_battle_option_ready_status = battle_option_ready_future.result()
+            self.check_pokemon_summary_status = check_pokemon_summary_future.result()
+
+        if self.is_battle_option_ready_status:
             return_status = 21
+        elif self.is_battle_in_progress_status:
+            return_status = 20
         else:
-            print(
-                self.memory_battle_status.get("battle_instance_address"),
-                self.memory_battle_status.get("battle_option_ready"),
-                self.memory_battle_status.get("battle_option_ready"),
-            )
+            return_status = 1
 
         self.game_status_dict = {
             "return_status": return_status,
-            "check_battle_end_pokemon_caught": self.check_battle_end_pokemon_caught(),  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
+            "check_pokemon_summary": self.check_pokemon_summary_status,  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
             "x_coords": self.memory_coords_status.get("x_coords"),
             "y_coords": self.memory_coords_status.get("y_coords"),
             "map_number_tuple": self.memory_coords_status.get("map_number"),
             "face_dir": self.memory_coords_status.get("face_dir"),
             "transport": self.memory_coords_status.get("transport"),
-            "battle_time_passed": self.memory_battle_status.get("battle_time_passed"),
             "skill_pp": self.skill_pp_dict,
         }
-
-        self.recent_status_game_status_dict_list.append(
-            (current_time, copy.deepcopy(self.game_status_dict))
-        )
 
         return self.game_status_dict
 

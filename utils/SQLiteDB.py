@@ -48,8 +48,7 @@ class SQLiteDB:
             enemy_status TEXT,
             state_dict TEXT,
             memory_coords TEXT,
-            memory_battle_status TEXT,
-            timestamp REAL
+            timestamp TEXT
         )
         """
         self.execute_query(query)
@@ -76,7 +75,7 @@ if __name__ == "__main__":
     # 定义要插入的数据
     game_status = {
         "return_status": 1,
-        "check_battle_end_pokemon_caught": (False, []),
+        "check_pokemon_summary": (False, []),
         "x_coords": 108,
         "y_coords": 282,
         "map_number_tuple": (2, 1, 81),

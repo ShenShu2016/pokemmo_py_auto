@@ -147,7 +147,7 @@ class Action_Controller:
 
     @synchronized
     def close_pokemon_summary(self, game_status):
-        coords_list = game_status["check_battle_end_pokemon_caught"][1]
+        coords_list = game_status["check_pokemon_summary"][1]
         for i in coords_list:  # [(814, 262, 936, 277)]
             exit_button_x = (i[0] + i[2]) / 2 + 17
             exit_button_y = (i[1] + i[3]) / 2 - 2
@@ -159,7 +159,7 @@ class Action_Controller:
 
     @synchronized
     def click_pokemon_summary_IV(self, game_status):
-        coords = game_status["check_battle_end_pokemon_caught"][1][0]
+        coords = game_status["check_pokemon_summary"][1][0]
         iv_icon_x = (coords[0] + coords[2]) / 2 - 386
         iv_icon_y = (coords[1] + coords[3]) / 2 + 3
         print(iv_icon_x, iv_icon_y)
@@ -226,9 +226,9 @@ class Action_Controller:
             print("IV 31 List:", iv_31_x_y_list)
             return len(iv_31_x_y_list) >= 1
 
-        if game_status["check_battle_end_pokemon_caught"][0]:
+        if game_status["check_pokemon_summary"][0]:
             self.click_pokemon_summary_IV(game_status)
-            coords = game_status["check_battle_end_pokemon_caught"][1][0]
+            coords = game_status["check_pokemon_summary"][1][0]
 
             # Compute common coordinates.
             close_summary_button_mid_x = int((coords[0] + coords[2]) / 2)

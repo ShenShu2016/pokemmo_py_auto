@@ -90,9 +90,7 @@ class Farming_Mistralton_City:
                 game_status = add_x_y_coords_offset_Mistralton_City(
                     self.pokeMMO.get_game_status()
                 )
-                if self.pokeMMO.get_game_status().get(
-                    "check_battle_end_pokemon_caught"
-                )[0]:
+                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
                 if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
                     farming_times += 1
@@ -165,9 +163,7 @@ class Farming_Mistralton_City:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
-                if self.pokeMMO.get_game_status().get(
-                    "check_battle_end_pokemon_caught"
-                )[0]:
+                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
 
                 if (

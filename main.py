@@ -89,7 +89,6 @@ class PokeMMO:
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
         threading.Thread(target=self.update_memory_coords).start()
-        # threading.Thread(target=self.update_memory_battle_status).start()
         threading.Thread(target=self.log_print_save.update_logs).start()
         threading.Thread(target=self.log_print_save.print_logs).start()
 
@@ -369,9 +368,9 @@ if __name__ == "__main__":
     # while True:
     #     game_status = pokeMMO.get_game_status()
 
-    #     if game_status["check_battle_end_pokemon_caught"][0]:
+    #     if game_status["check_pokemon_summary"][0]:
     #         pokeMMO.action_controller.click_pokemon_summary_IV(game_status)
-    #         coords = game_status["check_battle_end_pokemon_caught"][1][0]
+    #         coords = game_status["check_pokemon_summary"][1][0]
 
     #         # Compute common coordinates.
     #         close_summary_button_mid_x = int((coords[0] + coords[2]) / 2)
@@ -503,7 +502,7 @@ if __name__ == "__main__":
     }
     previous_location = None
 
-    while False:
+    while True:
         if previous_location is not None:
             available_locations = locations.copy()
             del available_locations[previous_location]  # 移除上一次地点
