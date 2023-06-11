@@ -36,7 +36,6 @@ class LogPrintSave:
                 enemy_status = self.pokemmo.get_enemy_status()
                 state_dict = self.pokemmo.get_state_dict()
                 memory_coords = self.pokemmo.get_memory_coords_status()
-                memory_battle_status = self.pokemmo.get_memory_battle_status()
 
                 # 获取当前时间戳
                 timestamp = time.time()
@@ -95,7 +94,6 @@ class LogPrintSave:
                 print(f"\033[32menemy_status: {self.logs[-1]['enemy_status']}\033[32m")
                 # print(f"state_dict: {self.logs[-1]['state_dict']}")
                 # print(f"memory_coords: {self.logs[-1]['memory_coords']}")
-                # print(f'memory_battle_status: {self.logs[-1]["memory_battle_status"]}')
                 # print(
                 #     f'memory_my_sprits_status: {self.logs[-1]["memory_my_sprits_status"]}'
                 # )
