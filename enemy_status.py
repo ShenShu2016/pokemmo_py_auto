@@ -4,6 +4,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+import pygame
+
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -25,6 +27,18 @@ enemy_name_coords = {
     5: [(316, 117), (517, 136)],
     6: [(835, 117), (1037, 136)],
 }
+
+
+def play_music(music_file=r"asserts\unravel.mp3"):
+    def _play_music():
+        pygame.mixer.init()
+        pygame.mixer.music.load(music_file)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+
+    thread = threading.Thread(target=_play_music)
+    thread.start()
 
 
 class EnemyStatus:
@@ -135,9 +149,12 @@ class EnemyStatus:
                 total_int = int(numeric_string)
 
                 if total_int >= 99999 and enemy_count == 1:  # 闪光
+                    play_music()
                     pass
                 elif total_int >= 99999 and enemy_count > 1:
+                    play_music()
                     print("闪光宠出现", name_Lv_OCR, total_int)
+                    time.sleep(600)
                     import os
 
                     os.system("taskkill /f /im python.exe")
@@ -249,3 +266,8 @@ class EnemyStatus:
                 check_enemy_sleep_time,
             )
         return self.enemy_status_dict
+
+
+if __name__ == "__main__":
+    play_music()
+    print("开始")
