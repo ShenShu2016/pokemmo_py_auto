@@ -85,20 +85,10 @@ class LogPrintSave:
 
     def print_logs(self):
         print("Starting print_logs")
-        """Print the logs every 2 seconds."""
         while not self.pokemmo.stop_threads_flag:
-            # Print the logs to the terminal
             try:
-                # print("\n".join(map(str, self.logs[-1])))
-                # os.system("cls" if os.name == "nt" else "clear")  # Clear the terminal
                 print(f"\033[31mgame_status: {self.logs[-1]['game_status']}\033[31m")
                 print(f"\033[32menemy_status: {self.logs[-1]['enemy_status']}\033[32m")
-                # print(f"state_dict: {self.logs[-1]['state_dict']}")
-                # print(f"memory_coords: {self.logs[-1]['memory_coords']}")
-                # print(
-                #     f'memory_my_sprits_status: {self.logs[-1]["memory_my_sprits_status"]}'
-                # )
-
                 sleep(5)
             except Exception as e:
                 pass
