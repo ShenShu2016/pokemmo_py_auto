@@ -92,10 +92,11 @@ class Farming_Mistralton_City:
         while True:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
-                game_status = add_x_y_coords_offset_Mistralton_City(
-                    self.pokeMMO.get_game_status()
+                coords_status = add_x_y_coords_offset_Mistralton_City(
+                    self.pokeMMO.get_coords_status()
                 )
-                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
+                game_status = self.pokeMMO.get_game_status()
+                if game_status.get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
                 if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
                     farming_times += 1
@@ -108,14 +109,13 @@ class Farming_Mistralton_City:
                         )
                         if self.pokeMMO.get_game_status()["return_status"] >= 20:
                             break
-                        game_status = self.pokeMMO.get_game_status()
                         coords_status = self.pokeMMO.get_coords_status()
                         if (
                             coords_status["x_coords"] == 16
                             and coords_status["y_coords"] == 25
                         ):
                             print("到达塔里,出门前")
-                            self.pokeMMO.controller.key_press("s", 3)
+                            self.pokeMMO.controller.key_press("s", 2.5)
                             if self.pokeMMO.get_coords_status()["map_number_tuple"] == (
                                 2,
                                 1,
@@ -153,6 +153,7 @@ class Farming_Mistralton_City:
                     self.step_3_go_tower()
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
+                coords_status = self.pokeMMO.get_coords_status()
                 if (
                     coords_status["x_coords"],
                     coords_status["y_coords"],
@@ -160,6 +161,9 @@ class Farming_Mistralton_City:
                     # Trigger the desired operation
                     self.pokeMMO.action_controller.use_sweet_sent()
                     # pass
+
+                else:
+                    print("不在刷怪点", coords_status["x_coords"], coords_status["y_coords"])
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,
@@ -208,7 +212,10 @@ class Farming_Mistralton_City:
                         self.pokeMMO.action_controller.run_from_s21()
 
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 11:
-                        if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
+                        if (
+                            is_go_pc(self.pokeMMO.action_controller.skill_pp_dict)
+                            and enemy_status.get("enemy_1_hp_pct") >= 80
+                        ):
                             self.pokeMMO.action_controller.run_from_s21()
                         elif enemy_status.get("enemy_1_hp_pct") >= 80:
                             self.pokeMMO.action_controller.fight_skill_3_from_s21()
@@ -273,4 +280,4 @@ if __name__ == "__main__":
 
     pokeMMO = PokeMMO()
     farming = Farming_Mistralton_City(pokeMMO)
-    farming.run()
+    farming.run(30)
