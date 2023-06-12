@@ -1,30 +1,35 @@
 from __future__ import annotations
 
+import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
+sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 from time import sleep
 from typing import TYPE_CHECKING
 
-# from auto_strategy.common_funciton import is_go_pc
 from auto_strategy.common_funciton import is_go_pc
 
 if TYPE_CHECKING:
     from main import PokeMMO
 
 
-def add_x_y_coords_offset_Mistralton_City(game_status):
-    game_status_copy = game_status.copy()  # Create a copy of the game_status
+def add_x_y_coords_offset_Mistralton_City(coords_status):
+    coords_status_copy = coords_status.copy()  # Create a copy of the game_status
 
-    if game_status_copy["map_number_tuple"] == (2, 1, 82):
-        if game_status_copy["y_coords"] <= 10:
-            game_status_copy["x_coords"] = 13 - game_status_copy["x_coords"]
-            game_status_copy["y_coords"] = 25 - game_status_copy["y_coords"]
+    if coords_status_copy["map_number_tuple"] == (2, 1, 82):
+        if coords_status_copy["y_coords"] <= 10:
+            coords_status_copy["x_coords"] = 13 - coords_status_copy["x_coords"]
+            coords_status_copy["y_coords"] = 25 - coords_status_copy["y_coords"]
 
-    elif game_status_copy["map_number_tuple"] == (2, 1, 83):
-        game_status_copy["x_coords"] = game_status_copy["x_coords"] - 26
-        game_status_copy["y_coords"] = game_status_copy["y_coords"] + 2
+    elif coords_status_copy["map_number_tuple"] == (2, 1, 83):
+        coords_status_copy["x_coords"] = coords_status_copy["x_coords"] - 26
+        coords_status_copy["y_coords"] = coords_status_copy["y_coords"] + 2
     else:
         pass
 
-    return game_status_copy  # Return the modified copy
+    return coords_status_copy  # Return the modified copy
 
 
 class Farming_Mistralton_City:
@@ -104,13 +109,14 @@ class Farming_Mistralton_City:
                         if self.pokeMMO.get_game_status()["return_status"] >= 20:
                             break
                         game_status = self.pokeMMO.get_game_status()
+                        coords_status = self.pokeMMO.get_coords_status()
                         if (
-                            game_status["x_coords"] == 16
-                            and game_status["y_coords"] == 25
+                            coords_status["x_coords"] == 16
+                            and coords_status["y_coords"] == 25
                         ):
                             print("到达塔里,出门前")
                             self.pokeMMO.controller.key_press("s", 3)
-                            if self.pokeMMO.get_game_status()["map_number_tuple"] == (
+                            if self.pokeMMO.get_coords_status()["map_number_tuple"] == (
                                 2,
                                 1,
                                 81,
@@ -125,11 +131,14 @@ class Farming_Mistralton_City:
                     )
                     if self.pokeMMO.get_game_status()["return_status"] >= 20:
                         break  # break 出，因为要战斗了
-                    game_status = self.pokeMMO.get_game_status()
-                    if game_status["x_coords"] == 16 and game_status["y_coords"] == 25:
+                    coords_status = self.pokeMMO.get_coords_status()
+                    if (
+                        coords_status["x_coords"] == 16
+                        and coords_status["y_coords"] == 25
+                    ):
                         print("到达塔里,出门前")
                         self.pokeMMO.controller.key_press("s", 3)
-                        if self.pokeMMO.get_game_status()["map_number_tuple"] == (
+                        if self.pokeMMO.get_coords_status()["map_number_tuple"] == (
                             2,
                             1,
                             81,
@@ -145,8 +154,8 @@ class Farming_Mistralton_City:
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
                 if (
-                    game_status["x_coords"],
-                    game_status["y_coords"],
+                    coords_status["x_coords"],
+                    coords_status["y_coords"],
                 ) in self.farming_coords:
                     # Trigger the desired operation
                     self.pokeMMO.action_controller.use_sweet_sent()

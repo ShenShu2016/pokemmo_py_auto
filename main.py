@@ -46,13 +46,13 @@ class PokeMMO:
         self.game_status_lock = threading.Lock()
         self.enemy_status_lock = threading.Lock()
         self.state_dict_lock = threading.Lock()
-        self.memory_coords_status_lock = threading.Lock()
+        self.coords_status_lock = threading.Lock()
         self.latest_img_BRG = self.window_manager.get_current_img_BRG()
 
         self.game_status = {"return_status": 0}
         self.enemy_status = {}
-        self.state_dict = {}
-        self.memory_coords_status = {}
+        self.state_dict = {"address": "", "money": 0}
+        self.coords_status = {}
         self.df_dict = {}
         self.load_assets()
         self.game_status_checker = GameStatus(self)
@@ -153,17 +153,18 @@ class PokeMMO:
                 config="--psm 6 -c tessedit_char_whitelist=0123456789",
                 img_BRG=img_BRG,
             )
+
             with self.state_dict_lock:
                 self.state_dict = {
                     "address": my_address,
-                    "money": my_money,
+                    "money": int(my_money),
                 }
 
     def update_memory_coords(self):
         while not self.stop_threads_flag:
             new_memory_coords = self.mj_coords.read_data()
-            with self.memory_coords_status_lock:
-                self.memory_coords_status = new_memory_coords
+            with self.coords_status_lock:
+                self.coords_status = new_memory_coords
             sleep(0.02)
 
     # Use this method to safely access the state_dict variable from other threads
@@ -179,9 +180,9 @@ class PokeMMO:
         with self.enemy_status_lock:
             return self.enemy_status
 
-    def get_mj_coords_status(self):
-        with self.memory_coords_status_lock:
-            return self.memory_coords_status
+    def get_coords_status(self):
+        with self.coords_status_lock:
+            return self.coords_status
 
     def get_latest_img_BRG(self):
         with self.latest_img_BRG_lock:
@@ -229,7 +230,7 @@ class PokeMMO:
         text = pytesseract.image_to_string(gray, config=config, lang=lang)
         # print(f"Text: {text}")
 
-        return text
+        return text.rstrip("\n")
 
     def get_text_from_center(
         self,
@@ -475,7 +476,7 @@ if __name__ == "__main__":
     }
     previous_location = None
 
-    while True:
+    while False:
         if previous_location is not None:
             available_locations = locations.copy()
             del available_locations[previous_location]  # 移除上一次地点

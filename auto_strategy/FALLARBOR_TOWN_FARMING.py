@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
+sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 from time import sleep
 from typing import TYPE_CHECKING
 
@@ -9,16 +15,17 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 
-def add_x_y_coords_offset_FALLARBOR_TOWN(game_status):
-    game_status_copy = game_status.copy()  # Create a copy of the game_status
-    if game_status_copy["map_number_tuple"][1] == 28:
-        game_status_copy["x_coords"] = game_status_copy["x_coords"] + 20
-    elif game_status_copy["map_number_tuple"][1] == 29:
-        game_status_copy["x_coords"] = game_status_copy["x_coords"] - 40
+def add_x_y_coords_offset_FALLARBOR_TOWN(coords_status):
+    print(coords_status, "add_x_y_coords_offset_FALLARBOR_TOWN")
+    coords_status_copy = coords_status.copy()  # Create a copy of the game_status
+    if coords_status_copy["map_number_tuple"][1] == 28:
+        coords_status_copy["x_coords"] = coords_status_copy["x_coords"] + 20
+    elif coords_status_copy["map_number_tuple"][1] == 29:
+        coords_status_copy["x_coords"] = coords_status_copy["x_coords"] - 40
 
     else:
         pass
-    return game_status_copy  # Return the modified copy
+    return coords_status_copy  # Return the modified copy
 
 
 class Farming_FALLARBOR_TOWN:
@@ -45,7 +52,7 @@ class Farming_FALLARBOR_TOWN:
         # 首先要确认是否能飞走
         sleep(1)
 
-        if self.pokeMMO.get_game_status()["map_number_tuple"][2] == 50:
+        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] == 50:
             result = self.pokeMMO.action_controller.fly_to_city(
                 self.city, locate_teleport=True
             )
@@ -64,9 +71,9 @@ class Farming_FALLARBOR_TOWN:
         while True:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
-                game_status = add_x_y_coords_offset_FALLARBOR_TOWN(
-                    self.pokeMMO.get_game_status()
-                )
+                coords_status = self.pokeMMO.get_coords_status()
+                game_status = self.pokeMMO.get_game_status()
+                coords_status = add_x_y_coords_offset_FALLARBOR_TOWN(coords_status)
                 if game_status.get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
                 if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
@@ -78,8 +85,8 @@ class Farming_FALLARBOR_TOWN:
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
                 if (
-                    game_status["x_coords"],
-                    game_status["y_coords"],
+                    coords_status["x_coords"],
+                    coords_status["y_coords"],
                 ) in self.farming_coords:
                     # Trigger the desired operation
                     self.pokeMMO.action_controller.use_sweet_sent()
@@ -154,12 +161,6 @@ class Farming_FALLARBOR_TOWN:
 
 
 if __name__ == "__main__":
-    import os
-    import sys
-
-    current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
-    package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
-    sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
     from main import PokeMMO
 
     pokeMMO = PokeMMO()

@@ -15,7 +15,6 @@ class GameStatus:
         self.recent_images = deque(maxlen=5)
         self.last_image_save_time = 0
         self.img_BRG = None
-        self.memory_coords_status = {}
         self.game_status_dict = {}
         self.skill_pp_dict = {}
 
@@ -69,8 +68,6 @@ class GameStatus:
         return_status = 0
 
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
-        self.memory_coords_status = self.pokeMMO.get_mj_coords_status()
-        # self.check_pokemon_summary_status = self.check_pokemon_summary()
         self.skill_pp_dict = self.pokeMMO.action_controller.skill_pp_dict.copy()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
@@ -92,11 +89,6 @@ class GameStatus:
         self.game_status_dict = {
             "return_status": return_status,
             "check_pokemon_summary": self.check_pokemon_summary_status,  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
-            "x_coords": self.memory_coords_status.get("x_coords"),
-            "y_coords": self.memory_coords_status.get("y_coords"),
-            "map_number_tuple": self.memory_coords_status.get("map_number"),
-            "face_dir": self.memory_coords_status.get("face_dir"),
-            "transport": self.memory_coords_status.get("transport"),
             "skill_pp": self.skill_pp_dict,
         }
 

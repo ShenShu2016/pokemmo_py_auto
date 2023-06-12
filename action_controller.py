@@ -143,7 +143,7 @@ class Action_Controller:
             print("扔球")
             self.pokeMMO.controller.key_press("z", 1)
             print("Throwing Pokeball")
-            sleep(5)
+            sleep(3)
 
     @synchronized
     def close_pokemon_summary(self, game_status):
@@ -241,7 +241,7 @@ class Action_Controller:
                 close_summary_button_mid_x + 33,
                 close_summary_button_mid_y + 152,
             )  # Round down
-            sleep(0.3)
+            sleep(0.1)
             img_BRG = self.pokeMMO.get_latest_img_BRG()
             with ThreadPoolExecutor(max_workers=3) as executor:
                 shiny_future = executor.submit(check_shiny)
@@ -267,7 +267,7 @@ class Action_Controller:
                     close_summary_button_mid_y + 3,
                 )  # Round up
                 self.pokeMMO.controller.click(*pc_release_icon_coords)
-                sleep(0.3)
+                sleep(0.1)
 
                 confirm_release_area_top_l = (
                     close_summary_button_mid_x - 418,
@@ -318,29 +318,29 @@ class Action_Controller:
 
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.pokeMMO.controller.key_press("7")
-        sleep(0.3)
+        sleep(0.2)
         for i in range(2):
             self.pokeMMO.controller.click(
                 city_info[city]["town_map_coords"][0],
                 city_info[city]["town_map_coords"][1],
                 tolerance=0,
             )
-        sleep(0.05)
+            sleep(0.05)
 
-        sleep(7)
+        sleep(5)
         # check if in right city
         print("Checking if in %s" % city)
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"] == city_info[city]["map_number"]:
+        coords_status = self.pokeMMO.get_coords_status()
+        if coords_status["map_number_tuple"] == city_info[city]["map_number"]:
             print(
                 "Flied to %s" % city,
-                f'当前坐标：{game_status["map_number_tuple"]},应该是{city_info[city]["map_number"]}',
+                f'当前坐标：{coords_status["map_number_tuple"]},应该是{city_info[city]["map_number"]}',
             )
         else:
             raise Exception("Not in %s" % city)
 
         if locate_teleport:
-            if (game_status["x_coords"], game_status["y_coords"]) == (
+            if (coords_status["x_coords"], coords_status["y_coords"]) == (
                 city_info[city]["112"][0],
                 city_info[city]["112"][1],
             ):
@@ -373,7 +373,7 @@ class Action_Controller:
         self.pokeMMO.controller.key_press("z", 1.5)
 
         for i in range(10):
-            if self.pokeMMO.get_game_status()["transport"] in [1, 11, 75, 65, 7]:
+            if self.pokeMMO.get_coords_status()["transport"] in [1, 11, 75, 65, 7]:
                 return True
             sleep(0.1)
 
@@ -397,26 +397,26 @@ class Action_Controller:
 
     @synchronized
     def use_teleport(self):
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"][2] == 50 or game_status[
+        coords_status = self.pokeMMO.get_coords_status()
+
+        if coords_status["map_number_tuple"][2] == 50 or coords_status[
             "map_number_tuple"
         ] in [(1, 14, 76), (2, 1, 81)]:
             self.pokeMMO.controller.key_press("8")
             sleep(3)
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"][2] != 50:
+        coords_status = self.pokeMMO.get_coords_status()
+        if coords_status["map_number_tuple"][2] != 50:
             return True
         else:
             raise Exception("Not in building,还没做完")
 
     @synchronized
     def use_dig(self):
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"][2] == 74:
+        coords_status = self.pokeMMO.get_coords_status()
+        if coords_status["map_number_tuple"][2] == 74:
             self.pokeMMO.controller.key_press("9")
             sleep(5)
-        game_status = self.pokeMMO.get_game_status()
-        if game_status["map_number_tuple"][2] != 74:
+        if coords_status["map_number_tuple"][2] != 74:
             return True
         else:
             raise Exception("Not in building,还没做完")

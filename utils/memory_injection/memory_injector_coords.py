@@ -261,7 +261,7 @@ class MemoryInjector_Coords:
         self.memory_info_dict = {
             "x_coords": self.x_coords,
             "y_coords": self.y_coords,
-            "map_number": (
+            "map_number_tuple": (
                 int(data[4 + 80]),
                 int(data[4 + 80 + 2]),
                 int(data[4 + 80 + 1]),
@@ -270,7 +270,6 @@ class MemoryInjector_Coords:
             "transport": self.transport,
         }
         return self.memory_info_dict
-        # print(self.memory_info_dict)
 
 
 if __name__ == "__main__":

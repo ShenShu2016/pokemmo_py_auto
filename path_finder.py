@@ -89,8 +89,8 @@ class PathFinder:
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
         transport_speed = {"bike": 0.08, "walk": 0.25, "run": 0.16, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
-        game_state = self.pokeMMO.get_game_status()
-        current_face_dir = game_state["face_dir"]
+        coords_status = self.pokeMMO.get_coords_status()
+        current_face_dir = coords_status["face_dir"]
         if path is None:
             return None
         keys_and_delays = []
@@ -241,7 +241,8 @@ class PathFinder:
 
         while True:
             game_status = self.pokeMMO.get_game_status()
-            game_status_with_offset = offset_func(game_status)
+            coords_status = self.pokeMMO.get_coords_status()
+            coords_status_with_offset = offset_func(coords_status)
             if style == "farming":
                 random_row = df[df["mark"] == 66].sample(n=1)
                 end_point = (
@@ -251,21 +252,19 @@ class PathFinder:
 
             # If end_point is reached or enters battle, break the loop
             if (
-                game_status_with_offset["x_coords"] - min_x == end_point[1]
-                and game_status_with_offset["y_coords"] - min_y == end_point[0]
+                coords_status_with_offset["x_coords"] - min_x == end_point[1]
+                and coords_status_with_offset["y_coords"] - min_y == end_point[0]
             ):
                 break
-            if (
-                style == "farming" or style == "ignore_sprite"
-            ) and game_status_with_offset[
+            if (style == "farming" or style == "ignore_sprite") and game_status[
                 "return_status"
             ] >= 20:  # 进入战斗了
                 break
 
             # Update start_point and end_point if farming
             start_point = (
-                game_status_with_offset["y_coords"] - min_y,
-                game_status_with_offset["x_coords"] - min_x,
+                coords_status_with_offset["y_coords"] - min_y,
+                coords_status_with_offset["x_coords"] - min_x,
             )
 
             # print(f"当前开始坐标: {start_point}, 网格大小: {(self.max_y, self.max_x)}")
@@ -283,15 +282,15 @@ class PathFinder:
 
     def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
         while True:
-            game_status = self.pokeMMO.get_game_status()
+            coords_status = self.pokeMMO.get_coords_status()
             if (
-                game_status["x_coords"] == city_info[city]["112_nurse"][0]
-                and game_status["y_coords"] == city_info[city]["112_nurse"][1]
-                and game_status["face_dir"] == city_info[city]["112_nurse"][2]
+                coords_status["x_coords"] == city_info[city]["112_nurse"][0]
+                and coords_status["y_coords"] == city_info[city]["112_nurse"][1]
+                and coords_status["face_dir"] == city_info[city]["112_nurse"][2]
             ):
                 break
             self.path = self.a_star_no_obstacle(
-                (game_status["y_coords"], game_status["x_coords"]),
+                (coords_status["y_coords"], coords_status["x_coords"]),
                 (city_info[city]["112_nurse"][1], city_info[city]["112_nurse"][0]),
             )
             print(self.path)
@@ -304,15 +303,15 @@ class PathFinder:
 
     def leave_pc_center(self, city="SOOTOPOLIS_CITY"):
         while True:
-            game_status = self.pokeMMO.get_game_status()
+            coords_status = self.pokeMMO.get_coords_status()
             if (
-                game_status["x_coords"] == city_info[city]["112_out"][0][0]
-                and game_status["y_coords"] == city_info[city]["112_out"][0][1]
-                and game_status["face_dir"] == city_info[city]["112_out"][0][2]
+                coords_status["x_coords"] == city_info[city]["112_out"][0][0]
+                and coords_status["y_coords"] == city_info[city]["112_out"][0][1]
+                and coords_status["face_dir"] == city_info[city]["112_out"][0][2]
             ):
                 break
             self.path = self.a_star_no_obstacle(
-                start=(game_status["y_coords"], game_status["x_coords"]),
+                start=(coords_status["y_coords"], coords_status["x_coords"]),
                 end=(
                     city_info[city]["112_out"][0][1],
                     city_info[city]["112_out"][0][0],
@@ -324,8 +323,8 @@ class PathFinder:
             sleep(0.5)
             self.pokeMMO.controller.key_press("s", 1)
             sleep(2)
-            game_status = self.pokeMMO.get_game_status()
-            if game_status["map_number_tuple"] == city_info[city]["map_number"]:
+            coords_status = self.pokeMMO.get_coords_status()
+            if coords_status["map_number_tuple"] == city_info[city]["map_number"]:
                 return True
             else:
                 raise Exception("Failed to leave pc center")
@@ -333,24 +332,24 @@ class PathFinder:
     def pf_move(
         self, end_face_dir=None, transport=None
     ):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
-        game_status = self.pokeMMO.get_game_status()
+        coords_status = self.pokeMMO.get_coords_status()
 
         if transport == None:
             if (
-                game_status["map_number_tuple"][2] == 50
-                or game_status["map_number_tuple"]
+                coords_status["map_number_tuple"][2] == 50
+                or coords_status["map_number_tuple"]
                 in [(1, 14, 76), (1, 4, 74), (2, 0, 107), (2, 1, 81)]
-            ) and game_status["transport"] not in [1, 11, 65, 75, 7]:
+            ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
                 transport = "bike"
-                if game_status["transport"] not in [10, 74, 6, 2]:
+                if coords_status["transport"] not in [10, 74, 6, 2]:
                     self.pokeMMO.controller.key_press("3", 0.1)
 
-            elif game_status["transport"] in [1, 11, 75, 65, 7]:
+            elif coords_status["transport"] in [1, 11, 75, 65, 7]:
                 transport = "surf"
             else:
                 transport = "run"
         elif transport == "walk" or transport == "run":
-            if game_status["transport"] in [10, 74, 6, 2]:
+            if coords_status["transport"] in [10, 74, 6, 2]:
                 self.pokeMMO.controller.key_press("3", 0.1)
 
         self.keys_and_delays = self.path_to_keys_and_delays(

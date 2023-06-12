@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
+sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 import random
 from time import sleep
 from typing import TYPE_CHECKING
@@ -75,7 +81,7 @@ class Farming_SOOTOPOLIS_CITY:
         # 首先要确认是否能飞走
         sleep(1)
 
-        if self.pokeMMO.get_game_status()["map_number_tuple"][2] in [50, 76]:
+        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] in [50, 76]:
             result = self.pokeMMO.action_controller.fly_to_city(
                 "SOOTOPOLIS_CITY", locate_teleport=True
             )
@@ -176,12 +182,6 @@ class Farming_SOOTOPOLIS_CITY:
 
 
 if __name__ == "__main__":
-    import os
-    import sys
-
-    current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
-    package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
-    sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
     from main import PokeMMO
 
     pokeMMO = PokeMMO()

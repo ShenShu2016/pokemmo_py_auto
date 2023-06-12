@@ -46,8 +46,11 @@ class SQLiteDB:
         CREATE TABLE IF NOT EXISTS general_status (
             game_status TEXT,
             enemy_status TEXT,
-            state_dict TEXT,
-            memory_coords TEXT,
+            address TEXT,
+            money INTEGER,
+            x_coords INTEGER,
+            y_coords INTEGER,
+            map_number_tuple TEXT,
             timestamp TEXT
         )
         """
