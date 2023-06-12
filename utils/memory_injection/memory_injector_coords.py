@@ -93,7 +93,7 @@ class MemoryInjector_Coords:
 
             # Try to read data
             try:
-                self.read_data()
+                self.test_data()
                 print(
                     f"Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
                 )
@@ -109,10 +109,10 @@ class MemoryInjector_Coords:
             self.try_the_aob()
 
     def aob_scan(self):
-        for i in range(10):
+        while True:
             self.aob_address_list = pattern_scan_all(
                 handle=self.pm.process_handle,
-                pattern=b"\\x0F\\xBE.\\x10.\\x0F\\xB6.\\x12",  # .\\x8B.\\x24\\x45\\x0F\\xB6.\\x11',#pattern=bytes.fromhex(self.aob_dict[i]['aob']),
+                pattern=b"\\x0F\\xBE.\\x10.\\x0F\\xB6.\\x12",
                 return_multiple=True,
             )
             print("aob_address_list:", self.aob_address_list)
@@ -129,13 +129,10 @@ class MemoryInjector_Coords:
                 print("aob_address_list after 45 41:", self.aob_address_list)
                 return
             if len(self.aob_address_list) < 1:
-                print(f"{i} try, retrying...")
-                sleep(1)
-        raise Exception("No aob found")
+                print(f"retrying...")
+                sleep(0.5)
 
     def try_the_aob(self):
-        print("Trying the aob")
-        print("aob_address_list:", self.aob_address_list)
         for i in self.aob_address_list:
             self.aob_address = i - 1  # 必定要偏移
             self.aob_hex_list = [
@@ -147,7 +144,7 @@ class MemoryInjector_Coords:
             try:
                 self.inject_memory()
                 sleep(1)
-                self.read_data()
+                self.test_data()
                 with open(self.json_file_path, "w") as json_file:
                     json.dump(
                         {
@@ -239,6 +236,16 @@ class MemoryInjector_Coords:
                 byte_values.append(int.from_bytes(hv, "little"))
         return bytes(byte_values)
 
+    def test_data(self):
+        data = self.pm.read_bytes(self.TR, 4)
+        value = int.from_bytes(data, byteorder="little")
+        x_address = value - 4 - 80
+        # print("x_address", x_address, hex(x_address))
+        data = self.pm.read_bytes(x_address, 10 + 80)
+        self.transport = split_bytes_to_int(data, 0, 2)
+        if self.transport >= 100:
+            raise Exception("交通状态异常")
+
     def read_data(self):
         data = self.pm.read_bytes(self.TR, 4)
         value = int.from_bytes(data, byteorder="little")
@@ -262,8 +269,6 @@ class MemoryInjector_Coords:
             "face_dir": int(self.face_dir),
             "transport": self.transport,
         }
-        if self.memory_info_dict["map_number"] == (0, 0, 0):
-            raise Exception("Map number is 0, 0, 0")
         return self.memory_info_dict
         # print(self.memory_info_dict)
 
