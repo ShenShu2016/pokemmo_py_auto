@@ -31,17 +31,16 @@ class Window_Manager:
         self.byte_array = None
         self.image_normal = None
         self.img_BRG = None
+        self.get_window_name()
 
     def get_window_name(self):
         """Get the window name of the PokeMMO game."""
         callback = self.EnumWindowsProc(self.foreach_window)
 
         windll.user32.EnumWindows(callback, 0)
-
+        self.handle = windll.user32.FindWindowW(None, self.window_name)
         if self.window_name is None:
             raise Exception("Failed to find window name for PokeMMO")
-
-        self.handle = windll.user32.FindWindowW(None, self.window_name)
 
         print(f"window name: {self.window_name}")
         return self.window_name

@@ -36,7 +36,7 @@ class LogPrintSave:
                 game_status = self.pokemmo.get_game_status()
                 enemy_status = self.pokemmo.get_enemy_status()
                 state_dict = self.pokemmo.get_state_dict()
-                memory_coords = self.pokemmo.get_memory_coords_status()
+                memory_coords = self.pokemmo.get_mj_coords_status()
 
                 # 获取当前时间戳
                 timestamp = time.time()

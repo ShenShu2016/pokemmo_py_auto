@@ -2,7 +2,6 @@ import json
 import logging
 import threading
 import time
-from ctypes import windll
 from time import sleep
 
 import cv2
@@ -37,8 +36,7 @@ class PokeMMO:
     def __init__(self):
         """Initialize the PokeMMO class."""
         self.window_manager = Window_Manager()
-        self.window_name = self.window_manager.get_window_name()
-        self.handle = windll.user32.FindWindowW(None, self.window_name)
+        self.handle = self.window_manager.handle
         with open("configure.json", "r") as f:
             self.config = json.load(f)
 
@@ -67,15 +65,14 @@ class PokeMMO:
         self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
         self.db = SQLiteDB("pokemmo.sqlite")
-        self.memory_injector = MemoryInjector_Coords()
-        # self.memory_battle = MemoryInjector_BattleInfo()
-        self.stop_threads_flag = False
+        self.mj_coords = MemoryInjector_Coords()
 
         self.PETALBURG_CITY_FARMING = Farming_PETALBURG_CITY(self)
         self.SOOTOPOLIS_CITY_FARMING = Farming_SOOTOPOLIS_CITY(self)
         self.FALLARBOR_TOWN_FARMING = Farming_FALLARBOR_TOWN(self)
         self.VERDANTURF_TOWN_FARMING = Farming_VERDANTURF_TOWN(self)
 
+        self.stop_threads_flag = False
         self.start_threads()
 
     def start_threads(self):
@@ -164,7 +161,7 @@ class PokeMMO:
 
     def update_memory_coords(self):
         while not self.stop_threads_flag:
-            new_memory_coords = self.memory_injector.read_data()
+            new_memory_coords = self.mj_coords.read_data()
             with self.memory_coords_status_lock:
                 self.memory_coords_status = new_memory_coords
             sleep(0.02)
@@ -182,7 +179,7 @@ class PokeMMO:
         with self.enemy_status_lock:
             return self.enemy_status
 
-    def get_memory_coords_status(self):
+    def get_mj_coords_status(self):
         with self.memory_coords_status_lock:
             return self.memory_coords_status
 

@@ -69,7 +69,7 @@ class GameStatus:
         return_status = 0
 
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
-        self.memory_coords_status = self.pokeMMO.get_memory_coords_status()
+        self.memory_coords_status = self.pokeMMO.get_mj_coords_status()
         # self.check_pokemon_summary_status = self.check_pokemon_summary()
         self.skill_pp_dict = self.pokeMMO.action_controller.skill_pp_dict.copy()
 
