@@ -349,7 +349,7 @@ class PokeMMO:
         while self.auto_strategy_flag:
             Farming_Mistralton_City().run(repeat_times=999)
 
-    def Hoenn_LV_up(self):
+    def Hoenn_LV_up_farming(self):
         print("Hoenn_LV_up started")
         while self.auto_strategy_flag:
             Farming_BATTLE_FRONTINER().run(repeat_times=999)
