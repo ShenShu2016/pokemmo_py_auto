@@ -50,7 +50,7 @@ class Farming_VERDANTURF_TOWN:
         sleep(1)
         print(self.pokeMMO.get_coords_status())
 
-        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] == 50:
+        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] in [50, 76]:
             result = self.pokeMMO.action_controller.fly_to_city(
                 self.city, locate_teleport=True
             )

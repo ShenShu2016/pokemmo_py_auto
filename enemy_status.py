@@ -58,6 +58,7 @@ class EnemyStatus:
             22,
             23,
         ] and self.enemy_status_dict.get("enemy_count") in [0, None]:
+            self.pokeMMO.set_encounter_start_time()
             hp_BRG_x_y_list = self.pokeMMO.find_items(
                 temp_BRG=self.pokeMMO.hp_BRG,
                 threshold=0.995,
@@ -169,6 +170,23 @@ class EnemyStatus:
                     if info.empty == False:
                         info_dict = info.to_dict(orient="records")
                         self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+                        # 开始插入数据
+                        columns = [
+                            "pokedex_number",
+                            "level_number",
+                            "encounter_number",
+                            "timestamp",
+                        ]
+                        columns_str = ", ".join(columns)
+                        values = (
+                            int(name_OCR),
+                            int(lv_orc),
+                            enemy_count,
+                            self.pokeMMO.encounter_start_time,
+                        )
+                        print(columns_str)
+
+                        self.pokeMMO.db.insert_data("encounter", columns_str, values)
                     else:
                         info = self.pokeMMO.pokedex_csv.loc[
                             self.pokeMMO.pokedex_csv["No"] == int(999)

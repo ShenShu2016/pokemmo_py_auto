@@ -9,7 +9,9 @@ class SQLiteDB:
         self.cursors = {}
         self.thread_ids = set()  # 存储线程标识符的集合
         self.connect()
-        self.create_table()
+        self.create_general_status_table()
+        self.create_encounter_table()
+        self.create_action_table()
 
     def connect(self):
         thread_id = threading.get_ident()
@@ -41,7 +43,7 @@ class SQLiteDB:
             cursor.execute(query)
         self.connections[thread_id].commit()
 
-    def create_table(self):
+    def create_general_status_table(self):
         query = """
         CREATE TABLE IF NOT EXISTS general_status (
             game_status TEXT,
@@ -56,13 +58,37 @@ class SQLiteDB:
         """
         self.execute_query(query)
 
+    def create_encounter_table(self):
+        query = """
+        CREATE TABLE IF NOT EXISTS encounter (
+            pokedex_number INTEGER,
+            level_number INTEGER,
+            encounter_number INTEGER,
+            timestamp TEXT
+        )
+        """
+        self.execute_query(query)
+
+    def create_action_table(self):
+        query = """
+        CREATE TABLE IF NOT EXISTS action (
+            throw_pokeball BOOLEAN,
+            ball_type TEXT,
+            caught_with_31_iv BOOLEAN,
+            release BOOLEAN,
+            message TEXT,
+            timestamp TEXT
+        )
+        """
+        self.execute_query(query)
+
     def insert_data(self, table_name, columns, values):
         placeholders = ", ".join(["?" for _ in range(len(values))])
         query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
         self.execute_query(query, values)
 
-    def select_data(self, columns="*", condition=None):
-        query = f"SELECT {columns} FROM general_status"
+    def select_data(self, table_name, columns="*", condition=None):
+        query = f"SELECT {columns} FROM {table_name}"
         if condition:
             query += f" WHERE {condition}"
         self.execute_query(query)

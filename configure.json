@@ -26,6 +26,7 @@
     "poke_ball_word_path": "asserts/template\\poke_ball_word.png",
     "secret_shiny_path": "asserts/template\\secret_shiny.png",
     "shiny_path": "asserts/template\\shiny.png",
+    "sprite_iv_page_path": "asserts/template\\sprite_iv_page.png",
     "ultra_ball_path": "asserts/template\\ultra_ball.png",
     "BATTLE_FRONTIER_coords_tracking_path": "asserts/coords_tracking\\BATTLE_FRONTIER_coords_tracking.csv",
     "FALLARBOR_TOWN_coords_tracking_path": "asserts/coords_tracking\\FALLARBOR_TOWN_coords_tracking.csv",

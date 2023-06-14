@@ -50,7 +50,7 @@ class Farming_FALLARBOR_TOWN:
         # 首先要确认是否能飞走
         sleep(1)
 
-        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] == 50:
+        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] in [50, 76]:
             result = self.pokeMMO.action_controller.fly_to_city(
                 self.city, locate_teleport=True
             )

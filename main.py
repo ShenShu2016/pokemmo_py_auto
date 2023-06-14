@@ -3,6 +3,7 @@ import logging
 import random
 import threading
 import time
+from datetime import datetime
 from time import sleep
 
 import cv2
@@ -66,6 +67,8 @@ class PokeMMO:
             "face_dir": 0,
             "transport": 0,
         }
+        self.encounter_start_time = None
+
         self.df_dict = {}
         self.load_assets()
         self.ui = PokemmoUI(self)
@@ -286,7 +289,9 @@ class PokeMMO:
         if img_BRG is None:
             img_BRG = self.get_latest_img_BRG()
         if top_l and bottom_r:
-            img_BRG = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
+            img_BRG = img_BRG[
+                int(top_l[1]) : int(bottom_r[1]), int(top_l[0]) : int(bottom_r[0])
+            ]
 
         # Perform template matching
         result = cv2.matchTemplate(img_BRG, temp_BRG, cv2.TM_CCORR_NORMED)
@@ -343,6 +348,17 @@ class PokeMMO:
                     return round(hp_pct, 1)
         return 100  # Return 0 if no white pixel is found
 
+    def set_encounter_start_time(self, set_None=False):
+        if set_None:
+            self.encounter_start_time = None
+            return
+        timestamp = time.time()
+        formatted_timestamp = datetime.fromtimestamp(timestamp).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        self.encounter_start_time = formatted_timestamp
+        return
+
     def Unova_farming(self):
         print("Unova_farming started")
 
@@ -388,39 +404,30 @@ class PokeMMO:
 
 if __name__ == "__main__":
     pokeMMO = PokeMMO()
-    sleep(2)
+    sleep(1)
     pokeMMO.start_ui()
 
-    # import random
-    # import time
-
-    # locations = {
-    #     "SOOTOPOLIS_CITY": 10,
-    #     "FALLARBOR_TOWN": 10,
-    #     "PETALBURG_CITY": 10,
-    #     "VERDANTURF_TOWN": 10,
-    # }
-    # previous_location = None
-
-    # while True:
-    #     if previous_location is not None:
-    #         available_locations = locations.copy()
-    #         del available_locations[previous_location]  # 移除上一次地点
-    #         total_weight = sum(available_locations.values())
-    #         probabilities = [
-    #             weight / total_weight for weight in available_locations.values()
-    #         ]
-    #         next_location = random.choices(
-    #             list(available_locations.keys()), probabilities
-    #         )[0]
-    #     else:
-    #         next_location = random.choices(
-    #             list(locations.keys()), list(locations.values())
-    #         )[0]
-
-    #     getattr(pokeMMO, f"{next_location}_FARMING").run(repeat_times=1)
-    #     sleep(1)
-    #     previous_location = next_location
-
-    # while True:
-    #     sleep(1)
+    while True:
+        game_states = pokeMMO.get_game_status()
+        if game_states["check_pokemon_summary"][0]:
+            coords = game_states["check_pokemon_summary"][1][0]
+            pokemon_summary_sign_mid_x = (coords[0] + coords[2]) / 2
+            pokemon_summary_sign_mid_y = (coords[1] + coords[3]) / 2
+            iv_icon_top_l = (
+                pokemon_summary_sign_mid_x - 393,
+                pokemon_summary_sign_mid_y - 13,
+            )
+            iv_icon_bottom_r = (
+                pokemon_summary_sign_mid_x - 373,
+                pokemon_summary_sign_mid_y + 15,
+            )  # Round down
+            iv_page_list = pokeMMO.find_items(
+                temp_BRG=pokeMMO.sprite_iv_page_BRG,
+                top_l=iv_icon_top_l,
+                threshold=0.97,
+                bottom_r=iv_icon_bottom_r,
+                display=False,
+                max_matches=1,
+            )
+            print(iv_page_list)
+        sleep(3)

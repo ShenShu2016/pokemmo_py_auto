@@ -13,7 +13,6 @@ import cv2
 if TYPE_CHECKING:
     from main import PokeMMO
 
-import queue
 import threading
 from functools import wraps
 
@@ -126,12 +125,11 @@ class Action_Controller:
     def run_from_s21(self):
         sleep(0.15)
         self.pokeMMO.controller.click(522, 557, tolerance=15)
-        sleep(2)
+        sleep(4)
         print("Running from battle")
 
     @synchronized
     def throw_pokeball(self, pokeball_type="pokeball"):
-        print("Throwing Pokeball")
         sleep(0.2)
         self.pokeMMO.controller.click(527, 506, tolerance=15)  # 点击背包
         sleep(0.3)
@@ -150,6 +148,10 @@ class Action_Controller:
             print("扔球")
             self.pokeMMO.controller.key_press("z", 1)
             print("Throwing Pokeball")
+            column = ["throw_pokeball", "ball_type", "timestamp"]
+            column_str = ",".join(column)
+            value = (True, "poke_ball", self.pokeMMO.encounter_start_time)
+            self.pokeMMO.db.insert_data("action", column_str, value)
             sleep(3)
 
     @synchronized
@@ -214,12 +216,12 @@ class Action_Controller:
             # ... 这里是检查IV 31的代码
             # Compute IV area coordinates.
             iv_area_top_l = (
-                close_summary_button_mid_x - 356,
-                close_summary_button_mid_y + 20,
+                pokemon_summary_sign_mid_x - 356,
+                pokemon_summary_sign_mid_y + 20,
             )
             iv_area_bottom_r = (
-                close_summary_button_mid_x - 313,
-                close_summary_button_mid_y + 216,
+                pokemon_summary_sign_mid_x - 313,
+                pokemon_summary_sign_mid_y + 216,
             )  # Round down
 
             iv_31_x_y_list = self.pokeMMO.find_items(
@@ -234,20 +236,39 @@ class Action_Controller:
             print("IV 31 List:", iv_31_x_y_list)
             return len(iv_31_x_y_list) >= 1
 
+        def check_in_iv_page():
+            iv_icon_top_l = (
+                pokemon_summary_sign_mid_x - 393,
+                pokemon_summary_sign_mid_y - 13,
+            )
+            iv_icon_bottom_r = (
+                pokemon_summary_sign_mid_x - 373,
+                pokemon_summary_sign_mid_y + 15,
+            )  # Round down
+            iv_page_list = self.pokeMMO.find_items(
+                temp_BRG=self.pokeMMO.sprite_iv_page_BRG,
+                top_l=iv_icon_top_l,
+                threshold=0.97,
+                bottom_r=iv_icon_bottom_r,
+                display=False,
+                max_matches=1,
+            )
+            return len(iv_page_list) >= 1
+
         if game_status["check_pokemon_summary"][0]:
             self.click_pokemon_summary_IV(game_status)
             coords = game_status["check_pokemon_summary"][1][0]
 
             # Compute common coordinates.
-            close_summary_button_mid_x = int((coords[0] + coords[2]) / 2)
-            close_summary_button_mid_y = int((coords[1] + coords[3]) / 2)
+            pokemon_summary_sign_mid_x = int((coords[0] + coords[2]) / 2)
+            pokemon_summary_sign_mid_y = int((coords[1] + coords[3]) / 2)
             shiny_area_top_l = (
-                close_summary_button_mid_x,
-                close_summary_button_mid_y + 40,
+                pokemon_summary_sign_mid_x,
+                pokemon_summary_sign_mid_y + 40,
             )
             shiny_area_bottom_r = (
-                close_summary_button_mid_x + 33,
-                close_summary_button_mid_y + 152,
+                pokemon_summary_sign_mid_x + 33,
+                pokemon_summary_sign_mid_y + 152,
             )  # Round down
             sleep(0.5)
             img_BRG = self.pokeMMO.get_latest_img_BRG()
@@ -255,12 +276,14 @@ class Action_Controller:
                 shiny_future = executor.submit(check_shiny)
                 secret_shiny_future = executor.submit(check_secret_shiny)
                 iv_31_future = executor.submit(check_iv_31)
+                in_iv_page_future = executor.submit(check_in_iv_page)  # 用于判断是否在IV页面
 
             is_shiny = shiny_future.result()
             is_secret_shiny = secret_shiny_future.result()
             is_iv31 = iv_31_future.result()
+            is_in_iv_page = in_iv_page_future.result()
 
-            if not (is_shiny or is_secret_shiny or is_iv31):
+            if not (is_shiny or is_secret_shiny or is_iv31) and is_in_iv_page == True:
                 timestamp_str = time.strftime(
                     "%Y%m%d%H%M%S", time.localtime(time.time())
                 )
@@ -271,19 +294,19 @@ class Action_Controller:
                 cv2.imwrite(filename, img_BRG)
                 print("start releasing pokemon")
                 pc_release_icon_coords = (
-                    close_summary_button_mid_x - 260,
-                    close_summary_button_mid_y + 3,
+                    pokemon_summary_sign_mid_x - 260,
+                    pokemon_summary_sign_mid_y + 3,
                 )  # Round up
                 self.pokeMMO.controller.click(*pc_release_icon_coords)
                 sleep(0.1)
 
                 confirm_release_area_top_l = (
-                    close_summary_button_mid_x - 454,
-                    close_summary_button_mid_y + 143,
+                    pokemon_summary_sign_mid_x - 454,
+                    pokemon_summary_sign_mid_y + 143,
                 )  # Round up
                 confirm_release_area_bottom_r = (
-                    close_summary_button_mid_x - 353,
-                    close_summary_button_mid_y + 168,
+                    pokemon_summary_sign_mid_x - 353,
+                    pokemon_summary_sign_mid_y + 168,
                 )  # Round up
 
                 confirm_release_x_y_list = self.pokeMMO.find_items(
@@ -298,6 +321,10 @@ class Action_Controller:
                 if len(confirm_release_x_y_list) == 1:
                     # Click the first two elements of the tuple (x and y coords).
                     self.pokeMMO.controller.click_center(confirm_release_x_y_list[0])
+                    column = ["release", "timestamp"]
+                    column_str = ", ".join(column)
+                    value = (True, self.pokeMMO.encounter_start_time)
+                    self.pokeMMO.db.insert_data("action", column_str, value)
                     sleep(0.4)  # 太快破电脑受不了
                     self.pokeMMO.controller.click(680, 348)
                 else:
@@ -305,6 +332,11 @@ class Action_Controller:
 
             else:
                 self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+
+                column = ["caught_with_31_iv", "timestamp"]
+                column_str = ", ".join(column)
+                value = (True, self.pokeMMO.encounter_start_time)
+                self.pokeMMO.db.insert_data("action", column_str, value)
 
     @synchronized
     def restart_from_hospital(self):
