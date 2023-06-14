@@ -17,11 +17,11 @@ target_words_dict = {
 game_status_dict = {
     0: "Unknown Game Status",
     404: "Not Active Game Status",
-    1: "Normal Game Status",
-    21: "Battle Option Status",
+    1: "普通状态",
+    21: "战斗选项",
     22: "Battle Go Back Status",
     23: "Battle End Pokemon Caught Status",
-    20: "Battle Loading Status",
+    20: "战斗进行中",
 }
 enemy_hp_positions = {
     2: [(329, 97), (346, 110)],

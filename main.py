@@ -49,12 +49,23 @@ class PokeMMO:
         self.coords_status_lock = threading.Lock()
         self.latest_img_BRG = self.window_manager.get_current_img_BRG()
 
-        self.game_status = {"return_status": 0}
+        self.game_status = {"return_status": 0, "skill_pp": {}}
         self.enemy_status = {}
         self.state_dict = {"address": "", "money": 0}
-        self.coords_status = {}
+        self.coords_status = {
+            "x_coords": 0,
+            "y_coords": 0,
+            "map_number_tuple": (
+                0,
+                0,
+                0,
+            ),
+            "face_dir": 0,
+            "transport": 0,
+        }
         self.df_dict = {}
         self.load_assets()
+        self.ui = PokemmoUI(self)
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
 
@@ -330,7 +341,8 @@ class PokeMMO:
 
 if __name__ == "__main__":
     pokeMMO = PokeMMO()
-    # pokeMMO.start_ui()
+    sleep(6)
+    pokeMMO.start_ui()
     # sleep(2)
 
     # while True:

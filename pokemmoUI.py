@@ -16,49 +16,104 @@ class PokemmoUI:
         self.pokeMMO = pokeMMO
 
         self.root = tk.Tk()
+        self.root.geometry("300x700")  # Set window width and height
         self.root.title("PokeMMO Status")
 
-        self.status_label = ttk.Label(self.root, text="Game Status:")
-        self.status_label.pack()
+        # Make the window semi-transparent
+        self.root.attributes("-alpha", 0.8)
 
-        self.state_dict_label = ttk.Label(self.root, text="State Dict:")
-        self.state_dict_label.pack()
+        # Keep the window always on top
+        self.root.attributes("-topmost", 1)
 
-        self.state_dict_text = tk.Text(self.root, height=10, width=50)
-        self.state_dict_text.pack()
-
-        self.stop_button = ttk.Button(
-            self.root, text="Stop", command=self.stop_threads_and_exit
+        self.status_label = ttk.Label(
+            self.root,
+            text="Game Status:",
+            font=("Helvetica", 16),
+            padding="10 10 10 10",
         )
-        self.stop_button.pack()
+        self.status_label.grid(column=0, row=0, columnspan=2, sticky=(tk.W, tk.E))
+        self.skill_labels = {}
+        for skill in {"点到为止": 0, "甜甜香气": 0, "蘑菇孢子": 0, "黑夜魔影": 0, "skill_4": 0}.keys():
+            self.skill_labels[skill] = ttk.Label(
+                self.root, text="", font=("Helvetica", 14), padding="10 10 10 10"
+            )
+            self.skill_labels[skill].grid(
+                column=0,
+                row=len(self.skill_labels) + 4,
+                columnspan=2,
+                sticky=(tk.W, tk.E),
+            )
+        # Add labels for x and y coordinates
+        self.x_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 14), padding="10 10 10 10"
+        )
+        self.x_label.grid(column=0, row=1, sticky=(tk.W, tk.E))
+        self.y_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 14), padding="10 10 10 10"
+        )
+        self.y_label.grid(column=1, row=1, sticky=(tk.W, tk.E))
+
+        self.map_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 14), padding="10 10 10 10"
+        )
+        self.map_label.grid(column=0, row=2, columnspan=2, sticky=(tk.W, tk.E))
+
+        # Add labels for face dir and transport
+        self.face_dir_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 14), padding="10 10 10 10"
+        )
+        self.face_dir_label.grid(column=0, row=3, sticky=(tk.W, tk.E))
+        self.transport_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 14), padding="10 10 10 10"
+        )
+        self.transport_label.grid(column=1, row=3, sticky=(tk.W, tk.E))
+
+        self.stop_button = tk.Button(
+            self.root,
+            text="Stop",
+            command=self.stop_threads_and_exit,
+            fg="white",
+            bg="red",
+        )  # Use tk.Button instead of ttk.Button
+        self.stop_button.grid(
+            column=0, row=4, columnspan=2, sticky=(tk.W, tk.E, tk.S), padx=10, pady=10
+        )  # Put the button at the bottom
+
+        self.root.grid_columnconfigure(
+            0, weight=1
+        )  # Make the column fill the entire window width
+        self.root.grid_columnconfigure(
+            1, weight=1
+        )  # Make the column fill the entire window width
+        self.root.grid_rowconfigure(4, weight=1)  # Make the button row expandable
 
         self.update_ui()
+
+    def update_ui(self):
+        game_status = self.pokeMMO.get_game_status()
+
+        # Update the labels with the new values
+        coords_status = self.pokeMMO.get_coords_status()
+        self.x_label.configure(text=f"X: {coords_status['x_coords']}")
+        self.y_label.configure(text=f"Y: {coords_status['y_coords']}")
+        self.map_label.configure(text=f"Map: {coords_status['map_number_tuple']}")
+        self.face_dir_label.configure(
+            text=f"Face direction: {coords_status['face_dir']}"
+        )
+        self.transport_label.configure(text=f"Transport: {coords_status['transport']}")
+
+        self.status_label.configure(
+            text=f"Game Status: {game_status_dict[game_status['return_status']]}"
+        )
+        for skill, pp in game_status["skill_pp"].items():
+            self.skill_labels[skill].configure(text=f"{skill}: {pp}")
+
+        self.root.after(500, self.update_ui)
 
     def stop_threads_and_exit(self):
         self.pokeMMO.stop_threads()
         self.root.quit()  # This will close the Tkinter window
         os._exit(0)  # This will terminate the entire Python program
-
-    def update_ui(self):
-        game_status = self.pokeMMO.get_game_status()
-        state_dict = self.pokeMMO.get_state_dict()
-
-        self.status_label.configure(
-            text=f"Game Status: {game_status_dict[game_status['return_status']]}"
-        )
-        self.state_dict_text.delete(1.0, tk.END)
-        self.state_dict_text.insert(tk.END, self.format_state_dict(state_dict))
-
-        self.root.after(500, self.update_ui)
-
-    def format_state_dict(self, state_dict):
-        formatted_text = ""
-        for timestamp, state in state_dict.items():
-            formatted_text += f"Timestamp: {timestamp}\n"
-            formatted_text += f"Address: {state['address']}\n"
-            formatted_text += f"Money: {state['money']}\n"
-            formatted_text += "\n"
-        return formatted_text
 
     def run(self):
         self.root.mainloop()
