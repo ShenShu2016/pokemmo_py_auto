@@ -111,7 +111,7 @@ class EnemyStatus:
         # start_time = time.time()
         enemy_count = self.enemy_status_dict["enemy_count"]
 
-        def _process_i(self, i):
+        def _process_i(i):
             if (
                 f"enemy_{i}_hp_pct" in self.enemy_status_dict
                 and f"enemy_{i}_name_Lv" not in self.enemy_status_dict
@@ -184,7 +184,6 @@ class EnemyStatus:
                             enemy_count,
                             self.pokeMMO.encounter_start_time,
                         )
-                        print(columns_str)
 
                         self.pokeMMO.db.insert_data("encounter", columns_str, values)
                     else:
@@ -203,10 +202,7 @@ class EnemyStatus:
                 i = 1
                 t = threading.Thread(
                     target=_process_i,
-                    args=(
-                        self,
-                        i,
-                    ),
+                    args=(i,),
                 )
                 t.start()
                 threads.append(t)
@@ -214,10 +210,7 @@ class EnemyStatus:
                 for i in range(2, enemy_count + 2):
                     t = threading.Thread(
                         target=_process_i,
-                        args=(
-                            self,
-                            i,
-                        ),
+                        args=(i,),
                     )
                     t.start()
                     threads.append(t)
