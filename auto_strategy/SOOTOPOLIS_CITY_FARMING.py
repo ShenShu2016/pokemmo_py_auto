@@ -94,7 +94,7 @@ class Farming_SOOTOPOLIS_CITY:
         # 检测是否回城补给
         # 开始刷怪
         farming_times = 0
-        while True:
+        while self.pokeMMO.auto_strategy_flag:
             print("开始刷怪,或者是回城补给")
             while self.pokeMMO.get_game_status()["return_status"] < 20:
                 game_status = self.pokeMMO.get_game_status()
@@ -118,7 +118,7 @@ class Farming_SOOTOPOLIS_CITY:
                     style="farming",
                 )
 
-            while True:
+            while self.pokeMMO.auto_strategy_flag:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()

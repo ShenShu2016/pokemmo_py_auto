@@ -66,7 +66,7 @@ class Farming_VERDANTURF_TOWN:
         # 开始刷怪
 
         farming_times = 0
-        while True:
+        while self.pokeMMO.auto_strategy_flag:
             print("开始刷怪,或者是回城补给")
             while True:
                 game_status = self.pokeMMO.get_game_status()
@@ -100,7 +100,7 @@ class Farming_VERDANTURF_TOWN:
                     style="farming",
                 )
 
-            while True:
+            while self.pokeMMO.auto_strategy_flag:
                 # print("进入战斗")
                 game_status = self.pokeMMO.get_game_status()
                 enemy_status = self.pokeMMO.get_enemy_status()
