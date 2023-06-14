@@ -293,7 +293,7 @@ class Action_Controller:
                         confirm_release_x_y_list[0][0], confirm_release_x_y_list[0][1]
                     )
                     sleep(0.1)
-                    self.pokeMMO.controller.click(679, 378)
+                    self.pokeMMO.controller.click(680, 348)
                 else:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
 

@@ -70,7 +70,17 @@ class MemoryInjector_Coords:
     def __init__(self):
         self.target_process = "javaw.exe"
         self.pm = pymem.Pymem(self.target_process)
-        self.memory_info_dict = {}
+        self.memory_info_dict = {
+            "x_coords": 0,
+            "y_coords": 0,
+            "map_number_tuple": (
+                0,
+                0,
+                0,
+            ),
+            "face_dir": 0,
+            "transport": 0,
+        }
 
         # Adding a path to your json file
         self.json_file_path = r"utils\memory_injection\memory_injector_coords.json"
