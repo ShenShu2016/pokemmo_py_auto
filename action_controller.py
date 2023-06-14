@@ -416,7 +416,7 @@ class Action_Controller:
         if coords_status["map_number_tuple"][2] == 74:
             self.pokeMMO.controller.key_press("9")
             sleep(5)
-        if coords_status["map_number_tuple"][2] != 74:
+        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] != 74:
             return True
         else:
             raise Exception("Not in building,还没做完")

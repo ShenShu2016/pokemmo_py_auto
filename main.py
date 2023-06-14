@@ -470,13 +470,13 @@ if __name__ == "__main__":
 
     locations = {
         "SOOTOPOLIS_CITY": 10,
-        "FALLARBOR_TOWN": 30,
+        "FALLARBOR_TOWN": 10,
         "PETALBURG_CITY": 10,
-        "VERDANTURF_TOWN": 40,
+        "VERDANTURF_TOWN": 10,
     }
     previous_location = None
 
-    while False:
+    while True:
         if previous_location is not None:
             available_locations = locations.copy()
             del available_locations[previous_location]  # 移除上一次地点

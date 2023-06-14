@@ -53,7 +53,7 @@ class Farming_Mistralton_City:
 
     def step_2_pass_bridge(self):
         self.pokeMMO.pf.go_somewhere(
-            end_point=(259, 115), city=self.city, transport="run"
+            end_point=(259, 116), city=self.city, transport="run"
         )
 
     def step_3_go_tower(self):
@@ -153,7 +153,7 @@ class Farming_Mistralton_City:
                     self.step_3_go_tower()
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
-                coords_status = self.pokeMMO.get_coords_status()
+                # coords_status = self.pokeMMO.get_coords_status()
                 if (
                     coords_status["x_coords"],
                     coords_status["y_coords"],

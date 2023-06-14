@@ -9,6 +9,6 @@ def is_go_pc(skill_pp_dict):
     elif skill_pp_dict["skill_4"] < 1:
         print("skill_4 用完，回家")
         return True
-    elif skill_pp_dict["黑夜魔影"] < 1:
+    elif skill_pp_dict["黑夜魔影"] < 5:
         print("黑夜魔影 用完，回家")
         return True
