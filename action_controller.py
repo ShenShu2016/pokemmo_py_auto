@@ -366,6 +366,7 @@ class Action_Controller:
             "黑夜魔影": 18,
             "skill_4": 12,
         }
+        self.first_sprit_hp = 100
         return True  #!现在没办法鉴别有没有成功
 
     @synchronized
