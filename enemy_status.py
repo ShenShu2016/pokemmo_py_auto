@@ -208,26 +208,32 @@ class EnemyStatus:
             t.join()  # 等待所有线程完成
 
     def check_enemy_sleep(self):
-        if self.game_status_dict.get("return_status") in [
-            20,
-            21,
-            22,
-            23,
-        ]:
-            # print("检查敌人睡眠状态")
-            sleeping_sign_coords_list = self.pokeMMO.find_items(
-                temp_BRG=self.pokeMMO.battle_bar_sleep_sign_BRG,
-                top_l=(220, 120),
-                bottom_r=(492, 150),
-                img_BRG=self.img_BRG,
-                threshold=0.99,
-                max_matches=1,
-            )
-            # print("sleeping_sign_coords_list", sleeping_sign_coords_list)
-            if len(sleeping_sign_coords_list) > 0:
-                self.enemy_status_dict["enemy_1_sleeping"] = True
-            else:
-                self.enemy_status_dict["enemy_1_sleeping"] = False
+        # print("检查敌人睡眠状态")
+        sleeping_sign_coords_list = self.pokeMMO.find_items(
+            temp_BRG=self.pokeMMO.battle_bar_sleep_sign_BRG,
+            top_l=(220, 120),
+            bottom_r=(492, 150),
+            img_BRG=self.img_BRG,
+            threshold=0.99,
+            max_matches=1,
+        )
+        # print("sleeping_sign_coords_list", sleeping_sign_coords_list)
+        if len(sleeping_sign_coords_list) > 0:
+            self.enemy_status_dict["enemy_1_sleeping"] = True
+        else:
+            self.enemy_status_dict["enemy_1_sleeping"] = False
+
+    def check_my_hp(self):
+        my_hp_coords = (939, 360), (1134, 362)
+
+        my_hp_pct = self.pokeMMO.get_hp_pct(
+            top_l=my_hp_coords[0], bottom_r=my_hp_coords[1], img_BRG=self.img_BRG
+        )
+        if my_hp_pct == 100:
+            pass
+        else:
+            self.enemy_status_dict["my_hp_pct"] = my_hp_pct
+            self.pokeMMO.action_controller.first_sprit_hp = my_hp_pct
 
     def check_enemy_status(self):
         self.img_BRG = self.pokeMMO.get_latest_img_BRG()
@@ -245,7 +251,15 @@ class EnemyStatus:
         check_enemy_name_lv_time = time.time() - start_time
         # print("检查敌人名字与等级使用时间:", time.time() - start_time)
         start_time = time.time()
-        self.check_enemy_sleep()
+        if self.game_status_dict.get("return_status") in [
+            20,
+            21,
+            22,
+            23,
+        ]:
+            self.check_my_hp()
+            self.check_enemy_sleep()
+
         check_enemy_sleep_time = time.time() - start_time
         # print("enemy_status_dict", self.enemy_status_dict)
         if (

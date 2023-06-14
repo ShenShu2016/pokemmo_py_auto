@@ -37,6 +37,7 @@ class Action_Controller:
         self.my_recent_actions_list = deque(maxlen=1000)
         self.press_down_count = 5
         self.action_lock = threading.Lock()
+        self.first_sprit_hp = 100
         self.skill_pp_dict = {
             "点到为止": 0,
             "甜甜香气": 0,
@@ -159,6 +160,7 @@ class Action_Controller:
 
     @synchronized
     def click_pokemon_summary_IV(self, game_status):
+        sleep(0.3)  # 看到这个东西之后要等一会儿，不然像是空按
         coords = game_status["check_pokemon_summary"][1][0]
         iv_icon_x = (coords[0] + coords[2]) / 2 - 386
         iv_icon_y = (coords[1] + coords[3]) / 2 + 3
@@ -241,7 +243,7 @@ class Action_Controller:
                 close_summary_button_mid_x + 33,
                 close_summary_button_mid_y + 152,
             )  # Round down
-            sleep(0.1)
+            sleep(0.5)
             img_BRG = self.pokeMMO.get_latest_img_BRG()
             with ThreadPoolExecutor(max_workers=3) as executor:
                 shiny_future = executor.submit(check_shiny)
@@ -289,9 +291,7 @@ class Action_Controller:
 
                 if len(confirm_release_x_y_list) == 1:
                     # Click the first two elements of the tuple (x and y coords).
-                    self.pokeMMO.controller.click(
-                        confirm_release_x_y_list[0][0], confirm_release_x_y_list[0][1]
-                    )
+                    self.pokeMMO.controller.click_center(confirm_release_x_y_list[0])
                     sleep(0.1)
                     self.pokeMMO.controller.click(680, 348)
                 else:
@@ -379,22 +379,6 @@ class Action_Controller:
 
         raise Exception("Not in water")
 
-    # @synchronized
-    # def use_bike(self):
-    #     game_status = self.pokeMMO.get_game_status()
-    #     if game_status["map_number_tuple"][2] in [50, 76] and game_status[
-    #         "transport"
-    #     ] not in [
-    #         1,
-    #         11,
-    #     ]:  # 室外
-    #         self.pokeMMO.controller.key_press("3")
-    #         sleep(1)
-    #     if game_status["transport"] == 10:
-    #         return True
-    #     else:
-    #         raise Exception("Not in bike,还没做完")
-
     @synchronized
     def use_teleport(self):
         coords_status = self.pokeMMO.get_coords_status()
@@ -421,9 +405,31 @@ class Action_Controller:
         else:
             raise Exception("Not in building,还没做完")
 
+    def is_go_pc(self):
+        """判断是否需要回城补给"""
+        if self.skill_pp_dict["点到为止"] < 1:
+            print("点到为止 用完，回家")
+            return True
+        elif self.skill_pp_dict["蘑菇孢子"] < 1:
+            print("蘑菇孢子 用完，回家")
+            return True
+        elif self.skill_pp_dict["skill_4"] < 1:
+            print("skill_4 用完，回家")
+            return True
+        elif self.skill_pp_dict["黑夜魔影"] < 1:
+            print("黑夜魔影 用完，回家")
+            return True
+        elif self.first_sprit_hp <= 30:
+            print("精灵血量过低，回家")
+            return True
+
 
 if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-    pokeMMO.action_controller.talk_to_nurse()
+    sleep(2)
+    while True:
+        game_status = pokeMMO.get_game_status()
+        pokeMMO.action_controller.iv_shiny_check_release(game_status)
+        sleep(5)

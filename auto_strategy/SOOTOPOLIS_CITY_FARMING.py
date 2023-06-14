@@ -10,8 +10,6 @@ import random
 from time import sleep
 from typing import TYPE_CHECKING
 
-from auto_strategy.common_funciton import is_go_pc
-
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -102,7 +100,7 @@ class Farming_SOOTOPOLIS_CITY:
                 game_status = self.pokeMMO.get_game_status()
                 if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
-                if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
+                if self.pokeMMO.action_controller.is_go_pc():
                     farming_times += 1
                     if farming_times >= repeat_times:
                         return

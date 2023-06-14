@@ -9,8 +9,6 @@ sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 from time import sleep
 from typing import TYPE_CHECKING
 
-from auto_strategy.common_funciton import is_go_pc
-
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -42,7 +40,7 @@ class Farming_VERDANTURF_TOWN:
     def leave_pc_center_and_go_farm(self):
         self.pokeMMO.pf.leave_pc_center(city=self.city)
 
-    def teleport_and_heal(self):
+    def dig_teleport_and_heal(self):
         self.pokeMMO.action_controller.use_dig()
         self.pokeMMO.action_controller.use_teleport()
         self.pokeMMO.action_controller.talk_to_nurse()  # teleport 就直接面对护士了
@@ -70,35 +68,36 @@ class Farming_VERDANTURF_TOWN:
         farming_times = 0
         while True:
             print("开始刷怪,或者是回城补给")
-            while self.pokeMMO.get_game_status()["return_status"] < 20:
+            while True:
                 game_status = self.pokeMMO.get_game_status()
-                coords_status = self.pokeMMO.get_coords_status()
-                coords_status = add_x_y_coords_offset_VERDANTURF_TOWN(coords_status)
-                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
+                if game_status["return_status"] >= 20:
+                    break
+
+                coords_status = add_x_y_coords_offset_VERDANTURF_TOWN(
+                    self.pokeMMO.get_coords_status()
+                )
+
+                if game_status.get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
-                if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
+
+                if self.pokeMMO.action_controller.is_go_pc():
                     farming_times += 1
                     if farming_times >= repeat_times:
                         self.pokeMMO.action_controller.use_dig()
                         sleep(1)
                         return
-                    self.teleport_and_heal(city="VERDANTURF_TOWN")
-                    self.leave_pc_center_and_go_farm(city="VERDANTURF_TOWN")
+                    self.dig_teleport_and_heal()
+                    self.leave_pc_center_and_go_farm()
 
-                # Check if there are any rows where both x_coords and y_coords are equal to 66
-                if (
-                    coords_status["x_coords"],
-                    coords_status["y_coords"],
-                ) in self.farming_coords:
-                    # Trigger the desired operation
+                coords = (coords_status["x_coords"], coords_status["y_coords"])
+                if coords in self.farming_coords:
                     self.pokeMMO.action_controller.use_sweet_sent()
-                    # pass
 
                 self.pokeMMO.pf.go_somewhere(
                     end_point=None,
                     end_face_dir=None,
                     city=self.city,
-                    style="farming",  # 编号66
+                    style="farming",
                 )
 
             while True:

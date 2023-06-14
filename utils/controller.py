@@ -22,14 +22,26 @@ class Controller:
         """Click at the current mouse position or at a specific position if provided."""
         self.window.set_focus()
         if x is not None and y is not None:
-            self.window.click_input(
-                button="move", coords=(int(x) + tolerance, int(y) + tolerance)
-            )
-            sleep(0.5)
             self.window.click_input(coords=(int(x) + tolerance, int(y) + tolerance))
             sleep(0.03)
         else:
             self.window.click_input()
+
+    def click_center(self, point):
+        try:
+            x1, y1, x2, y2 = point
+            if x1 > x2 or y1 > y2:
+                raise ValueError("Invalid coordinates: x1 > x2 or y1 > y2")
+
+            center_x = (x1 + x2) / 2
+            center_y = (y1 + y2) / 2
+
+            self.window.set_focus()
+            self.window.click_input(coords=(int(center_x), int(center_y)))
+            sleep(0.03)
+
+        except (TypeError, ValueError) as e:
+            print(f"Error: {e}")
 
     def drag(self, x1, y1, x2, y2):
         """Drag the mouse from one position to another."""

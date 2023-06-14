@@ -9,8 +9,6 @@ sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 from time import sleep
 from typing import TYPE_CHECKING
 
-from auto_strategy.common_funciton import is_go_pc
-
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -98,7 +96,7 @@ class Farming_Mistralton_City:
                 game_status = self.pokeMMO.get_game_status()
                 if game_status.get("check_pokemon_summary")[0]:
                     self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
-                if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
+                if self.pokeMMO.action_controller.is_go_pc():
                     farming_times += 1
                     if farming_times >= repeat_times:  # 如果重复次数到了，会停到一个可以飞的地方，没到的话就会pc
                         self.pokeMMO.pf.go_somewhere(
@@ -213,7 +211,7 @@ class Farming_Mistralton_City:
 
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 11:
                         if (
-                            is_go_pc(self.pokeMMO.action_controller.skill_pp_dict)
+                            self.pokeMMO.action_controller.is_go_pc()
                             and enemy_status.get("enemy_1_hp_pct") >= 80
                         ):
                             self.pokeMMO.action_controller.run_from_s21()
