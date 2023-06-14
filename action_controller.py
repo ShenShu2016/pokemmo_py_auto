@@ -71,8 +71,9 @@ class Action_Controller:
 
     @synchronized
     def fight_skill_1_from_s21(self):  # False Swipe
+        sleep(0.15)
         self.pokeMMO.controller.click(314, 508, tolerance=5)
-        sleep(0.08)
+        sleep(0.17)
         self.pokeMMO.controller.click(312, 507, tolerance=5)
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
         self.skill_pp_dict["点到为止"] = self.skill_pp_dict["点到为止"] - 1
@@ -92,8 +93,9 @@ class Action_Controller:
 
     @synchronized
     def fight_skill_2_from_s21(self):  # Spore
+        sleep(0.15)
         self.pokeMMO.controller.click(314, 508, tolerance=10)
-        sleep(0.08)
+        sleep(0.17)
         self.pokeMMO.controller.click(526, 508, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
         self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
@@ -102,8 +104,9 @@ class Action_Controller:
 
     @synchronized
     def fight_skill_3_from_s21(self):
+        sleep(0.15)
         self.pokeMMO.controller.click(314, 508, tolerance=10)
-        sleep(0.08)
+        sleep(0.17)
         self.pokeMMO.controller.click(312, 561, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_3_from_s21", time.time()))
         self.skill_pp_dict["黑夜魔影"] = self.skill_pp_dict["黑夜魔影"] - 1
@@ -111,8 +114,9 @@ class Action_Controller:
 
     @synchronized
     def fight_skill_4_from_s21(self):
+        sleep(0.15)
         self.pokeMMO.controller.click(314, 508, tolerance=10)
-        sleep(0.08)
+        sleep(0.17)
         self.pokeMMO.controller.click(528, 558, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_4_from_s21", time.time()))
         self.skill_pp_dict["skill_4"] = self.skill_pp_dict["skill_4"] - 1
@@ -120,6 +124,7 @@ class Action_Controller:
 
     @synchronized
     def run_from_s21(self):
+        sleep(0.15)
         self.pokeMMO.controller.click(522, 557, tolerance=15)
         sleep(2)
         print("Running from battle")
@@ -127,6 +132,7 @@ class Action_Controller:
     @synchronized
     def throw_pokeball(self, pokeball_type="pokeball"):
         print("Throwing Pokeball")
+        sleep(0.2)
         self.pokeMMO.controller.click(527, 506, tolerance=15)  # 点击背包
         sleep(0.3)
         if (
@@ -292,7 +298,7 @@ class Action_Controller:
                 if len(confirm_release_x_y_list) == 1:
                     # Click the first two elements of the tuple (x and y coords).
                     self.pokeMMO.controller.click_center(confirm_release_x_y_list[0])
-                    sleep(0.2)  # 太快破电脑受不了
+                    sleep(0.4)  # 太快破电脑受不了
                     self.pokeMMO.controller.click(680, 348)
                 else:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
