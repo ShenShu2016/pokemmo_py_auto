@@ -244,21 +244,8 @@ class Farming_Mistralton_City:
 
                 elif (
                     game_status["return_status"] == 21
-                    and enemy_status.get("enemy_count") == 3
-                    and enemy_status.get("enemy_2_info") is not None
-                    and enemy_status.get("enemy_3_info") is not None
-                    and enemy_status.get("enemy_4_info") is not None
-                ):
-                    self.pokeMMO.action_controller.run_from_s21()
-
-                elif (
-                    game_status["return_status"] == 21
-                    and enemy_status.get("enemy_count") == 5
-                    and enemy_status.get("enemy_2_info") is not None
-                    and enemy_status.get("enemy_3_info") is not None
-                    and enemy_status.get("enemy_4_info") is not None
-                    and enemy_status.get("enemy_5_info") is not None
-                    and enemy_status.get("enemy_6_info") is not None
+                    and enemy_status.get("enemy_count") >= 2
+                    and enemy_status.get("allChecked") == True
                 ):
                     self.pokeMMO.action_controller.run_from_s21()
 

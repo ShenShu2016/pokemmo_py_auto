@@ -363,12 +363,12 @@ class PokeMMO:
         print("Unova_farming started")
 
         while self.auto_strategy_flag:
-            Farming_Mistralton_City().run(repeat_times=999)
+            Farming_Mistralton_City(self).run(repeat_times=999)
 
     def Hoenn_LV_up_farming(self):
         print("Hoenn_LV_up started")
         while self.auto_strategy_flag:
-            Farming_BATTLE_FRONTINER().run(repeat_times=999)
+            Farming_BATTLE_FRONTINER(self).run(repeat_times=999)
 
     def Hoenn_farming(self):
         print("Hoenn_farming started")

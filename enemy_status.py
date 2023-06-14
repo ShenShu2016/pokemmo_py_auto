@@ -217,6 +217,7 @@ class EnemyStatus:
 
         for t in threads:
             t.join()  # 等待所有线程完成
+        self.enemy_status_dict["allChecked"] = True
 
     def check_enemy_sleep(self):
         # print("检查敌人睡眠状态")

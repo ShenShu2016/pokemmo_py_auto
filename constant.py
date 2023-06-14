@@ -44,6 +44,7 @@ city_info = {
             (6, 8, 0),
         ],  # 把正对着护士的放在第一个
         "coords_tracking_ready": True,
+        "area": "Hoenn",
     },
     "FALLARBOR_TOWN": {
         "town_map_coords": (403, 241),
@@ -53,6 +54,7 @@ city_info = {
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
         "coords_tracking_ready": False,
+        "area": "Hoenn",
     },
     "PETALBURG_CITY": {
         "town_map_coords": (357, 457),
@@ -61,6 +63,7 @@ city_info = {
         "112_map_number": (1, 4, 58),
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
+        "area": "Hoenn",
     },
     "BATTLE_FRONTIER": {
         "town_map_coords": (860, 530),
@@ -69,6 +72,7 @@ city_info = {
         "112_map_number": (1, 53, 76),
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
+        "area": "Hoenn",
     },
     "VERDANTURF_TOWN": {
         "town_map_coords": (424, 383),
@@ -77,6 +81,7 @@ city_info = {
         "112_map_number": (1, 4, 56),
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
+        "area": "Hoenn",
     },
     "Undella_Town": {
         "town_map_coords": (938, 377),
@@ -85,6 +90,7 @@ city_info = {
         "112_map_number": (2, 1, 157),
         "112_nurse": (7, 12, 1),  # x,y,dir
         "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
+        "area": "Unova",
     },
     "Icirrus_City": {
         "town_map_coords": (489, 303),
@@ -93,6 +99,7 @@ city_info = {
         "112_map_number": (2, 0, 115),
         "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
         "112_nurse": (7, 12, 1),  # x,y,dir
+        "area": "Unova",
     },
     "Mistralton_City": {  # 合众飞行到医院前面下面一格不在大门口
         "town_map_coords": (420, 371),
@@ -101,6 +108,7 @@ city_info = {
         "112_map_number": (2, 0, 109),
         "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
         "112_nurse": (7, 12, 1),  # x,y,dir
+        "area": "Unova"
         # (105,262,1) 要下自行车zzz
         # (107,233,1) 烛光零门口（2，1，81）
         # (16,28,1)(2,1,82) 螺旋塔门口 要变xy了 往上走一步变成（16，28）

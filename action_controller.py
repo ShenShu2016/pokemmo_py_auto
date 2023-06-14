@@ -386,17 +386,19 @@ class Action_Controller:
                 sleep(2)
                 print("going to find nurse")
                 self.pokeMMO.pf.go_to_nurse(city=city)
-                self.talk_to_nurse()
+                self.talk_to_nurse(city=city)
                 return True
             else:
                 raise Exception("Not in front of hospital")
 
     @synchronized
-    def talk_to_nurse(self):
+    def talk_to_nurse(self, city=None):
         print("Talking to nurse")
-        self.pokeMMO.controller.key_press("z", 5)  # 合众 比较久
-        sleep(1)
-
+        if city_info[city]["area"] == "Hoenn":
+            press_delay = 2
+        else:
+            press_delay = 5
+        self.pokeMMO.controller.key_press("z", press_delay)  # 合众 比较久
         self.skill_pp_dict = {
             "点到为止": 30,
             "甜甜香气": 32,
