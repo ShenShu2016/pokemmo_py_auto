@@ -292,7 +292,7 @@ class Action_Controller:
                 if len(confirm_release_x_y_list) == 1:
                     # Click the first two elements of the tuple (x and y coords).
                     self.pokeMMO.controller.click_center(confirm_release_x_y_list[0])
-                    sleep(0.1)
+                    sleep(0.2)  # 太快破电脑受不了
                     self.pokeMMO.controller.click(680, 348)
                 else:
                     self.pokeMMO.action_controller.close_pokemon_summary(game_status)
