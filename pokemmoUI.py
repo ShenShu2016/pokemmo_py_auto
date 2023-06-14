@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import threading
 import tkinter as tk
 from tkinter import ttk
 from typing import TYPE_CHECKING
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
 class PokemmoUI:
     def __init__(self, pokeMMO: PokeMMO):
         self.pokeMMO = pokeMMO
+        self.Hoenn_farming_thread = None
 
         self.root = tk.Tk()
         self.root.geometry("300x700")  # Set window width and height
@@ -68,6 +70,16 @@ class PokemmoUI:
         )
         self.transport_label.grid(column=1, row=3, sticky=(tk.W, tk.E))
 
+        self.Hoenn_farming_button = tk.Button(
+            self.root,
+            text="Start Hoenn Farming",
+            command=self.toggle_Hoenn_farming,
+            fg="white",
+            bg="green",
+        )
+        self.Hoenn_farming_button.grid(
+            column=0, row=5, columnspan=2, sticky=(tk.W, tk.E, tk.S), padx=10, pady=10
+        )
         self.stop_button = tk.Button(
             self.root,
             text="Stop",
@@ -110,10 +122,37 @@ class PokemmoUI:
 
         self.root.after(500, self.update_ui)
 
+    def toggle_Hoenn_farming(self):
+        if self.Hoenn_farming_thread and self.Hoenn_farming_thread.is_alive():
+            self.pokeMMO.auto_strategy_flag = False
+            self.Hoenn_farming_button.configure(
+                text="Stopping Main Loop...", state=tk.DISABLED
+            )
+            stop_thread = threading.Thread(target=self.wait_and_reset_button)
+            stop_thread.start()
+        else:
+            self.pokeMMO.auto_strategy_flag = True
+            self.Hoenn_farming_thread = threading.Thread(
+                target=self.pokeMMO.Hoenn_farming
+            )
+            self.Hoenn_farming_thread.start()
+            self.Hoenn_farming_button.configure(text="Stop Main Loop", bg="red")
+
+    def wait_and_reset_button(self):
+        if self.Hoenn_farming_thread and self.Hoenn_farming_thread.is_alive():
+            self.Hoenn_farming_thread.join()  # Wait for the thread to finish
+        self.Hoenn_farming_thread = None
+        self.Hoenn_farming_button.configure(
+            text="Start Main Loop", bg="green", state=tk.NORMAL
+        )
+
     def stop_threads_and_exit(self):
+        if self.Hoenn_farming_thread and self.Hoenn_farming_thread.is_alive():
+            self.pokeMMO.auto_strategy_flag = False
+            self.Hoenn_farming_thread.join()
         self.pokeMMO.stop_threads()
-        self.root.quit()  # This will close the Tkinter window
-        os._exit(0)  # This will terminate the entire Python program
+        self.root.quit()
+        os._exit(0)
 
     def run(self):
         self.root.mainloop()

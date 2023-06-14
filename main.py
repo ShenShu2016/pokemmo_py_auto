@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import threading
 import time
 from time import sleep
@@ -10,7 +11,9 @@ import pandas as pd
 import pytesseract
 
 from action_controller import Action_Controller
+from auto_strategy.BATTLE_FRONTINER_LV_UP import Farming_BATTLE_FRONTINER
 from auto_strategy.FALLARBOR_TOWN_FARMING import Farming_FALLARBOR_TOWN
+from auto_strategy.Mistralton_City_FARMING import Farming_Mistralton_City
 from auto_strategy.PETALBURG_CITY_FARMING import Farming_PETALBURG_CITY
 from auto_strategy.SOOTOPOLIS_CITY_FARMING import Farming_SOOTOPOLIS_CITY
 from auto_strategy.VERDANTURF_TOWN_FARMING import Farming_VERDANTURF_TOWN
@@ -82,6 +85,8 @@ class PokeMMO:
         self.SOOTOPOLIS_CITY_FARMING = Farming_SOOTOPOLIS_CITY(self)
         self.FALLARBOR_TOWN_FARMING = Farming_FALLARBOR_TOWN(self)
         self.VERDANTURF_TOWN_FARMING = Farming_VERDANTURF_TOWN(self)
+
+        self.auto_strategy_flag = False  # 用来控制所有的自动策略 开始与结束
 
         self.stop_threads_flag = False
         self.start_threads()
@@ -338,175 +343,84 @@ class PokeMMO:
                     return round(hp_pct, 1)
         return 100  # Return 0 if no white pixel is found
 
+    def Unova_farming(self):
+        print("Unova_farming started")
+
+        while self.auto_strategy_flag:
+            Farming_Mistralton_City().run(repeat_times=999)
+
+    def Hoenn_LV_up(self):
+        print("Hoenn_LV_up started")
+        while self.auto_strategy_flag:
+            Farming_BATTLE_FRONTINER().run(repeat_times=999)
+
+    def Hoenn_farming(self):
+        print("Hoenn_farming started")
+        locations = {
+            "SOOTOPOLIS_CITY": 10,
+            "FALLARBOR_TOWN": 10,
+            "PETALBURG_CITY": 10,
+            "VERDANTURF_TOWN": 10,
+        }
+        previous_location = None
+
+        while self.auto_strategy_flag:  # 主循环现在会检查 run_main_loop 标志
+            if previous_location is not None:
+                available_locations = locations.copy()
+                del available_locations[previous_location]  # 移除上一次地点
+                total_weight = sum(available_locations.values())
+                probabilities = [
+                    weight / total_weight for weight in available_locations.values()
+                ]
+                next_location = random.choices(
+                    list(available_locations.keys()), probabilities
+                )[0]
+            else:
+                next_location = random.choices(
+                    list(locations.keys()), list(locations.values())
+                )[0]
+
+            getattr(self, f"{next_location}_FARMING").run(repeat_times=1)
+            sleep(1)
+            previous_location = next_location
+        print("Main loop has stopped.")  # 打印消息表示主循环已停止
+
 
 if __name__ == "__main__":
     pokeMMO = PokeMMO()
-    sleep(6)
+    sleep(2)
     pokeMMO.start_ui()
-    # sleep(2)
+
+    # import random
+    # import time
+
+    # locations = {
+    #     "SOOTOPOLIS_CITY": 10,
+    #     "FALLARBOR_TOWN": 10,
+    #     "PETALBURG_CITY": 10,
+    #     "VERDANTURF_TOWN": 10,
+    # }
+    # previous_location = None
 
     # while True:
-    #     game_status = pokeMMO.get_game_status()
-    #     pokeMMO.action_controller.iv_shiny_check_release(game_status)
+    #     if previous_location is not None:
+    #         available_locations = locations.copy()
+    #         del available_locations[previous_location]  # 移除上一次地点
+    #         total_weight = sum(available_locations.values())
+    #         probabilities = [
+    #             weight / total_weight for weight in available_locations.values()
+    #         ]
+    #         next_location = random.choices(
+    #             list(available_locations.keys()), probabilities
+    #         )[0]
+    #     else:
+    #         next_location = random.choices(
+    #             list(locations.keys()), list(locations.values())
+    #         )[0]
 
-    #     sleep(5)
-
-    # while True:
-    #     game_status = pokeMMO.get_game_status()
-
-    #     if game_status["check_pokemon_summary"][0]:
-    #         pokeMMO.action_controller.click_pokemon_summary_IV(game_status)
-    #         coords = game_status["check_pokemon_summary"][1][0]
-
-    #         # Compute common coordinates.
-    #         close_summary_button_mid_x = int((coords[0] + coords[2]) / 2)
-    #         close_summary_button_mid_y = int((coords[1] + coords[3]) / 2)
-
-    #         # 检查闪光
-    #         shiny_area_top_l = (
-    #             close_summary_button_mid_x,
-    #             close_summary_button_mid_y + 40,
-    #         )
-    #         shiny_area_bottom_r = (
-    #             close_summary_button_mid_x + 33,
-    #             close_summary_button_mid_y + 152,
-    #         )  # Round down
-    #         shiny_x_y_list = pokeMMO.find_items(
-    #             temp_BRG=pokeMMO.shiny_BRG,
-    #             threshold=0.98,
-    #             max_matches=10,
-    #             top_l=shiny_area_top_l,
-    #             bottom_r=shiny_area_bottom_r,
-    #             display=False,
-    #         )
-    #         print("shiny_x_y_list", shiny_x_y_list)
-    #         if len(shiny_x_y_list) >= 1:
-    #             print("Shiny!")
-    #             pokeMMO.action_controller.close_pokemon_summary(game_status)
-
-    #         secret_shiny_x_y_list = pokeMMO.find_items(
-    #             temp_BRG=pokeMMO.secret_shiny_BRG,
-    #             threshold=0.995,
-    #             max_matches=10,
-    #             top_l=shiny_area_top_l,
-    #             bottom_r=shiny_area_bottom_r,
-    #             display=False,
-    #         )
-    #         print("secret_shiny_x_y_list", secret_shiny_x_y_list)
-    #         if len(secret_shiny_x_y_list) >= 1:
-    #             print("Secret Shiny!")
-    #             pokeMMO.action_controller.close_pokemon_summary(game_status)
-
-    #         # Compute IV area coordinates.
-    #         iv_area_top_l = (
-    #             close_summary_button_mid_x - 346,
-    #             close_summary_button_mid_y + 27,
-    #         )
-    #         iv_area_bottom_r = (
-    #             close_summary_button_mid_x - 312,
-    #             close_summary_button_mid_y + 211,
-    #         )  # Round down
-    #         print("IV area top left:", iv_area_top_l)
-    #         print("IV area bottom right:", iv_area_bottom_r)
-
-    #         iv_31_x_y_list = pokeMMO.find_items(
-    #             temp_BRG=pokeMMO.iv_31_BRG,
-    #             threshold=0.995,
-    #             max_matches=10,
-    #             top_l=iv_area_top_l,
-    #             bottom_r=iv_area_bottom_r,
-    #             display=False,
-    #         )
-    #         print("IV 31 List:", iv_31_x_y_list)
-
-    #         if len(iv_31_x_y_list) == 0:
-    #             print("start releasing pokemon")
-    #             pc_release_icon_coords = (
-    #                 close_summary_button_mid_x - 260,
-    #                 close_summary_button_mid_y + 3,
-    #             )  # Round up
-    #             pokeMMO.controller.click(*pc_release_icon_coords)
-    #             sleep(0.3)
-
-    #             confirm_release_area_top_l = (
-    #                 close_summary_button_mid_x - 418,
-    #                 close_summary_button_mid_y + 143,
-    #             )  # Round up
-    #             confirm_release_area_bottom_r = (
-    #                 close_summary_button_mid_x - 301,
-    #                 close_summary_button_mid_y + 168,
-    #             )  # Round up
-    #             print("Confirm release area top left:", confirm_release_area_top_l)
-    #             print(
-    #                 "Confirm release area bottom right:", confirm_release_area_bottom_r
-    #             )
-
-    #             confirm_release_x_y_list = pokeMMO.find_items(
-    #                 temp_BRG=pokeMMO.confirm_release_BRG,
-    #                 threshold=0.995,
-    #                 top_l=confirm_release_area_top_l,
-    #                 bottom_r=confirm_release_area_bottom_r,
-    #                 max_matches=1,
-    #                 display=False,
-    #             )
-    #             print("Confirm release list:", confirm_release_x_y_list)
-
-    #             if len(confirm_release_x_y_list) == 1:
-    #                 # Click the first two elements of the tuple (x and y coords).
-    #                 pokeMMO.controller.click(
-    #                     confirm_release_x_y_list[0][0], confirm_release_x_y_list[0][1]
-    #                 )
-    #                 sleep(0.3)
-    #                 pokeMMO.controller.click(679, 378)
-    #         else:
-    #             pokeMMO.action_controller.close_pokemon_summary(game_status)
-
-    #     sleep(5)
-
-    # hp_BRG_x_y_list = pokeMMO.find_items(
-    #     temp_BRG=pokeMMO.hp_BRG,
-    #     threshold=0.995,
-    #     max_matches=10,
-    #     top_l=(0, 70),
-    #     bottom_r=(1080, 170),
-    #     display=True,
-    # )
-
-    # sleep(6)
-    # while True:
-    #     pokeMMO.action_controller.close_pokemon_summary(pokeMMO.get_game_status())
+    #     getattr(pokeMMO, f"{next_location}_FARMING").run(repeat_times=1)
     #     sleep(1)
+    #     previous_location = next_location
 
-    import random
-    import time
-
-    locations = {
-        "SOOTOPOLIS_CITY": 10,
-        "FALLARBOR_TOWN": 10,
-        "PETALBURG_CITY": 10,
-        "VERDANTURF_TOWN": 10,
-    }
-    previous_location = None
-
-    while True:
-        if previous_location is not None:
-            available_locations = locations.copy()
-            del available_locations[previous_location]  # 移除上一次地点
-            total_weight = sum(available_locations.values())
-            probabilities = [
-                weight / total_weight for weight in available_locations.values()
-            ]
-            next_location = random.choices(
-                list(available_locations.keys()), probabilities
-            )[0]
-        else:
-            next_location = random.choices(
-                list(locations.keys()), list(locations.values())
-            )[0]
-
-        getattr(pokeMMO, f"{next_location}_FARMING").run(repeat_times=1)
-        sleep(1)
-        previous_location = next_location
-
-    while True:
-        sleep(1)
+    # while True:
+    #     sleep(1)
