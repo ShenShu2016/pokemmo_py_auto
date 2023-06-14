@@ -270,11 +270,11 @@ class Action_Controller:
                 sleep(0.1)
 
                 confirm_release_area_top_l = (
-                    close_summary_button_mid_x - 418,
+                    close_summary_button_mid_x - 454,
                     close_summary_button_mid_y + 143,
                 )  # Round up
                 confirm_release_area_bottom_r = (
-                    close_summary_button_mid_x - 301,
+                    close_summary_button_mid_x - 353,
                     close_summary_button_mid_y + 168,
                 )  # Round up
 
