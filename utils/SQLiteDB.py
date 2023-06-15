@@ -16,7 +16,7 @@ class SQLiteDB:
         db_file,
     ):
         self.db_file = db_file
-        self.pokeMMO = pokeMMO
+        self.p = pokeMMO
         self.connections = {}
         self.cursors = {}
         self.thread_ids = set()  # 存储线程标识符的集合
@@ -135,7 +135,7 @@ class SQLiteDB:
 
     def insert_ball_throw_data(self, ball_type):
         columns = ["throw_pokeball", "ball_type", "timestamp"]
-        value = (True, ball_type, self.pokeMMO.encounter_start_time)
+        value = (True, ball_type, self.p.encounter_start_time)
         self.insert_data("action", columns, value)
 
     def insert_release_data(self):
@@ -143,7 +143,7 @@ class SQLiteDB:
         Inserts a boolean value and timestamp into the 'action' table of the database.
         """
         columns = ["release", "timestamp"]
-        value = (True, self.pokeMMO.encounter_start_time)
+        value = (True, self.p.encounter_start_time)
         self.insert_data("action", columns, value)
 
     def insert_31_iv_data(self):
@@ -151,7 +151,7 @@ class SQLiteDB:
         Inserts a boolean value and timestamp into the 'action' table of the database.
         """
         columns = ["caught_with_31_iv", "timestamp"]
-        value = (True, self.pokeMMO.encounter_start_time)
+        value = (True, self.p.encounter_start_time)
         self.insert_data("action", columns, value)
 
 

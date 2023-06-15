@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class GameStatus:
     def __init__(self, pokeMMO_instance: PokeMMO):
-        self.pokeMMO = pokeMMO_instance
+        self.p = pokeMMO_instance
         self.recent_status_game_status_dict_list = deque(maxlen=200)
         self.recent_images = deque(maxlen=5)
         self.last_image_save_time = 0
@@ -19,22 +19,22 @@ class GameStatus:
         self.skill_pp_dict = {}
 
     def is_battle_in_progress(self):
-        battle_in_progress_coords_list = self.pokeMMO.find_items(
+        battle_in_progress_coords_list = self.p.find_items(
             img_BRG=self.img_BRG,
             top_l=(726, 581),
             bottom_r=(797, 591),
-            temp_BRG=self.pokeMMO.battle_in_progress_BRG,
+            temp_BRG=self.p.battle_in_progress_BRG,
             threshold=0.99,
             max_matches=5,
         )
         return len(battle_in_progress_coords_list) > 0
 
     def is_battle_option_ready(self):
-        battle_option_ready_coords_list = self.pokeMMO.find_items(
+        battle_option_ready_coords_list = self.p.find_items(
             img_BRG=self.img_BRG,
             top_l=(504, 488),
             bottom_r=(547, 508),
-            temp_BRG=self.pokeMMO.battle_option_BRG,
+            temp_BRG=self.p.battle_option_BRG,
             threshold=0.99,
             max_matches=5,
         )
@@ -42,11 +42,11 @@ class GameStatus:
 
     def check_pokemon_summary(self):
         # print("check_battle_end_pokemon_caught")
-        pokemon_summary_coords_list = self.pokeMMO.find_items(
+        pokemon_summary_coords_list = self.p.find_items(
             img_BRG=self.img_BRG,
             bottom_r=(1360, 487),  # ,(479, 12)
             top_l=(316, 7),
-            temp_BRG=self.pokeMMO.pokemon_summary_BRG,  # self.pokeMMO.Pokemon_Summary_Exit_Button_BRG,
+            temp_BRG=self.p.pokemon_summary_BRG,  # self.p.Pokemon_Summary_Exit_Button_BRG,
             threshold=0.99,
             max_matches=5,
         )
@@ -67,8 +67,8 @@ class GameStatus:
         }
         return_status = 0
 
-        self.img_BRG = self.pokeMMO.get_latest_img_BRG()
-        self.skill_pp_dict = self.pokeMMO.action_controller.skill_pp_dict.copy()
+        self.img_BRG = self.p.get_img_BRG()
+        self.skill_pp_dict = self.p.ac.skill_pp_dict.copy()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
             battle_in_progress_future = executor.submit(self.is_battle_in_progress)

@@ -32,7 +32,7 @@ def calculate_catch_rate(
 
 class Action_Controller:
     def __init__(self, pokeMMO: PokeMMO):
-        self.pokeMMO = pokeMMO
+        self.p = pokeMMO
         self.my_recent_actions_list = deque(maxlen=1000)
         self.press_down_count = 5
         self.action_lock = threading.Lock()
@@ -62,8 +62,8 @@ class Action_Controller:
             keys = ["s", "s"]
             self.press_down_count -= 1
 
-        self.pokeMMO.controller.key_press(keys[0], delay + random.uniform(0, delay))
-        self.pokeMMO.controller.key_press(keys[1], delay + random.uniform(0, delay))
+        self.p.controller.key_press(keys[0], delay + random.uniform(0, delay))
+        self.p.controller.key_press(keys[1], delay + random.uniform(0, delay))
         total_delay = random.uniform(0, 0.5)
         sleep(total_delay)
         self.my_recent_actions_list.append(("move_left_right", time.time()))
@@ -71,9 +71,9 @@ class Action_Controller:
     @synchronized
     def fight_skill_1_from_s21(self):  # False Swipe
         sleep(0.15)
-        self.pokeMMO.controller.click(314, 508, tolerance=5)
+        self.p.controller.click(314, 508, tolerance=5)
         sleep(0.17)
-        self.pokeMMO.controller.click(312, 507, tolerance=5)
+        self.p.controller.click(312, 507, tolerance=5)
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
         self.skill_pp_dict["点到为止"] = self.skill_pp_dict["点到为止"] - 1
         sleep(5)
@@ -81,9 +81,9 @@ class Action_Controller:
 
     @synchronized
     def multi_fight_skill_1_from_s21(self):  # 地震
-        self.pokeMMO.controller.click(314, 508, tolerance=0)
-        self.pokeMMO.controller.key_press("z", 0.2)
-        self.pokeMMO.controller.key_press("z", 0.2)
+        self.p.controller.click(314, 508, tolerance=0)
+        self.p.controller.key_press("z", 0.2)
+        self.p.controller.key_press("z", 0.2)
         self.my_recent_actions_list.append(
             ("multi_fight_skill_1_from_s21", time.time())
         )
@@ -93,9 +93,9 @@ class Action_Controller:
     @synchronized
     def fight_skill_2_from_s21(self):  # Spore
         sleep(0.15)
-        self.pokeMMO.controller.click(314, 508, tolerance=10)
+        self.p.controller.click(314, 508, tolerance=10)
         sleep(0.17)
-        self.pokeMMO.controller.click(526, 508, tolerance=10)
+        self.p.controller.click(526, 508, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
         self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
         sleep(5)
@@ -104,9 +104,9 @@ class Action_Controller:
     @synchronized
     def fight_skill_3_from_s21(self):
         sleep(0.15)
-        self.pokeMMO.controller.click(314, 508, tolerance=10)
+        self.p.controller.click(314, 508, tolerance=10)
         sleep(0.17)
-        self.pokeMMO.controller.click(312, 561, tolerance=10)
+        self.p.controller.click(312, 561, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_3_from_s21", time.time()))
         self.skill_pp_dict["黑夜魔影"] = self.skill_pp_dict["黑夜魔影"] - 1
         sleep(5)
@@ -114,9 +114,9 @@ class Action_Controller:
     @synchronized
     def fight_skill_4_from_s21(self):
         sleep(0.15)
-        self.pokeMMO.controller.click(314, 508, tolerance=10)
+        self.p.controller.click(314, 508, tolerance=10)
         sleep(0.17)
-        self.pokeMMO.controller.click(528, 558, tolerance=10)
+        self.p.controller.click(528, 558, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_4_from_s21", time.time()))
         self.skill_pp_dict["skill_4"] = self.skill_pp_dict["skill_4"] - 1
         sleep(5)
@@ -124,19 +124,19 @@ class Action_Controller:
     @synchronized
     def run_from_s21(self):
         sleep(0.15)
-        self.pokeMMO.controller.click(522, 557, tolerance=15)
+        self.p.controller.click(522, 557, tolerance=15)
         sleep(4)
         print("Running from battle")
 
     @synchronized
     def throw_pokeball(self, pokeball_type="pokeball"):
         sleep(0.2)
-        self.pokeMMO.controller.click(527, 506, tolerance=15)  # 点击背包
+        self.p.controller.click(527, 506, tolerance=15)  # 点击背包
         sleep(0.3)
         if (
             len(
-                self.pokeMMO.find_items(
-                    temp_BRG=self.pokeMMO.poke_ball_BRG,
+                self.p.find_items(
+                    temp_BRG=self.p.poke_ball_BRG,
                     top_l=(521, 395),
                     bottom_r=(563, 438),
                     max_matches=1,
@@ -146,8 +146,8 @@ class Action_Controller:
             > 0
         ):
             print("扔球")
-            self.pokeMMO.controller.key_press("z", 1)
-            self.pokeMMO.db.insert_ball_throw_data("poke_ball")
+            self.p.controller.key_press("z", 1)
+            self.p.db.insert_ball_throw_data("poke_ball")
             print("Throwing Pokeball")
             sleep(3)
 
@@ -158,7 +158,7 @@ class Action_Controller:
             exit_button_x = (i[0] + i[2]) / 2 + 17
             exit_button_y = (i[1] + i[3]) / 2 - 2
             print(exit_button_x, exit_button_y)
-            self.pokeMMO.controller.click(exit_button_x, exit_button_y, tolerance=0)
+            self.p.controller.click(exit_button_x, exit_button_y, tolerance=0)
             sleep(0.1)
             self.my_recent_actions_list.append(("close_pokemon_summary", time.time()))
             print("Closing Pokemon Summary at %s, %s" % (exit_button_x, exit_button_y))
@@ -170,14 +170,14 @@ class Action_Controller:
         iv_icon_x = (coords[0] + coords[2]) / 2 - 386
         iv_icon_y = (coords[1] + coords[3]) / 2 + 3
         print(iv_icon_x, iv_icon_y)
-        self.pokeMMO.controller.click(iv_icon_x, iv_icon_y, tolerance=0)
+        self.p.controller.click(iv_icon_x, iv_icon_y, tolerance=0)
         print("Clicking Pokemon Summary IV at %s, %s" % (iv_icon_x, iv_icon_y))
 
     def iv_shiny_check_release(self, game_status):
         def check_shiny():
             # ... 这里是检查Shiny的代码
-            shiny_x_y_list = self.pokeMMO.find_items(
-                temp_BRG=self.pokeMMO.shiny_BRG,
+            shiny_x_y_list = self.p.find_items(
+                temp_BRG=self.p.shiny_BRG,
                 threshold=0.98,
                 max_matches=10,
                 top_l=shiny_area_top_l,
@@ -188,13 +188,13 @@ class Action_Controller:
             print("shiny_x_y_list", shiny_x_y_list)
             if len(shiny_x_y_list) >= 1:
                 print("Shiny!")
-                self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+                self.p.ac.close_pokemon_summary(game_status)
             return len(shiny_x_y_list) >= 1
 
         def check_secret_shiny():
             # ... 这里是检查Secret Shiny的代码
-            secret_shiny_x_y_list = self.pokeMMO.find_items(
-                temp_BRG=self.pokeMMO.secret_shiny_BRG,
+            secret_shiny_x_y_list = self.p.find_items(
+                temp_BRG=self.p.secret_shiny_BRG,
                 threshold=0.99,
                 max_matches=10,
                 top_l=shiny_area_top_l,
@@ -205,7 +205,7 @@ class Action_Controller:
             print("secret_shiny_x_y_list", secret_shiny_x_y_list)
             if len(secret_shiny_x_y_list) >= 1:
                 print("Secret Shiny!")
-                self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+                self.p.ac.close_pokemon_summary(game_status)
 
             return len(secret_shiny_x_y_list) >= 1
 
@@ -221,8 +221,8 @@ class Action_Controller:
                 pokemon_summary_sign_mid_y + 216,
             )  # Round down
 
-            iv_31_x_y_list = self.pokeMMO.find_items(
-                temp_BRG=self.pokeMMO.iv_31_BRG,
+            iv_31_x_y_list = self.p.find_items(
+                temp_BRG=self.p.iv_31_BRG,
                 threshold=0.95,
                 max_matches=10,
                 top_l=iv_area_top_l,
@@ -242,8 +242,8 @@ class Action_Controller:
                 pokemon_summary_sign_mid_x - 373,
                 pokemon_summary_sign_mid_y + 15,
             )  # Round down
-            iv_page_list = self.pokeMMO.find_items(
-                temp_BRG=self.pokeMMO.sprite_iv_page_BRG,
+            iv_page_list = self.p.find_items(
+                temp_BRG=self.p.sprite_iv_page_BRG,
                 top_l=iv_icon_top_l,
                 threshold=0.97,
                 bottom_r=iv_icon_bottom_r,
@@ -268,7 +268,7 @@ class Action_Controller:
                 pokemon_summary_sign_mid_y + 152,
             )  # Round down
             sleep(0.5)
-            img_BRG = self.pokeMMO.get_latest_img_BRG()
+            img_BRG = self.p.get_img_BRG()
             with ThreadPoolExecutor(max_workers=3) as executor:
                 shiny_future = executor.submit(check_shiny)
                 secret_shiny_future = executor.submit(check_secret_shiny)
@@ -294,7 +294,7 @@ class Action_Controller:
                     pokemon_summary_sign_mid_x - 260,
                     pokemon_summary_sign_mid_y + 3,
                 )  # Round up
-                self.pokeMMO.controller.click(*pc_release_icon_coords)
+                self.p.controller.click(*pc_release_icon_coords)
                 sleep(0.1)
 
                 confirm_release_area_top_l = (
@@ -306,8 +306,8 @@ class Action_Controller:
                     pokemon_summary_sign_mid_y + 168,
                 )  # Round up
 
-                confirm_release_x_y_list = self.pokeMMO.find_items(
-                    temp_BRG=self.pokeMMO.confirm_release_BRG,
+                confirm_release_x_y_list = self.p.find_items(
+                    temp_BRG=self.p.confirm_release_BRG,
                     threshold=0.99,
                     top_l=confirm_release_area_top_l,
                     bottom_r=confirm_release_area_bottom_r,
@@ -317,38 +317,38 @@ class Action_Controller:
 
                 if len(confirm_release_x_y_list) == 1:
                     # Click the first two elements of the tuple (x and y coords).
-                    self.pokeMMO.controller.click_center(confirm_release_x_y_list[0])
-                    self.pokeMMO.db.insert_release_data()
+                    self.p.controller.click_center(confirm_release_x_y_list[0])
+                    self.p.db.insert_release_data()
                     sleep(0.4)  # 太快破电脑受不了
-                    self.pokeMMO.controller.click(680, 348)
+                    self.p.controller.click(680, 348)
                 else:
-                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+                    self.p.ac.close_pokemon_summary(game_status)
 
             else:
-                self.pokeMMO.action_controller.close_pokemon_summary(game_status)
-                self.pokeMMO.db.insert_31_iv_data()
+                self.p.ac.close_pokemon_summary(game_status)
+                self.p.db.insert_31_iv_data()
 
     @synchronized
     def restart_from_hospital(self):
-        self.pokeMMO.controller.key_press("8")
+        self.p.controller.key_press("8")
         sleep(4.5)
-        self.pokeMMO.controller.key_press("z", 1.5)  # 护士姐姐对话
-        self.pokeMMO.controller.key_press("s", 5)
-        self.pokeMMO.controller.key_press("z", 1.5)  # 下水
+        self.p.controller.key_press("z", 1.5)  # 护士姐姐对话
+        self.p.controller.key_press("s", 5)
+        self.p.controller.key_press("z", 1.5)  # 下水
         print("Restarting from hospital")
 
     @synchronized
     def use_sweet_sent(self):
         if self.skill_pp_dict["甜甜香气"] >= 5:
-            self.pokeMMO.controller.key_press("2")
+            self.p.controller.key_press("2")
             self.skill_pp_dict["甜甜香气"] = self.skill_pp_dict["甜甜香气"] - 5
             sleep(3)
 
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
-        self.pokeMMO.controller.key_press("7")
+        self.p.controller.key_press("7")
         sleep(0.2)
         for i in range(2):
-            self.pokeMMO.controller.click(
+            self.p.controller.click(
                 city_info[city]["town_map_coords"][0],
                 city_info[city]["town_map_coords"][1],
                 tolerance=0,
@@ -358,7 +358,7 @@ class Action_Controller:
         sleep(5)
         # check if in right city
         print("Checking if in %s" % city)
-        coords_status = self.pokeMMO.get_coords_status()
+        coords_status = self.p.get_coords()
         if coords_status["map_number_tuple"] == city_info[city]["map_number"]:
             print(
                 "Flied to %s" % city,
@@ -372,10 +372,10 @@ class Action_Controller:
                 city_info[city]["112"][0],
                 city_info[city]["112"][1],
             ):
-                self.pokeMMO.controller.key_press("w", 1)
+                self.p.controller.key_press("w", 1)
                 sleep(2)
                 print("going to find nurse")
-                self.pokeMMO.pf.go_to_nurse(city=city)
+                self.p.pf.go_to_nurse(city=city)
                 self.talk_to_nurse(city=city)
                 return True
             else:
@@ -388,16 +388,16 @@ class Action_Controller:
             press_delay = 2
         else:
             press_delay = 5
-        self.pokeMMO.controller.key_press("z", press_delay)  # 合众 比较久
+        self.p.controller.key_press("z", press_delay)  # 合众 比较久
         self.rest_pp_health()
         return True  #!现在没办法鉴别有没有成功
 
     @synchronized
     def use_surf(self):
-        self.pokeMMO.controller.key_press("z", 1.5)
+        self.p.controller.key_press("z", 1.5)
 
         for i in range(10):
-            if self.pokeMMO.get_coords_status()["transport"] in [1, 11, 75, 65, 7]:
+            if self.p.get_coords()["transport"] in [1, 11, 75, 65, 7]:
                 return True
             sleep(0.1)
 
@@ -405,14 +405,14 @@ class Action_Controller:
 
     @synchronized
     def use_teleport(self):
-        coords_status = self.pokeMMO.get_coords_status()
+        coords_status = self.p.get_coords()
 
         if coords_status["map_number_tuple"][2] == 50 or coords_status[
             "map_number_tuple"
         ] in [(1, 14, 76), (2, 1, 81)]:
-            self.pokeMMO.controller.key_press("8")
+            self.p.controller.key_press("8")
             sleep(3)
-        coords_status = self.pokeMMO.get_coords_status()
+        coords_status = self.p.get_coords()
         if coords_status["map_number_tuple"][2] != 50:
             return True
         else:
@@ -420,11 +420,11 @@ class Action_Controller:
 
     @synchronized
     def use_dig(self):
-        coords_status = self.pokeMMO.get_coords_status()
+        coords_status = self.p.get_coords()
         if coords_status["map_number_tuple"][2] == 74:
-            self.pokeMMO.controller.key_press("9")
+            self.p.controller.key_press("9")
             sleep(5)
-        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] != 74:
+        if self.p.get_coords()["map_number_tuple"][2] != 74:
             return True
         else:
             raise Exception("Not in building,还没做完")
@@ -464,6 +464,6 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
     sleep(2)
     while True:
-        game_status = pokeMMO.get_game_status()
-        pokeMMO.action_controller.iv_shiny_check_release(game_status)
+        game_status = pokeMMO.get_gs()
+        pokeMMO.ac.iv_shiny_check_release(game_status)
         sleep(5)

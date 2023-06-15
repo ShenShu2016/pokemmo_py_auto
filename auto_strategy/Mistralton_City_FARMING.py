@@ -32,9 +32,9 @@ def add_x_y_coords_offset_Mistralton_City(coords_status):
 
 class Farming_Mistralton_City:
     def __init__(self, pokeMMO_instance: PokeMMO):
-        self.pokeMMO = pokeMMO_instance
+        self.p = pokeMMO_instance
         self.city = "Mistralton_City"
-        self.my_df = self.pokeMMO.df_dict[f"{self.city}_coords_tracking_csv"]
+        self.my_df = self.p.df_dict[f"{self.city}_coords_tracking_csv"]
         self.farming_coords = [
             (x, y)
             for x, y, mark in zip(
@@ -44,24 +44,22 @@ class Farming_Mistralton_City:
         ]
 
     def leave_pc_center_and_go_farm(self):
-        self.pokeMMO.pf.leave_pc_center(city=self.city)
+        self.p.pf.leave_pc_center(city=self.city)
 
     def step_1_go_bridge(self):
-        self.pokeMMO.pf.go_somewhere(end_point=(262, 105), city=self.city)
+        self.p.pf.go_somewhere(end_point=(262, 105), city=self.city)
 
     def step_2_pass_bridge(self):
-        self.pokeMMO.pf.go_somewhere(
-            end_point=(259, 116), city=self.city, transport="run"
-        )
+        self.p.pf.go_somewhere(end_point=(259, 116), city=self.city, transport="run")
 
     def step_3_go_tower(self):
-        self.pokeMMO.pf.go_somewhere(end_point=(233, 107), city=self.city)
-        self.pokeMMO.controller.key_press("w", 0.7)
+        self.p.pf.go_somewhere(end_point=(233, 107), city=self.city)
+        self.p.controller.key_press("w", 0.7)
         sleep(2)
 
     def teleport_and_heal(self):
-        self.pokeMMO.action_controller.use_teleport()
-        self.pokeMMO.action_controller.talk_to_nurse()  # teleport 就直接面对护士了
+        self.p.ac.use_teleport()
+        self.p.ac.talk_to_nurse()  # teleport 就直接面对护士了
 
     def back_to_open_air(self):
         pass
@@ -70,9 +68,7 @@ class Farming_Mistralton_City:
         # 首先要确认是否能飞走
         sleep(1)
 
-        result = self.pokeMMO.action_controller.fly_to_city(
-            self.city, locate_teleport=True
-        )
+        result = self.p.ac.fly_to_city(self.city, locate_teleport=True)
         if result:
             print("飞走成功")
             self.leave_pc_center_and_go_farm()
@@ -87,56 +83,56 @@ class Farming_Mistralton_City:
         # 开始刷怪
 
         farming_times = 0
-        while self.pokeMMO.auto_strategy_flag:
+        while self.p.auto_strategy_flag:
             print("开始刷怪,或者是回城补给")
-            while self.pokeMMO.get_game_status()["return_status"] < 20:
+            while self.p.get_gs()["return_status"] < 20:
                 coords_status = add_x_y_coords_offset_Mistralton_City(
-                    self.pokeMMO.get_coords_status()
+                    self.p.get_coords()
                 )
-                game_status = self.pokeMMO.get_game_status()
+                game_status = self.p.get_gs()
                 if game_status.get("check_pokemon_summary")[0]:
-                    self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
-                if self.pokeMMO.action_controller.is_go_pc():
+                    self.p.ac.iv_shiny_check_release(game_status)
+                if self.p.ac.is_go_pc():
                     farming_times += 1
                     if farming_times >= repeat_times:  # 如果重复次数到了，会停到一个可以飞的地方，没到的话就会pc
-                        self.pokeMMO.pf.go_somewhere(
+                        self.p.pf.go_somewhere(
                             end_point=(25, 16),
                             end_face_dir=None,
                             city=self.city,
                             style="ignore_sprite",  # 编号66
                         )
-                        if self.pokeMMO.get_game_status()["return_status"] >= 20:
+                        if self.p.get_gs()["return_status"] >= 20:
                             break
-                        coords_status = self.pokeMMO.get_coords_status()
+                        coords_status = self.p.get_coords()
                         if (
                             coords_status["x_coords"] == 16
                             and coords_status["y_coords"] == 25
                         ):
                             print("到达塔里,出门前")
-                            self.pokeMMO.controller.key_press("s", 2.5)
-                            if self.pokeMMO.get_coords_status()["map_number_tuple"] == (
+                            self.p.controller.key_press("s", 2.5)
+                            if self.p.get_coords()["map_number_tuple"] == (
                                 2,
                                 1,
                                 81,
                             ):
                                 return  # 出function
 
-                    self.pokeMMO.pf.go_somewhere(
+                    self.p.pf.go_somewhere(
                         end_point=(25, 16),
                         end_face_dir=None,
                         city=self.city,
                         style="ignore_sprite",  # 编号66
                     )
-                    if self.pokeMMO.get_game_status()["return_status"] >= 20:
+                    if self.p.get_gs()["return_status"] >= 20:
                         break  # break 出，因为要战斗了
-                    coords_status = self.pokeMMO.get_coords_status()
+                    coords_status = self.p.get_coords()
                     if (
                         coords_status["x_coords"] == 16
                         and coords_status["y_coords"] == 25
                     ):
                         print("到达塔里,出门前")
-                        self.pokeMMO.controller.key_press("s", 3)
-                        if self.pokeMMO.get_coords_status()["map_number_tuple"] == (
+                        self.p.controller.key_press("s", 3)
+                        if self.p.get_coords()["map_number_tuple"] == (
                             2,
                             1,
                             81,
@@ -151,31 +147,31 @@ class Farming_Mistralton_City:
                     self.step_3_go_tower()
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
-                # coords_status = self.pokeMMO.get_coords_status()
+                # coords_status = self.p.get_coords()
                 if (
                     coords_status["x_coords"],
                     coords_status["y_coords"],
                 ) in self.farming_coords:
                     # Trigger the desired operation
-                    self.pokeMMO.action_controller.use_sweet_sent()
+                    self.p.ac.use_sweet_sent()
                     # pass
 
                 else:
                     print("不在刷怪点", coords_status["x_coords"], coords_status["y_coords"])
 
-                self.pokeMMO.pf.go_somewhere(
+                self.p.pf.go_somewhere(
                     end_point=None,
                     end_face_dir=None,
                     city=self.city,
                     style="farming",  # 编号66
                 )
 
-            while self.pokeMMO.auto_strategy_flag:
+            while self.p.auto_strategy_flag:
                 # print("进入战斗")
-                game_status = self.pokeMMO.get_game_status()
-                enemy_status = self.pokeMMO.get_enemy_status()
+                game_status = self.p.get_gs()
+                enemy_status = self.p.get_bs()
                 if game_status.get("check_pokemon_summary")[0]:
-                    self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
+                    self.p.ac.iv_shiny_check_release(game_status)
 
                 if (
                     game_status["return_status"] == 21
@@ -183,62 +179,62 @@ class Farming_Mistralton_City:
                 ):
                     if enemy_status.get("enemy_1_info")["CatchMethod"] == 1:
                         if enemy_status.get("enemy_1_hp_pct") >= 20:
-                            self.pokeMMO.action_controller.fight_skill_1_from_s21()
+                            self.p.ac.fight_skill_1_from_s21()
 
                         elif enemy_status.get("enemy_1_hp_pct") < 20:
-                            self.pokeMMO.action_controller.throw_pokeball()
+                            self.p.ac.throw_pokeball()
 
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 2:
                         if enemy_status.get("enemy_1_hp_pct") >= 20:
-                            self.pokeMMO.action_controller.fight_skill_1_from_s21()
+                            self.p.ac.fight_skill_1_from_s21()
 
                         elif (
                             enemy_status.get("enemy_1_hp_pct") < 20
                             and enemy_status.get("enemy_1_sleeping") == False
                         ):
-                            self.pokeMMO.action_controller.fight_skill_2_from_s21()  # Spore
+                            self.p.ac.fight_skill_2_from_s21()  # Spore
 
                         elif (
                             enemy_status.get("enemy_1_hp_pct") < 20
                             and enemy_status.get("enemy_1_sleeping") == True
                         ):
-                            self.pokeMMO.action_controller.throw_pokeball()
+                            self.p.ac.throw_pokeball()
                     elif (
                         enemy_status.get("enemy_1_info")["CatchMethod"] == 0
                         and int(enemy_status.get("enemy_1_info")["No"]) != 999
                     ):
-                        self.pokeMMO.action_controller.run_from_s21()
+                        self.p.ac.run_from_s21()
 
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 11:
                         if (
-                            self.pokeMMO.action_controller.is_go_pc()
+                            self.p.ac.is_go_pc()
                             and enemy_status.get("enemy_1_hp_pct") >= 80
                         ):
-                            self.pokeMMO.action_controller.run_from_s21()
+                            self.p.ac.run_from_s21()
                         elif enemy_status.get("enemy_1_hp_pct") >= 80:
-                            self.pokeMMO.action_controller.fight_skill_3_from_s21()
+                            self.p.ac.fight_skill_3_from_s21()
                         else:
-                            self.pokeMMO.action_controller.throw_pokeball()
+                            self.p.ac.throw_pokeball()
                     # elif (
                     #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
                     # ):  # 直接睡了扔球
-                    #     if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
-                    #         self.pokeMMO.action_controller.run_from_s21()
+                    #     if is_go_pc(self.p.ac.skill_pp_dict):
+                    #         self.p.ac.run_from_s21()
                     #     elif enemy_status.get("enemy_1_hp_pct") >= 80:
-                    #         self.pokeMMO.action_controller.fight_skill_4_from_s21()  # 龙之怒
+                    #         self.p.ac.fight_skill_4_from_s21()  # 龙之怒
                     #     elif enemy_status.get("enemy_1_sleeping") == False:
-                    #         self.pokeMMO.action_controller.fight_skill_2_from_s21()
+                    #         self.p.ac.fight_skill_2_from_s21()
                     #     elif enemy_status.get("enemy_1_sleeping") == True:
-                    #         self.pokeMMO.action_controller.throw_pokeball()
+                    #         self.p.ac.throw_pokeball()
                     # elif (
                     #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
                     # ):  # 直接睡了扔球
-                    #     if is_go_pc(self.pokeMMO.action_controller.skill_pp_dict):
-                    #         self.pokeMMO.action_controller.run_from_s21()
+                    #     if is_go_pc(self.p.ac.skill_pp_dict):
+                    #         self.p.ac.run_from_s21()
                     #     elif enemy_status.get("enemy_1_sleeping") == False:
-                    #         self.pokeMMO.action_controller.fight_skill_2_from_s21()
+                    #         self.p.ac.fight_skill_2_from_s21()
                     #     elif enemy_status.get("enemy_1_sleeping") == True:
-                    #         self.pokeMMO.action_controller.throw_pokeball()
+                    #         self.p.ac.throw_pokeball()
                     else:
                         raise Exception("闪光，有问题！！！")
 
@@ -247,7 +243,7 @@ class Farming_Mistralton_City:
                     and enemy_status.get("enemy_count") >= 2
                     and enemy_status.get("allChecked") == True
                 ):
-                    self.pokeMMO.action_controller.run_from_s21()
+                    self.p.ac.run_from_s21()
 
                 if game_status["return_status"] == 1:
                     break

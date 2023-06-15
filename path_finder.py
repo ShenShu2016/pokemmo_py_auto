@@ -24,7 +24,7 @@ from constant import city_info
 class PathFinder:
     def __init__(self, pokeMMO: PokeMMO):
         """Initialize the LogPrintSave class."""
-        self.pokeMMO = pokeMMO
+        self.p = pokeMMO
         self.path = []
         self.keys_and_delays = []
 
@@ -89,7 +89,7 @@ class PathFinder:
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
         transport_speed = {"bike": 0.08, "walk": 0.25, "run": 0.16, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
-        coords_status = self.pokeMMO.get_coords_status()
+        coords_status = self.p.get_coords()
         current_face_dir = coords_status["face_dir"]
         if path is None:
             return None
@@ -203,7 +203,7 @@ class PathFinder:
         transport=None,
     ):  # style random_end_point,solid_end_point
         """end_point: (y, x)"""
-        df = self.pokeMMO.df_dict[f"{city}_coords_tracking_csv"]
+        df = self.p.df_dict[f"{city}_coords_tracking_csv"]
         df = df.reset_index(drop=True)
 
         # Convert coords to integer and shift to non-negative range
@@ -240,8 +240,8 @@ class PathFinder:
         offset_func = offset_func_mapping.get(city, lambda x: x)
 
         while True:
-            game_status = self.pokeMMO.get_game_status()
-            coords_status = self.pokeMMO.get_coords_status()
+            game_status = self.p.get_gs()
+            coords_status = self.p.get_coords()
             coords_status_with_offset = offset_func(coords_status)
             if style == "farming":
                 random_row = df[df["mark"] == 66].sample(n=1)
@@ -282,7 +282,7 @@ class PathFinder:
 
     def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
         while True:
-            coords_status = self.pokeMMO.get_coords_status()
+            coords_status = self.p.get_coords()
             if (
                 coords_status["x_coords"] == city_info[city]["112_nurse"][0]
                 and coords_status["y_coords"] == city_info[city]["112_nurse"][1]
@@ -303,7 +303,7 @@ class PathFinder:
 
     def leave_pc_center(self, city="SOOTOPOLIS_CITY"):
         while True:
-            coords_status = self.pokeMMO.get_coords_status()
+            coords_status = self.p.get_coords()
             if (
                 coords_status["x_coords"] == city_info[city]["112_out"][0][0]
                 and coords_status["y_coords"] == city_info[city]["112_out"][0][1]
@@ -321,9 +321,9 @@ class PathFinder:
 
             self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
             sleep(0.5)
-            self.pokeMMO.controller.key_press("s", 1)
+            self.p.controller.key_press("s", 1)
             sleep(2)
-            coords_status = self.pokeMMO.get_coords_status()
+            coords_status = self.p.get_coords()
             if coords_status["map_number_tuple"] == city_info[city]["map_number"]:
                 return True
             else:
@@ -332,7 +332,7 @@ class PathFinder:
     def pf_move(
         self, end_face_dir=None, transport=None
     ):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
-        coords_status = self.pokeMMO.get_coords_status()
+        coords_status = self.p.get_coords()
 
         if transport == None:
             if (
@@ -342,7 +342,7 @@ class PathFinder:
             ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
                 transport = "bike"
                 if coords_status["transport"] not in [10, 74, 6, 2]:
-                    self.pokeMMO.controller.key_press("3", 0.1)
+                    self.p.controller.key_press("3", 0.1)
 
             elif coords_status["transport"] in [1, 11, 75, 65, 7]:
                 transport = "surf"
@@ -350,7 +350,7 @@ class PathFinder:
                 transport = "run"
         elif transport == "walk" or transport == "run":
             if coords_status["transport"] in [10, 74, 6, 2]:
-                self.pokeMMO.controller.key_press("3", 0.1)
+                self.p.controller.key_press("3", 0.1)
 
         self.keys_and_delays = self.path_to_keys_and_delays(
             self.path, transport=transport, end_face_dir=end_face_dir
@@ -359,12 +359,12 @@ class PathFinder:
         print(self.keys_and_delays)
         if self.keys_and_delays is not None:
             if transport == "run":
-                self.pokeMMO.controller.key_down("x")
+                self.p.controller.key_down("x")
             for key, delay in self.keys_and_delays:
-                self.pokeMMO.controller.key_press(key, delay)
+                self.p.controller.key_press(key, delay)
                 sleep(0.1)
             if transport == "run":
-                self.pokeMMO.controller.key_up("x")
+                self.p.controller.key_up("x")
 
 
 if __name__ == "__main__":

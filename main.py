@@ -46,12 +46,12 @@ class PokeMMO:
 
         pytesseract.pytesseract.tesseract_cmd = self.config["tesseract"]
 
-        self.latest_img_BRG_lock = threading.Lock()
-        self.game_status_lock = threading.Lock()
-        self.enemy_status_lock = threading.Lock()
+        self.img_BRG_lock = threading.Lock()
+        self.gs_lock = threading.Lock()
+        self.bs_lock = threading.Lock()
         self.state_dict_lock = threading.Lock()
-        self.coords_status_lock = threading.Lock()
-        self.latest_img_BRG = self.window_manager.get_current_img_BRG()
+        self.coords_lock = threading.Lock()
+        self.img_BRG = self.window_manager.get_current_img_BRG()
 
         self.game_status = {"return_status": 0, "skill_pp": {}}
         self.enemy_status = {}
@@ -59,11 +59,7 @@ class PokeMMO:
         self.coords_status = {
             "x_coords": 0,
             "y_coords": 0,
-            "map_number_tuple": (
-                0,
-                0,
-                0,
-            ),
+            "map_number_tuple": (0, 0, 0),
             "face_dir": 0,
             "transport": 0,
         }
@@ -77,7 +73,7 @@ class PokeMMO:
 
         self.controller = Controller(handle=self.handle)
 
-        self.action_controller = Action_Controller(self)
+        self.ac = Action_Controller(self)
         self.word_recognizer = Word_Recognizer()
         self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
@@ -99,7 +95,7 @@ class PokeMMO:
         self.start_threads()
 
     def start_threads(self):
-        threading.Thread(target=self.update_latest_img_BRG).start()
+        threading.Thread(target=self.update_img_BRG).start()
         threading.Thread(target=self.update_game_status).start()
         threading.Thread(target=self.update_state_dict).start()
         threading.Thread(target=self.update_enemy_status).start()
@@ -132,13 +128,13 @@ class PokeMMO:
         """Start the user interface."""
         self.ui.run()
 
-    def update_latest_img_BRG(self):  # only image will be captured
+    def update_img_BRG(self):  # only image will be captured
         while not self.stop_threads_flag:
             # Add the current image, timestamp, and name to the list
             start_time = time.time()
             current_img_BRG = self.window_manager.get_current_img_BRG()
-            with self.latest_img_BRG_lock:
-                self.latest_img_BRG = current_img_BRG
+            with self.img_BRG_lock:
+                self.img_BRG = current_img_BRG
 
             time_passed = time.time() - start_time
             if time_passed >= 0.05:
@@ -151,14 +147,14 @@ class PokeMMO:
     def update_game_status(self):
         while not self.stop_threads_flag:
             new_game_state = self.game_status_checker.check_game_status()
-            with self.game_status_lock:
+            with self.gs_lock:
                 self.game_status = new_game_state
             sleep(0.02)  # wait for 3 seconds
 
     def update_enemy_status(self):
         while not self.stop_threads_flag:
             new_enemy_status = self.enemy_status_checker.check_enemy_status()
-            with self.enemy_status_lock:
+            with self.bs_lock:
                 self.enemy_status = new_enemy_status
             sleep(0.02)
 
@@ -166,7 +162,7 @@ class PokeMMO:
         while not self.stop_threads_flag:
             # Update every 30 seconds
             sleep(3)
-            img_BRG = self.get_latest_img_BRG()
+            img_BRG = self.get_img_BRG()
             my_address = self.get_text_from_box_coords(
                 (30, 0), (250, 25), img_BRG=img_BRG
             )
@@ -186,7 +182,7 @@ class PokeMMO:
     def update_memory_coords(self):
         while not self.stop_threads_flag:
             new_memory_coords = self.mj_coords.read_data()
-            with self.coords_status_lock:
+            with self.coords_lock:
                 self.coords_status = new_memory_coords
             sleep(0.02)
 
@@ -195,21 +191,21 @@ class PokeMMO:
         with self.state_dict_lock:
             return self.state_dict
 
-    def get_game_status(self):
-        with self.game_status_lock:
+    def get_gs(self):
+        with self.gs_lock:
             return self.game_status
 
-    def get_enemy_status(self):
-        with self.enemy_status_lock:
+    def get_bs(self):
+        with self.bs_lock:
             return self.enemy_status
 
-    def get_coords_status(self):
-        with self.coords_status_lock:
+    def get_coords(self):
+        with self.coords_lock:
             return self.coords_status
 
-    def get_latest_img_BRG(self):
-        with self.latest_img_BRG_lock:
-            return self.latest_img_BRG
+    def get_img_BRG(self):
+        with self.img_BRG_lock:
+            return self.img_BRG
 
     def get_box_coordinate_from_center(
         self,
@@ -222,7 +218,7 @@ class PokeMMO:
     ):
         """Draw a box on the image and get the text from the area inside the box."""
         if img_BRG is None:
-            img_BRG = self.get_latest_img_BRG()
+            img_BRG = self.get_img_BRG()
         height, width, _ = img_BRG.shape
         center_x, center_y = (width // 2) + offset_x, (height // 2) - offset_y
 
@@ -243,7 +239,7 @@ class PokeMMO:
         self, top_l, bottom_r, config="--psm 6", lang="eng", img_BRG=None
     ):
         if img_BRG is None:
-            img_BRG = self.get_latest_img_BRG()
+            img_BRG = self.get_img_BRG()
         # Extract the area from the image
         area = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
 
@@ -291,7 +287,7 @@ class PokeMMO:
         """Find items in the PokeMMO game by matching a template image with the game screenshot."""
         # print(top_l, bottom_r)
         if img_BRG is None:
-            img_BRG = self.get_latest_img_BRG()
+            img_BRG = self.get_img_BRG()
         if top_l and bottom_r:
             img_BRG = img_BRG[
                 int(top_l[1]) : int(bottom_r[1]), int(top_l[0]) : int(bottom_r[0])
@@ -339,7 +335,7 @@ class PokeMMO:
 
     def get_hp_pct(self, top_l, bottom_r, img_BRG=None):
         if img_BRG is None:
-            img_BRG = self.get_latest_img_BRG()
+            img_BRG = self.get_img_BRG()
         hp_image = img_BRG[top_l[1] : bottom_r[1], top_l[0] : bottom_r[0]]
         total_hp_length = bottom_r[0] - top_l[0]
 
@@ -412,7 +408,7 @@ if __name__ == "__main__":
     pokeMMO.start_ui()
 
     while True:
-        game_states = pokeMMO.get_game_status()
+        game_states = pokeMMO.get_gs()
         if game_states["check_pokemon_summary"][0]:
             coords = game_states["check_pokemon_summary"][1][0]
             pokemon_summary_sign_mid_x = (coords[0] + coords[2]) / 2

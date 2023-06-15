@@ -33,10 +33,10 @@ class LogPrintSave:
         while not self.pokemmo.stop_threads_flag:
             try:
                 # 获取状态和信息
-                game_status = self.pokemmo.get_game_status()
-                enemy_status = self.pokemmo.get_enemy_status()
+                game_status = self.pokemmo.get_gs()
+                enemy_status = self.pokemmo.get_bs()
                 state_dict = self.pokemmo.get_state_dict()
-                coords_status = self.pokemmo.get_coords_status()
+                coords_status = self.pokemmo.get_coords()
 
                 # 获取当前时间戳
                 timestamp = time.time()

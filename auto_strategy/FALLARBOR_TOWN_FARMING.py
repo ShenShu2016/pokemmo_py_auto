@@ -28,9 +28,9 @@ def add_x_y_coords_offset_FALLARBOR_TOWN(coords_status):
 
 class Farming_FALLARBOR_TOWN:
     def __init__(self, pokeMMO_instance: PokeMMO):
-        self.pokeMMO = pokeMMO_instance
+        self.p = pokeMMO_instance
         self.city = "FALLARBOR_TOWN"
-        self.my_df = self.pokeMMO.df_dict["FALLARBOR_TOWN_coords_tracking_csv"]
+        self.my_df = self.p.df_dict["FALLARBOR_TOWN_coords_tracking_csv"]
         self.farming_coords = [
             (x, y)
             for x, y, mark in zip(
@@ -40,20 +40,18 @@ class Farming_FALLARBOR_TOWN:
         ]
 
     def leave_pc_center_and_go_farm(self):
-        self.pokeMMO.pf.leave_pc_center(city=self.city)
+        self.p.pf.leave_pc_center(city=self.city)
 
     def teleport_and_heal(self, city: str):
-        self.pokeMMO.action_controller.use_teleport()
-        self.pokeMMO.action_controller.talk_to_nurse()  # teleport 就直接面对护士了
+        self.p.ac.use_teleport()
+        self.p.ac.talk_to_nurse()  # teleport 就直接面对护士了
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
         sleep(1)
 
-        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] in [50, 76]:
-            result = self.pokeMMO.action_controller.fly_to_city(
-                self.city, locate_teleport=True
-            )
+        if self.p.get_coords()["map_number_tuple"][2] in [50, 76]:
+            result = self.p.ac.fly_to_city(self.city, locate_teleport=True)
             if result:
                 print("飞走成功")
                 self.leave_pc_center_and_go_farm()
@@ -66,15 +64,15 @@ class Farming_FALLARBOR_TOWN:
         # 开始刷怪
 
         farming_times = 0
-        while self.pokeMMO.auto_strategy_flag:
+        while self.p.auto_strategy_flag:
             print("开始刷怪,或者是回城补给")
-            while self.pokeMMO.get_game_status()["return_status"] < 20:
-                coords_status = self.pokeMMO.get_coords_status()
-                game_status = self.pokeMMO.get_game_status()
+            while self.p.get_gs()["return_status"] < 20:
+                coords_status = self.p.get_coords()
+                game_status = self.p.get_gs()
                 coords_status = add_x_y_coords_offset_FALLARBOR_TOWN(coords_status)
                 if game_status.get("check_pokemon_summary")[0]:
-                    self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
-                if self.pokeMMO.action_controller.is_go_pc():
+                    self.p.ac.iv_shiny_check_release(game_status)
+                if self.p.ac.is_go_pc():
                     farming_times += 1
                     if farming_times >= repeat_times:
                         return
@@ -87,22 +85,22 @@ class Farming_FALLARBOR_TOWN:
                     coords_status["y_coords"],
                 ) in self.farming_coords:
                     # Trigger the desired operation
-                    self.pokeMMO.action_controller.use_sweet_sent()
+                    self.p.ac.use_sweet_sent()
                     # pass
 
-                self.pokeMMO.pf.go_somewhere(
+                self.p.pf.go_somewhere(
                     end_point=None,
                     end_face_dir=None,
                     city=self.city,
                     style="farming",  # 编号66
                 )
 
-            while self.pokeMMO.auto_strategy_flag:
+            while self.p.auto_strategy_flag:
                 # print("进入战斗")
-                game_status = self.pokeMMO.get_game_status()
-                enemy_status = self.pokeMMO.get_enemy_status()
-                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
-                    self.pokeMMO.action_controller.iv_shiny_check_release(game_status)
+                game_status = self.p.get_gs()
+                enemy_status = self.p.get_bs()
+                if self.p.get_gs().get("check_pokemon_summary")[0]:
+                    self.p.ac.iv_shiny_check_release(game_status)
 
                 if (
                     game_status["return_status"] == 21
@@ -110,35 +108,35 @@ class Farming_FALLARBOR_TOWN:
                 ):
                     if enemy_status.get("enemy_1_info")["CatchMethod"] == 1:
                         if enemy_status.get("enemy_1_hp_pct") >= 20:
-                            self.pokeMMO.action_controller.fight_skill_1_from_s21()
+                            self.p.ac.fight_skill_1_from_s21()
 
                         elif enemy_status.get("enemy_1_hp_pct") < 20:
-                            self.pokeMMO.action_controller.throw_pokeball()
+                            self.p.ac.throw_pokeball()
 
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 2:
                         if enemy_status.get("enemy_1_hp_pct") >= 20:
-                            self.pokeMMO.action_controller.fight_skill_1_from_s21()
+                            self.p.ac.fight_skill_1_from_s21()
 
                         elif (
                             enemy_status.get("enemy_1_hp_pct") < 20
                             and enemy_status.get("enemy_1_sleeping") == False
                         ):
-                            self.pokeMMO.action_controller.fight_skill_2_from_s21()  # Spore
+                            self.p.ac.fight_skill_2_from_s21()  # Spore
 
                         elif (
                             enemy_status.get("enemy_1_hp_pct") < 20
                             and enemy_status.get("enemy_1_sleeping") == True
                         ):
-                            self.pokeMMO.action_controller.throw_pokeball()
+                            self.p.ac.throw_pokeball()
                     elif enemy_status.get("enemy_1_info")["CatchMethod"] == 0:
-                        self.pokeMMO.action_controller.run_from_s21()
+                        self.p.ac.run_from_s21()
 
                 elif (
                     game_status["return_status"] == 21
                     and enemy_status.get("enemy_count") >= 2
                     and enemy_status.get("allChecked") == True
                 ):
-                    self.pokeMMO.action_controller.run_from_s21()
+                    self.p.ac.run_from_s21()
 
                 if game_status["return_status"] == 1:
                     break

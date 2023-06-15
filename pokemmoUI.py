@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class PokemmoUI:
     def __init__(self, pokeMMO: PokeMMO):
-        self.pokeMMO = pokeMMO
+        self.p = pokeMMO
 
         self.root = tk.Tk()
         self.root.geometry("300x700")  # Set window width and height
@@ -121,21 +121,21 @@ class PokemmoUI:
 
     def update_db(self):
         # Update the new labels with data from the database
-        pokeballs_today = self.pokeMMO.db.count_today_pokeball()
+        pokeballs_today = self.p.db.count_today_pokeball()
         self.pokeball_label.configure(text=f"今天用掉的精灵球: {pokeballs_today}")
-        released_today = self.pokeMMO.db.count_today_released()
+        released_today = self.p.db.count_today_released()
         self.released_label.configure(text=f"今天放掉的精灵: {released_today}")
 
-        caught_iv_today = self.pokeMMO.db.count_today_caught_with31_iv()
+        caught_iv_today = self.p.db.count_today_caught_with31_iv()
         self.caught_iv_label.configure(text=f"今天抓到的lv31素材: {caught_iv_today}")
 
         self.root.after(5000, self.update_db)  # Refresh every 5 seconds
 
     def update_ui(self):
-        game_status = self.pokeMMO.get_game_status()
+        game_status = self.p.get_gs()
 
         # Update the labels with the new values
-        coords_status = self.pokeMMO.get_coords_status()
+        coords_status = self.p.get_coords()
         self.xy_label[
             "text"
         ] = f"坐标: ({coords_status['x_coords']} , {coords_status['y_coords']})"
@@ -162,7 +162,7 @@ class PokemmoUI:
                 and getattr(self, f"{other_farming}_thread")
                 and getattr(self, f"{other_farming}_thread").is_alive()
             ):
-                setattr(self.pokeMMO, "auto_strategy_flag", False)
+                setattr(self.p, "auto_strategy_flag", False)
                 self.farming_buttons[other_farming].configure(
                     text=f"Stopping {other_farming} Farming...", state=tk.DISABLED
                 )
@@ -176,7 +176,7 @@ class PokemmoUI:
             and getattr(self, f"{farming}_thread")
             and getattr(self, f"{farming}_thread").is_alive()
         ):
-            setattr(self.pokeMMO, "auto_strategy_flag", False)
+            setattr(self.p, "auto_strategy_flag", False)
             self.farming_buttons[farming].configure(
                 text=f"Stopping {farming} Farming...", state=tk.DISABLED
             )
@@ -185,11 +185,11 @@ class PokemmoUI:
             )
             stop_thread.start()
         else:
-            setattr(self.pokeMMO, "auto_strategy_flag", True)
+            setattr(self.p, "auto_strategy_flag", True)
             setattr(
                 self,
                 f"{farming}_thread",
-                threading.Thread(target=getattr(self.pokeMMO, f"{farming}_farming")),
+                threading.Thread(target=getattr(self.p, f"{farming}_farming")),
             )
             getattr(self, f"{farming}_thread").start()
             self.farming_buttons[farming].configure(
@@ -214,9 +214,9 @@ class PokemmoUI:
                 and getattr(self, f"{farming}_thread")
                 and getattr(self, f"{farming}_thread").is_alive()
             ):
-                setattr(self.pokeMMO, f"{farming}_farming_flag", False)
+                setattr(self.p, f"{farming}_farming_flag", False)
                 getattr(self, f"{farming}_thread").join()
-        self.pokeMMO.stop_threads()
+        self.p.stop_threads()
         self.root.quit()
         os._exit(0)
 

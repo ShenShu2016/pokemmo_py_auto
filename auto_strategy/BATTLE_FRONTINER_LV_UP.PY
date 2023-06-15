@@ -10,9 +10,9 @@ if TYPE_CHECKING:
 
 class Farming_BATTLE_FRONTINER:
     def __init__(self, pokeMMO_instance: PokeMMO):
-        self.pokeMMO = pokeMMO_instance
+        self.p = pokeMMO_instance
         self.city = "BATTLE_FRONTIER"
-        self.my_df = self.pokeMMO.df_dict["BATTLE_FRONTIER_coords_tracking_csv"]
+        self.my_df = self.p.df_dict["BATTLE_FRONTIER_coords_tracking_csv"]
         self.lake_edge_df = self.my_df[
             self.my_df["mark"] == 3
         ].copy()  # Create a copy of the filtered DataFrame
@@ -50,30 +50,28 @@ class Farming_BATTLE_FRONTINER:
     def leave_pc_center_and_go_farm(
         self,
     ):
-        self.pokeMMO.pf.leave_pc_center(city=self.city)
+        self.p.pf.leave_pc_center(city=self.city)
         # 去湖边
         my_edge_choice = random.choice(self.lake_edge_face_dir_list)
-        self.pokeMMO.pf.go_somewhere(
+        self.p.pf.go_somewhere(
             end_point=(my_edge_choice[0], my_edge_choice[1]),
             end_face_dir=my_edge_choice[2],
             city=self.city,
         )
 
         # 冲浪
-        self.pokeMMO.action_controller.use_surf()
+        self.p.ac.use_surf()
 
     def teleport_and_heal(self):
-        self.pokeMMO.action_controller.use_teleport()
-        self.pokeMMO.action_controller.talk_to_nurse()
+        self.p.ac.use_teleport()
+        self.p.ac.talk_to_nurse()
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
         sleep(1)
 
-        if self.pokeMMO.get_coords_status()["map_number_tuple"][2] in [50, 76]:
-            result = self.pokeMMO.action_controller.fly_to_city(
-                self.city, locate_teleport=True
-            )
+        if self.p.get_coords()["map_number_tuple"][2] in [50, 76]:
+            result = self.p.ac.fly_to_city(self.city, locate_teleport=True)
             if result:
                 print("飞走成功")
                 self.leave_pc_center_and_go_farm()
@@ -85,13 +83,13 @@ class Farming_BATTLE_FRONTINER:
         # 检测是否回城补给
         # 开始刷怪
         farming_times = 0
-        while self.pokeMMO.auto_strategy_flag:
+        while self.p.auto_strategy_flag:
             print("开始刷怪,或者是回城补给")
-            while self.pokeMMO.get_game_status()["return_status"] < 20:
-                game_status = self.pokeMMO.get_game_status()
-                if self.pokeMMO.get_game_status().get("check_pokemon_summary")[0]:
-                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
-                if self.pokeMMO.action_controller.skill_pp_dict["甜甜香气"] < 5:
+            while self.p.get_gs()["return_status"] < 20:
+                game_status = self.p.get_gs()
+                if self.p.get_gs().get("check_pokemon_summary")[0]:
+                    self.p.ac.close_pokemon_summary(game_status)
+                if self.p.ac.skill_pp_dict["甜甜香气"] < 5:
                     farming_times += 1
                     if farming_times >= repeat_times:
                         print("刷怪次数达到上限!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -99,20 +97,20 @@ class Farming_BATTLE_FRONTINER:
                     self.teleport_and_heal()
                     self.leave_pc_center_and_go_farm()  # 应该已经到了湖里了
 
-                self.pokeMMO.action_controller.use_sweet_sent()
+                self.p.ac.use_sweet_sent()
 
-            while self.pokeMMO.auto_strategy_flag:
+            while self.p.auto_strategy_flag:
                 # print("进入战斗")
-                game_status = self.pokeMMO.get_game_status()
-                enemy_status = self.pokeMMO.get_enemy_status()
+                game_status = self.p.get_gs()
+                enemy_status = self.p.get_bs()
                 if game_status.get("check_pokemon_summary")[0]:
-                    self.pokeMMO.action_controller.close_pokemon_summary(game_status)
+                    self.p.ac.close_pokemon_summary(game_status)
 
                 if (
                     game_status["return_status"] == 21
                     and enemy_status.get("allChecked") == True
                 ):
-                    self.pokeMMO.action_controller.multi_fight_skill_1_from_s21()
+                    self.p.ac.multi_fight_skill_1_from_s21()
 
                 if game_status["return_status"] == 1:
                     break

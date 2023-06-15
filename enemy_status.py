@@ -43,7 +43,7 @@ def play_music(music_file=r"asserts\unravel.mp3"):
 
 class EnemyStatus:
     def __init__(self, pokeMMO_instance: PokeMMO):
-        self.pokeMMO = pokeMMO_instance
+        self.p = pokeMMO_instance
         self.enemy_status_dict = {"enemy_count": 0}
         self.game_status_dict = {}
 
@@ -58,9 +58,9 @@ class EnemyStatus:
             22,
             23,
         ] and self.enemy_status_dict.get("enemy_count") in [0, None]:
-            self.pokeMMO.set_encounter_start_time()
-            hp_BRG_x_y_list = self.pokeMMO.find_items(
-                temp_BRG=self.pokeMMO.hp_BRG,
+            self.p.set_encounter_start_time()
+            hp_BRG_x_y_list = self.p.find_items(
+                temp_BRG=self.p.hp_BRG,
                 threshold=0.995,
                 max_matches=5,
                 top_l=(0, 70),
@@ -73,7 +73,7 @@ class EnemyStatus:
             self.enemy_status_dict["enemy_count"] = len(hp_BRG_x_y_list)
 
     def _check_enemy_hp_individual(self, enemy_index):
-        hp_pct = self.pokeMMO.get_hp_pct(
+        hp_pct = self.p.get_hp_pct(
             enemy_hp_bar_coords[enemy_index][0],
             enemy_hp_bar_coords[enemy_index][1],
             self.img_BRG,
@@ -117,8 +117,8 @@ class EnemyStatus:
                 and f"enemy_{i}_name_Lv" not in self.enemy_status_dict
                 and self.enemy_status_dict[f"enemy_{i}_hp_pct"] is not None
             ):
-                sex_coords = self.pokeMMO.find_items(
-                    temp_BRG=self.pokeMMO.enemy_male_BRG,
+                sex_coords = self.p.find_items(
+                    temp_BRG=self.p.enemy_male_BRG,
                     top_l=enemy_name_coords[i][0],
                     bottom_r=enemy_name_coords[i][1],
                     img_BRG=self.img_BRG,
@@ -126,8 +126,8 @@ class EnemyStatus:
                     max_matches=1,
                 )
                 if not sex_coords:
-                    sex_coords = self.pokeMMO.find_items(
-                        temp_BRG=self.pokeMMO.enemy_female_BRG,
+                    sex_coords = self.p.find_items(
+                        temp_BRG=self.p.enemy_female_BRG,
                         top_l=enemy_name_coords[i][0],
                         bottom_r=enemy_name_coords[i][1],
                         img_BRG=self.img_BRG,
@@ -139,7 +139,7 @@ class EnemyStatus:
                         enemy_name_coords[i][0],
                         (sex_coords[0][0], enemy_name_coords[i][1][1]),
                     )
-                name_Lv_OCR = self.pokeMMO.get_text_from_box_coords(
+                name_Lv_OCR = self.p.get_text_from_box_coords(
                     top_l=enemy_name_coords[i][0],
                     bottom_r=enemy_name_coords[i][1],
                     img_BRG=self.img_BRG,
@@ -164,8 +164,8 @@ class EnemyStatus:
                     self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_OCR
                     name_OCR = name_Lv_OCR.split("Lv")[0].strip()
                     lv_orc = name_Lv_OCR.split("Lv")[1].strip()
-                    info = self.pokeMMO.pokedex_csv.loc[
-                        self.pokeMMO.pokedex_csv["No"] == int(name_OCR)
+                    info = self.p.pokedex_csv.loc[
+                        self.p.pokedex_csv["No"] == int(name_OCR)
                     ]
                     if info.empty == False:
                         info_dict = info.to_dict(orient="records")
@@ -181,13 +181,13 @@ class EnemyStatus:
                             int(name_OCR),
                             int(lv_orc),
                             enemy_count,
-                            self.pokeMMO.encounter_start_time,
+                            self.p.encounter_start_time,
                         )
 
-                        self.pokeMMO.db.insert_data("encounter", columns, values)
+                        self.p.db.insert_data("encounter", columns, values)
                     else:
-                        info = self.pokeMMO.pokedex_csv.loc[
-                            self.pokeMMO.pokedex_csv["No"] == int(999)
+                        info = self.p.pokedex_csv.loc[
+                            self.p.pokedex_csv["No"] == int(999)
                         ]
                         info_dict = info.to_dict(orient="records")
                         self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
@@ -220,8 +220,8 @@ class EnemyStatus:
 
     def check_enemy_sleep(self):
         # print("检查敌人睡眠状态")
-        sleeping_sign_coords_list = self.pokeMMO.find_items(
-            temp_BRG=self.pokeMMO.battle_bar_sleep_sign_BRG,
+        sleeping_sign_coords_list = self.p.find_items(
+            temp_BRG=self.p.battle_bar_sleep_sign_BRG,
             top_l=(220, 120),
             bottom_r=(492, 150),
             img_BRG=self.img_BRG,
@@ -237,18 +237,18 @@ class EnemyStatus:
     def check_my_hp(self):
         my_hp_coords = (939, 360), (1134, 362)
 
-        my_hp_pct = self.pokeMMO.get_hp_pct(
+        my_hp_pct = self.p.get_hp_pct(
             top_l=my_hp_coords[0], bottom_r=my_hp_coords[1], img_BRG=self.img_BRG
         )
         if my_hp_pct == 100:
             pass
         else:
             self.enemy_status_dict["my_hp_pct"] = my_hp_pct
-            self.pokeMMO.action_controller.first_sprit_hp = my_hp_pct
+            self.p.ac.first_sprit_hp = my_hp_pct
 
     def check_enemy_status(self):
-        self.img_BRG = self.pokeMMO.get_latest_img_BRG()
-        self.game_status_dict = self.pokeMMO.get_game_status()
+        self.img_BRG = self.p.get_img_BRG()
+        self.game_status_dict = self.p.get_gs()
         start_time = time.time()
         self._check_enemy_number()
         check_enemy_number_time = time.time() - start_time
