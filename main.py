@@ -71,7 +71,7 @@ class PokeMMO:
 
         self.df_dict = {}
         self.load_assets()
-        self.ui = PokemmoUI(self)
+
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
 
@@ -95,6 +95,7 @@ class PokeMMO:
         self.auto_strategy_flag = False  # 用来控制所有的自动策略 开始与结束
 
         self.stop_threads_flag = False
+        self.ui = PokemmoUI(self)
         self.start_threads()
 
     def start_threads(self):

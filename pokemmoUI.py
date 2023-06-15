@@ -42,28 +42,27 @@ class PokemmoUI:
             )
             self.skill_labels[skill].grid(
                 column=index % 2,
-                row=5 + index // 2,
+                row=7 + index // 2,
                 sticky=(tk.W, tk.E),
             )
         self.xy_label = ttk.Label(
             self.root, text="坐标: (x , y)", font=("Helvetica", 12), padding="5 5 5 5"
         )
-        self.xy_label.grid(column=0, row=1, sticky=(tk.W, tk.E))
 
         self.face_dir_label = ttk.Label(
             self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
         )
+        self.xy_label.grid(column=0, row=1, sticky=(tk.W, tk.E))
         self.face_dir_label.grid(column=1, row=1, sticky=(tk.W, tk.E))
-
         # For map and transport:
         self.map_label = ttk.Label(
             self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
         )
-        self.map_label.grid(column=0, row=2, sticky=(tk.W, tk.E))
 
         self.transport_label = ttk.Label(
             self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
         )
+        self.map_label.grid(column=0, row=2, sticky=(tk.W, tk.E))
         self.transport_label.grid(column=1, row=2, sticky=(tk.W, tk.E))
 
         self.farming_buttons = {}
@@ -92,8 +91,8 @@ class PokemmoUI:
             bg="red",
         )  # Use tk.Button instead of ttk.Button
         self.stop_button.grid(
-            column=0, row=4, columnspan=2, sticky=(tk.W, tk.E, tk.S), padx=10, pady=10
-        )  # Put the button at the bottom
+            column=0, row=3, columnspan=2, sticky=(tk.W, tk.E, tk.S), padx=10, pady=10
+        )
 
         self.root.grid_columnconfigure(
             0, weight=1
@@ -101,9 +100,36 @@ class PokemmoUI:
         self.root.grid_columnconfigure(
             1, weight=1
         )  # Make the column fill the entire window width
-        self.root.grid_rowconfigure(4, weight=1)  # Make the button row expandable
+        # self.root.grid_rowconfigure(4, weight=1)  # Make the button row expandable
+        self.released_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
+        )
 
+        self.pokeball_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
+        )
+
+        self.caught_iv_label = ttk.Label(
+            self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
+        )
+        self.released_label.grid(row=5, columnspan=2, sticky=(tk.W, tk.E))
+
+        self.pokeball_label.grid(row=4, columnspan=2, sticky=(tk.W, tk.E))
+        self.caught_iv_label.grid(row=6, columnspan=2, sticky=(tk.W, tk.E))
         self.update_ui()
+        self.update_db()
+
+    def update_db(self):
+        # Update the new labels with data from the database
+        pokeballs_today = self.pokeMMO.db.count_today_pokeball()
+        self.pokeball_label.configure(text=f"今天用掉的精灵球: {pokeballs_today}")
+        released_today = self.pokeMMO.db.count_today_released()
+        self.released_label.configure(text=f"今天放掉的精灵: {released_today}")
+
+        caught_iv_today = self.pokeMMO.db.count_today_caught_with31_iv()
+        self.caught_iv_label.configure(text=f"今天抓到的lv31素材: {caught_iv_today}")
+
+        self.root.after(5000, self.update_db)  # Refresh every 5 seconds
 
     def update_ui(self):
         game_status = self.pokeMMO.get_game_status()
@@ -125,7 +151,7 @@ class PokemmoUI:
         for skill, pp in game_status["skill_pp"].items():
             self.skill_labels[skill].configure(text=f"{skill}: {pp}")
 
-        self.root.after(500, self.update_ui)
+        self.root.after(500, self.update_ui)  # Refresh every 500 ms
 
     def toggle_farming(self, farming):
         # If another farming thread is running, stop it
