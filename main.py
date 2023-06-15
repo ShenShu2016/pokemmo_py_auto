@@ -81,7 +81,10 @@ class PokeMMO:
         self.word_recognizer = Word_Recognizer()
         self.pf = PathFinder(self)
         self.log_print_save = LogPrintSave(self)
-        self.db = SQLiteDB("pokemmo.sqlite")
+        self.db = SQLiteDB(
+            self,
+            "pokemmo.sqlite",
+        )
         self.mj_coords = MemoryInjector_Coords()
 
         self.PETALBURG_CITY_FARMING = Farming_PETALBURG_CITY(self)

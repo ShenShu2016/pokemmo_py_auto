@@ -147,11 +147,8 @@ class Action_Controller:
         ):
             print("扔球")
             self.pokeMMO.controller.key_press("z", 1)
+            self.pokeMMO.db.insert_ball_throw_data("poke_ball")
             print("Throwing Pokeball")
-            column = ["throw_pokeball", "ball_type", "timestamp"]
-            column_str = ",".join(column)
-            value = (True, "poke_ball", self.pokeMMO.encounter_start_time)
-            self.pokeMMO.db.insert_data("action", column_str, value)
             sleep(3)
 
     @synchronized
@@ -321,10 +318,7 @@ class Action_Controller:
                 if len(confirm_release_x_y_list) == 1:
                     # Click the first two elements of the tuple (x and y coords).
                     self.pokeMMO.controller.click_center(confirm_release_x_y_list[0])
-                    column = ["release", "timestamp"]
-                    column_str = ", ".join(column)
-                    value = (True, self.pokeMMO.encounter_start_time)
-                    self.pokeMMO.db.insert_data("action", column_str, value)
+                    self.pokeMMO.db.insert_release_data()
                     sleep(0.4)  # 太快破电脑受不了
                     self.pokeMMO.controller.click(680, 348)
                 else:
@@ -332,11 +326,7 @@ class Action_Controller:
 
             else:
                 self.pokeMMO.action_controller.close_pokemon_summary(game_status)
-
-                column = ["caught_with_31_iv", "timestamp"]
-                column_str = ", ".join(column)
-                value = (True, self.pokeMMO.encounter_start_time)
-                self.pokeMMO.db.insert_data("action", column_str, value)
+                self.pokeMMO.db.insert_31_iv_data()
 
     @synchronized
     def restart_from_hospital(self):
@@ -399,14 +389,7 @@ class Action_Controller:
         else:
             press_delay = 5
         self.pokeMMO.controller.key_press("z", press_delay)  # 合众 比较久
-        self.skill_pp_dict = {
-            "点到为止": 30,
-            "甜甜香气": 32,
-            "蘑菇孢子": 15,
-            "黑夜魔影": 18,
-            "skill_4": 12,
-        }
-        self.first_sprit_hp = 100
+        self.rest_pp_health()
         return True  #!现在没办法鉴别有没有成功
 
     @synchronized
@@ -445,6 +428,16 @@ class Action_Controller:
             return True
         else:
             raise Exception("Not in building,还没做完")
+
+    def rest_pp_health(self):
+        self.skill_pp_dict = {
+            "点到为止": 30,
+            "甜甜香气": 32,
+            "蘑菇孢子": 15,
+            "黑夜魔影": 18,
+            "skill_4": 12,
+        }
+        self.first_sprit_hp = 100
 
     def is_go_pc(self):
         """判断是否需要回城补给"""

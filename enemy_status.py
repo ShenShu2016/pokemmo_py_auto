@@ -177,7 +177,6 @@ class EnemyStatus:
                             "encounter_number",
                             "timestamp",
                         ]
-                        columns_str = ", ".join(columns)
                         values = (
                             int(name_OCR),
                             int(lv_orc),
@@ -185,7 +184,7 @@ class EnemyStatus:
                             self.pokeMMO.encounter_start_time,
                         )
 
-                        self.pokeMMO.db.insert_data("encounter", columns_str, values)
+                        self.pokeMMO.db.insert_data("encounter", columns, values)
                     else:
                         info = self.pokeMMO.pokedex_csv.loc[
                             self.pokeMMO.pokedex_csv["No"] == int(999)

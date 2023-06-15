@@ -1,10 +1,22 @@
+from __future__ import annotations
+
 import sqlite3
 import threading
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from main import PokeMMO
 
 
 class SQLiteDB:
-    def __init__(self, db_file):
+    def __init__(
+        self,
+        pokeMMO: PokeMMO,
+        db_file,
+    ):
         self.db_file = db_file
+        self.pokeMMO = pokeMMO
         self.connections = {}
         self.cursors = {}
         self.thread_ids = set()  # 存储线程标识符的集合
@@ -83,61 +95,74 @@ class SQLiteDB:
         self.execute_query(query)
 
     def insert_data(self, table_name, columns, values):
+        column_names = ", ".join(columns)
         placeholders = ", ".join(["?" for _ in range(len(values))])
-        query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+        query = f"INSERT INTO {table_name} ({column_names}) VALUES ({placeholders})"
         self.execute_query(query, values)
 
-    def select_data(self, table_name, columns="*", condition=None):
-        query = f"SELECT {columns} FROM {table_name}"
-        if condition:
-            query += f" WHERE {condition}"
-        self.execute_query(query)
+    def select_data(self, query, parameters=None):
         thread_id = threading.get_ident()
-        rows = self.cursors[thread_id].fetchall()
+        cursor = self.cursors[thread_id]
+        if parameters:
+            cursor.execute(query, parameters)
+        else:
+            cursor.execute(query)
+        rows = cursor.fetchall()
         return rows
+
+    def count_today_released(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        query = "SELECT COUNT(*) FROM action WHERE release=1 AND timestamp >= ?"
+        parameters = (today,)
+        result = self.select_data(query, parameters)
+        return result[0][0]
+
+    def count_today_pokeball(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        query = "SELECT COUNT(*) FROM action WHERE throw_pokeball=1 AND timestamp >= ?"
+        parameters = (today,)
+        result = self.select_data(query, parameters)
+        return result[0][0]
+
+    def count_today_caught_with31_iv(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        query = (
+            "SELECT COUNT(*) FROM action WHERE caught_with_31_iv=1 AND timestamp >= ?"
+        )
+        parameters = (today,)
+        result = self.select_data(query, parameters)
+        return result[0][0]
+
+    def insert_ball_throw_data(self, ball_type):
+        columns = ["throw_pokeball", "ball_type", "timestamp"]
+        value = (True, ball_type, self.pokeMMO.encounter_start_time)
+        self.insert_data("action", columns, value)
+
+    def insert_release_data(self):
+        """
+        Inserts a boolean value and timestamp into the 'action' table of the database.
+        """
+        columns = ["release", "timestamp"]
+        value = (True, self.pokeMMO.encounter_start_time)
+        self.insert_data("action", columns, value)
+
+    def insert_31_iv_data(self):
+        """
+        Inserts a boolean value and timestamp into the 'action' table of the database.
+        """
+        columns = ["caught_with_31_iv", "timestamp"]
+        value = (True, self.pokeMMO.encounter_start_time)
+        self.insert_data("action", columns, value)
 
 
 if __name__ == "__main__":
     # 创建SQLiteDB对象
     db = SQLiteDB("pokemmo.sqlite")
 
-    # 定义要插入的数据
-    game_status = {
-        "return_status": 1,
-        "check_pokemon_summary": (False, []),
-        "x_coords": 108,
-        "y_coords": 282,
-        "map_number_tuple": (2, 1, 81),
-        "face_dir": 3,
-        "transport": 0,
-        "battle_time_passed": None,
-        "skill_pp": {"点到为止": 0, "甜甜香气": 0, "蘑菇孢子": 0},
-    }
-    enemy_status = {"enemy_count": None}
-    state_dict = {"address": "Route 7 Ch. 3\n", "money": "86532\n"}
-    memory_coords = {
-        "x_coords": 108,
-        "y_coords": 282,
-        "map_number": (2, 1, 81),
-        "face_dir": 1,
-        "transport": 0,
-    }
-    memory_battle_status = {
-        "player_info_not_sure_address": 3937488048,
-        "battle_instance_address": 0,
-        "battle_time_passed": None,
-        "battle_option_ready": None,
-    }
-    timestamp = 1686329023.1261268
-
-    # 将数据插入到general_status表中
-    columns = "game_status, enemy_status, state_dict, memory_coords, memory_battle_status, timestamp"
-    values = (
-        str(game_status),
-        str(enemy_status),
-        str(state_dict),
-        str(memory_coords),
-        str(memory_battle_status),
-        str(timestamp),
-    )
-    db.insert_data("general_status", columns, values)
+    # test count_today_released
+    release_count = db.count_today_released()
+    print(f"release_count: {release_count}")
+    pokeball_used = db.count_today_pokeball()
+    print(f"pokeball_used: {pokeball_used}")
+    caught_with_31_iv = db.count_today_caught_with31_iv()
+    print(f"caught_with_31_iv: {caught_with_31_iv}")

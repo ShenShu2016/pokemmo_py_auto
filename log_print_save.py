@@ -60,7 +60,17 @@ class LogPrintSave:
 
                 # 比较新旧日志，如果有变化，将新日志插入数据库，并更新last_log
                 if self.last_log is None or new_log_without_timestamp != self.last_log:
-                    columns = "game_status, enemy_status, address,money, x_coords,y_coords,map_number_tuple,timestamp"
+                    columns = [
+                        "game_status",
+                        "enemy_status",
+                        "address",
+                        "money",
+                        "x_coords",
+                        "y_coords",
+                        "map_number_tuple",
+                        "timestamp",
+                    ]
+
                     values = (
                         str(new_log["game_status"]),
                         str(new_log["enemy_status"]),
