@@ -46,22 +46,34 @@ class PathFinder:
             ):
                 result.append(next_node)
             else:
-                # print(f"节点 {next_node} 是障碍物或者超出网格边界")
                 pass
         return result
 
     # A*算法
     def a_star(self, start, end):
         heap = []
-        heapq.heappush(heap, (0, start))
+        in_heap = set()
+        heapq.heappush(heap, (self.heuristic(start, end), start))
+        in_heap.add(start)
         parent = {start: None}
         g_score = {start: 0}
-        f_score = {start: self.heuristic(start, end)}
+        coords_status = self.p.get_coords()  # 新增：获取初始状态
+        current_face_dir = coords_status["face_dir"]  # 新增：获取初始方向
+        # 新增：根据初始方向设置 prev_node
+        if current_face_dir == 0:  # 往y变大方向
+            prev_node = (start[0], start[1] - 1)
+        elif current_face_dir == 1:  # 往y变小方向
+            prev_node = (start[0], start[1] + 1)
+        elif current_face_dir == 2:  # 往x变小方向
+            prev_node = (start[0] + 1, start[1])
+        elif current_face_dir == 3:  # 往x变大方向
+            prev_node = (start[0] - 1, start[1])
+        else:
+            prev_node = None
 
         while heap:
             curr = heapq.heappop(heap)[1]
-
-            # print(f"当前节点: {curr}")  # 打印当前节点
+            in_heap.remove(curr)
 
             if curr == end:
                 path = []
@@ -71,23 +83,48 @@ class PathFinder:
                 return path[::-1]
 
             for next_node in self.neighbors(curr):
-                tentative_g_score = g_score[curr] + 1
+                tentative_g_score = g_score[curr] + self.get_base_cost(
+                    next_node
+                )  # 修改：只计算基本移动成本
+
                 if next_node not in g_score or tentative_g_score < g_score[next_node]:
                     g_score[next_node] = tentative_g_score
-                    f_score[next_node] = tentative_g_score + self.heuristic(
-                        next_node, end
-                    )
                     parent[next_node] = curr
-                    if next_node not in [i[1] for i in heap]:
-                        heapq.heappush(heap, (f_score[next_node], next_node))
+                    if next_node not in in_heap:
+                        f_score = tentative_g_score + self.heuristic(next_node, end)
+                        if parent[curr] is not None and self.turned(
+                            parent[curr], curr, next_node
+                        ):
+                            f_score += 3  # 修改：在这里添加转弯惩罚
+                        heapq.heappush(heap, (f_score, next_node))
+                        in_heap.add(next_node)
 
-                # print(f"检查相邻节点: {next_node}")  # 打印正在检查的相邻节点
+            prev_node = curr  # 更新前一个节点
 
-        print("完成，没有找到路径")  # 如果没有找到路径，打印消息
+        print("完成，没有找到路径")
         return None
 
+    # 计算从curr到next_node的基本移动成本
+    def get_base_cost(self, next_node):  # 修改：只计算基本移动成本并且删除了curr参数
+        base_cost = 1
+
+        # 若下一个点周围一格有障碍物，则增加相应的惩罚值
+        x, y = next_node
+        if any(
+            0 <= a < self.max_y and 0 <= b < self.max_x and self.grid[a][b] == 0
+            for a in range(max(0, x), min(self.max_y, x + 1))
+            for b in range(max(0, y), min(self.max_x, y + 1))
+        ):
+            base_cost += 1
+
+        return base_cost
+
+    # 判断是否转弯
+    def turned(self, A, B, C):
+        return not (A[0] == B[0] == C[0] or A[1] == B[1] == C[1])
+
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
-        transport_speed = {"bike": 0.08, "walk": 0.25, "run": 0.16, "surf": 0.1}
+        transport_speed = {"bike": 0.075, "walk": 0.25, "run": 0.16, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
         coords_status = self.p.get_coords()
         current_face_dir = coords_status["face_dir"]
@@ -121,11 +158,11 @@ class PathFinder:
             if keys_and_delays and keys_and_delays[-1][0] == key:
                 keys_and_delays[-1] = (
                     key,
-                    round(keys_and_delays[-1][1] + transport_speed[transport], 3),
+                    keys_and_delays[-1][1] + transport_speed[transport],
                 )
             else:
                 keys_and_delays.append(
-                    (key, round(transport_speed[transport] + start_delay[transport], 3))
+                    (key, transport_speed[transport] + start_delay[transport])
                 )
 
         # 如果指定了最后的面向方向，添加相应的转向动作
@@ -140,11 +177,16 @@ class PathFinder:
                 keys_and_delays.append(("d", 0.1))
 
         total_delay = 0
+        default_delay = 2
         keys_and_delays_two_seconds = []
         for key_and_delay in keys_and_delays:
-            if total_delay + key_and_delay[1] > 2:
+            new_delay = default_delay - total_delay
+            if new_delay < 0.1:
+                # 如果新的延迟时间小于0.1，设置延迟时间为0.1
+                new_delay = 0.1
+            if total_delay + key_and_delay[1] > default_delay:
                 # 如果加上当前的延迟会超过2秒，那么就只加上足够的延迟以达到2秒
-                keys_and_delays_two_seconds.append((key_and_delay[0], 2 - total_delay))
+                keys_and_delays_two_seconds.append((key_and_delay[0], new_delay))
                 break
             else:
                 total_delay += key_and_delay[1]
@@ -278,7 +320,7 @@ class PathFinder:
                 self.pf_move(end_face_dir=end_face_dir, transport=transport)
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
-            sleep(0.1)
+            sleep(0.005)
 
     def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
         while True:
