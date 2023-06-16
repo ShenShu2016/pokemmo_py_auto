@@ -4623,7 +4623,7 @@ EXAMPLE event has started.</string>
     <string id="101167">释放御三家{STRING_0}隐藏特性的道具.\n\n一次性消耗品.</string>
     <string id="1446">仅允许对这些进化链上的{STRING_0}使用:</string>
     <string id="1893">{00}蛋</string>
-    <string id="1887">头目{STRING_0}</string>
+    <string id="1887">0000 {00}</string>
     <string id="8600">PP不足</string>
     <string id="8601">使用{00}个{01}</string>
     <string id="101169">释放{STRING_0}隐藏特性的道具.\n\n一次性消耗品.</string>
