@@ -64,7 +64,7 @@ class Farming_BATTLE_FRONTINER:
 
     def teleport_and_heal(self):
         self.p.ac.use_teleport()
-        self.p.ac.talk_to_nurse()
+        self.p.ac.talk_to_nurse(city=self.city)
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
