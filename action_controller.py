@@ -441,7 +441,7 @@ class Action_Controller:
 
     def is_go_pc(self):
         """判断是否需要回城补给"""
-        if self.skill_pp_dict["点到为止"] < 1:
+        if self.skill_pp_dict["点到为止"] < 5:
             print("点到为止 用完，回家")
             return True
         elif self.skill_pp_dict["蘑菇孢子"] < 1:
