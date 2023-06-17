@@ -5,6 +5,7 @@ from time import sleep
 from pywinauto import Application, keyboard
 
 logging.basicConfig(level=logging.INFO)
+import win32api
 
 
 class Controller:
@@ -22,24 +23,34 @@ class Controller:
         )
         sleep(self.DEFAULT_SLEEP_TIME)
 
-    def click(self, x=None, y=None, tolerance=0):
+    def click(self, x=None, y=None, tolerance=0, back_to_original=True):
         """Click at the current mouse position or at a specific position if provided."""
+        # Store the original mouse position
+        original_position = win32api.GetCursorPos() if back_to_original else None
+
         self.window.set_focus()
         if x is not None and y is not None:
             x = int(x) + tolerance
             y = int(y) + tolerance
-            # 移动鼠标
+            # Move the mouse
             self.move_to(x, y)
-            # 等待一段时间
-            sleep(0.1)
-            # 点击
+            # Wait for a moment
+            sleep(0.05)
+            # Click
             self.window.click_input(coords=(x, y))
             sleep(self.DEFAULT_SLEEP_TIME)
         else:
             self.window.click_input()
 
-    def click_center(self, point):
+        # Move the mouse back to the original position
+        if back_to_original and original_position is not None:
+            win32api.SetCursorPos(original_position)
+
+    def click_center(self, point, back_to_original=True):
         """Click at the center of the given coordinates."""
+        # Store the original mouse position
+        original_position = win32api.GetCursorPos() if back_to_original else None
+
         try:
             x1, y1, x2, y2 = point
             if x1 > x2 or y1 > y2:
@@ -49,17 +60,20 @@ class Controller:
             center_y = (y1 + y2) / 2
 
             self.window.set_focus()
-            # 移动鼠标
+            # Move the mouse
             self.move_to(center_x, center_y)
-            # 等待一段时间
-            sleep(0.1)
-            # 点击
+            # Wait for a moment
+            sleep(0.05)
+            # Click
             self.window.click_input(coords=(int(center_x), int(center_y)))
             sleep(self.DEFAULT_SLEEP_TIME)
 
-        except (TypeError, ValueError) as e:
-            logging.error(f"Error: {e}")
-            raise e
+            # Move the mouse back to the original position
+            if back_to_original and original_position is not None:
+                win32api.SetCursorPos(original_position)
+
+        except Exception as e:
+            print(f"Error in click_center: {e}")
 
     def drag(self, x1, y1, x2, y2):
         """Drag the mouse from one position to another."""
