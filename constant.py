@@ -42,6 +42,7 @@ city_info = {
         "112_out": [(7, 8, 0), (6, 8, 0)],  # 把正对着护士的放在第一个
         "coords_tracking_ready": True,
         "area": "Hoenn",
+        "pc_type": "Hoenn_PC",
     },
     "FALLARBOR_TOWN": {
         "town_map_coords": (403, 241),
@@ -52,6 +53,7 @@ city_info = {
         "112_out": [(7, 8, 0), (6, 8, 0)],
         "coords_tracking_ready": False,
         "area": "Hoenn",
+        "pc_type": "Hoenn_PC",
     },
     "PETALBURG_CITY": {
         "town_map_coords": (357, 457),
@@ -61,6 +63,7 @@ city_info = {
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
         "area": "Hoenn",
+        "pc_type": "Hoenn_PC",
     },
     "BATTLE_FRONTIER": {
         "town_map_coords": (860, 530),
@@ -70,6 +73,7 @@ city_info = {
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
         "area": "Hoenn",
+        "pc_type": "Hoenn_PC",
     },
     "VERDANTURF_TOWN": {
         "town_map_coords": (424, 383),
@@ -79,6 +83,7 @@ city_info = {
         "112_nurse": (7, 4, 1),  # x,y,dir
         "112_out": [(7, 8, 0), (6, 8, 0)],
         "area": "Hoenn",
+        "pc_type": "Hoenn_PC",
     },
     "Undella_Town": {
         "town_map_coords": (938, 377),
@@ -88,6 +93,7 @@ city_info = {
         "112_nurse": (7, 12, 1),  # x,y,dir
         "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
         "area": "Unova",
+        "pc_type": "Unova_PC",
     },
     "Icirrus_City": {
         "town_map_coords": (489, 303),
@@ -97,6 +103,7 @@ city_info = {
         "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
         "112_nurse": (7, 12, 1),  # x,y,dir
         "area": "Unova",
+        "pc_type": "Unova_PC",
     },
     "Mistralton_City": {  # 合众飞行到医院前面下面一格不在大门口
         "town_map_coords": (420, 371),
@@ -106,6 +113,7 @@ city_info = {
         "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
         "112_nurse": (7, 12, 1),  # x,y,dir
         "area": "Unova",
+        "pc_type": "Unova_PC",
     },
     "Cerulean_City": {
         "town_map_coords": (763, 338),
@@ -115,6 +123,7 @@ city_info = {
         "112_out": [(7, 8, 0)],
         "112_nurse": (7, 4, 1),  # x,y,dir
         "area": "Kanto",
+        "pc_type": "Kanto_PC",
     },
 }
 

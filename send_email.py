@@ -22,6 +22,3 @@ def send_email():
         smtp_server.login(sender, password)
         smtp_server.sendmail(sender, recipients, msg.as_string())
     print("Message sent!")
-
-
-send_email()

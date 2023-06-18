@@ -196,7 +196,6 @@ class EnemyStatus:
                         info_dict = info.to_dict(orient="records")
                         self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
                         send_email()
-
                         print(f"{name_OCR} 有可能是闪光")
 
         threads = []

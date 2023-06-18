@@ -373,7 +373,7 @@ class Action_Controller:
                 city_info[city]["112"][0],
                 city_info[city]["112"][1],
             ):
-                self.p.controller.key_press("w", 1)
+                self.p.controller.key_press("w", 1)  # 进pc
                 sleep(2)
                 print("going to find nurse")
                 self.p.pf.go_to_nurse(city=city)
@@ -414,7 +414,7 @@ class Action_Controller:
 
         if coords_status["map_number_tuple"][2] == 50 or coords_status[
             "map_number_tuple"
-        ] in [(1, 14, 76), (2, 1, 81), (0, 3, 3)]:
+        ] in [(1, 14, 76), (2, 1, 81), (0, 3, 3), (0, 23, 3)]:
             self.p.controller.key_press("8")
             sleep(3)
         else:
@@ -438,9 +438,9 @@ class Action_Controller:
 
     def rest_pp_health(self):
         self.skill_pp_dict = {
-            "点到为止": 30,
+            "点到为止": 48,
             "甜甜香气": 32,
-            "蘑菇孢子": 15,
+            "蘑菇孢子": 24,
             "黑夜魔影": 18,
             "skill_4": 12,
         }

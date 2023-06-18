@@ -22,6 +22,11 @@ import numpy as np
 from constant import city_info
 
 
+def default_offset_func(coords):
+    # 默认处理函数的逻辑
+    return coords
+
+
 class PathFinder:
     def __init__(self, pokeMMO: PokeMMO):
         """Initialize the LogPrintSave class."""
@@ -195,48 +200,6 @@ class PathFinder:
 
         return keys_and_delays_two_seconds
 
-    def a_star_no_obstacle(self, start, end):
-        self.max_x = max(start[1], end[1]) + 1
-        self.max_y = max(start[0], end[0]) + 1
-        heap = []
-        heapq.heappush(heap, (0, start))
-        parent = {start: None}
-        g_score = {start: 0}
-        f_score = {start: self.heuristic(start, end)}
-
-        while heap:
-            curr = heapq.heappop(heap)[1]
-
-            if curr == end:
-                path = []
-                while curr is not None:
-                    path.append(curr)
-                    curr = parent[curr]
-                return path[::-1]
-
-            for next_node in self.neighbors_no_obstacle(curr):
-                tentative_g_score = g_score[curr] + 1
-                if next_node not in g_score or tentative_g_score < g_score[next_node]:
-                    g_score[next_node] = tentative_g_score
-                    f_score[next_node] = tentative_g_score + self.heuristic(
-                        next_node, end
-                    )
-                    parent[next_node] = curr
-                    if next_node not in [i[1] for i in heap]:
-                        heapq.heappush(heap, (f_score[next_node], next_node))
-
-        return None
-
-    # 获取邻居节点
-    def neighbors_no_obstacle(self, node):
-        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-        result = []
-        for direction in directions:
-            next_node = (node[0] + direction[0], node[1] + direction[1])
-            if 0 <= next_node[0] < self.max_y and 0 <= next_node[1] < self.max_x:
-                result.append(next_node)
-        return result
-
     def get_farthest_point(self, rows, coords_status_with_offset, min_x, min_y):
         origin = np.array(
             [
@@ -244,13 +207,11 @@ class PathFinder:
                 coords_status_with_offset["x_coords"] - min_x,
             ]
         )
-        print("origin", origin)
         distances = rows.apply(
             lambda row: self.heuristic((row["y_coords"], row["x_coords"]), origin),
             axis=1,
         )
         farthest_row = rows.loc[distances.idxmax()]
-        print("farthest point", (farthest_row["y_coords"], farthest_row["x_coords"]))
         return farthest_row["y_coords"], farthest_row["x_coords"]
 
     def go_somewhere(
@@ -260,10 +221,13 @@ class PathFinder:
         style=None,
         end_face_dir=None,
         transport=None,
+        pc=False,
     ):  # style random_end_point,solid_end_point
         """end_point: (y, x)"""
-        df = self.p.df_dict[f"{city}_coords_tracking_csv"]
-        print(f"{city}_coords_tracking_csv")
+        if pc:
+            df = self.p.df_dict[f"{city_info[city]['pc_type']}_coords_tracking_csv"]
+        else:
+            df = self.p.df_dict[f"{city}_coords_tracking_csv"]
         df = df.reset_index(drop=True)
 
         # Convert coords to integer and shift to non-negative range
@@ -279,6 +243,8 @@ class PathFinder:
         self.max_x = df["x_coords"].max() + 1
         self.max_y = df["y_coords"].max() + 1
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
+        # for i in self.grid:
+        #     print(i)
 
         # Set walkable area based on style
         walkable_markers = (
@@ -290,10 +256,6 @@ class PathFinder:
             mask = df["mark"] == marker
             self.grid[df[mask]["y_coords"], df[mask]["x_coords"]] = 1
 
-        # print all grid
-        # for i in self.grid:
-        #     print(i)
-
         offset_func_mapping = {
             "PETALBURG_CITY": add_x_y_coords_offset_PETALBURG_CITY,
             "FALLARBOR_TOWN": add_x_y_coords_offset_FALLARBOR_TOWN,
@@ -302,14 +264,13 @@ class PathFinder:
             "Mistralton_City": add_x_y_coords_offset_Mistralton_City,
             "Cerulean_City": add_x_y_coords_offset_Cerulean_City,
         }
-        offset_func = offset_func_mapping.get(city, lambda x: x)
+
+        offset_func = offset_func_mapping.get(city, default_offset_func)
 
         while True:
-            # print("style", style)
             game_status = self.p.get_gs()
             coords_status = self.p.get_coords()
             coords_status_with_offset = offset_func(coords_status)
-            # print("coords_status_with_offset", coords_status_with_offset)
             if style == "farming":
                 selected_rows = df[df["mark"] == 66]
                 end_point = self.get_farthest_point(
@@ -320,7 +281,6 @@ class PathFinder:
                 selected_rows = df[
                     (df["mark"] == 66) & (df["y_coords"] == y_coords - min_y)
                 ]
-                print("selected_rows", selected_rows)
                 end_point = self.get_farthest_point(
                     selected_rows, coords_status_with_offset, min_x, min_y
                 )
@@ -346,7 +306,7 @@ class PathFinder:
                 coords_status_with_offset["y_coords"] - min_y,
                 coords_status_with_offset["x_coords"] - min_x,
             )
-            # print("start_point", start_point, "end_point", end_point)
+            # print("start_point", start_point, "end_point", end_point, min_x, min_y)
 
             # Find path if start_point is within grid
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
@@ -359,54 +319,37 @@ class PathFinder:
 
             sleep(0.001)
 
-    def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
-        while True:
-            coords_status = self.p.get_coords()
-            if (
-                coords_status["x_coords"] == city_info[city]["112_nurse"][0]
-                and coords_status["y_coords"] == city_info[city]["112_nurse"][1]
-                and coords_status["face_dir"] == city_info[city]["112_nurse"][2]
-            ):
-                break
-            self.path = self.a_star_no_obstacle(
-                (coords_status["y_coords"], coords_status["x_coords"]),
-                (city_info[city]["112_nurse"][1], city_info[city]["112_nurse"][0]),
-            )
-            print(self.path)
-
-            self.pf_move(end_face_dir=city_info[city]["112_nurse"][2])
-
-            sleep(0.5)  # 等一会儿才能知道到底到了没到
+    def go_to_nurse(self, city):
+        self.go_somewhere(
+            city=city,
+            end_point=(
+                city_info[city]["112_nurse"][1],
+                city_info[city]["112_nurse"][0],
+            ),
+            end_face_dir=1,
+            pc=True,
+        )
         print("到达了护士那里")
         return True
 
-    def leave_pc_center(self, city="SOOTOPOLIS_CITY"):
-        while True:
-            coords_status = self.p.get_coords()
-            if (
-                coords_status["x_coords"] == city_info[city]["112_out"][0][0]
-                and coords_status["y_coords"] == city_info[city]["112_out"][0][1]
-                and coords_status["face_dir"] == city_info[city]["112_out"][0][2]
-            ):
-                break
-            self.path = self.a_star_no_obstacle(
-                start=(coords_status["y_coords"], coords_status["x_coords"]),
-                end=(
-                    city_info[city]["112_out"][0][1],
-                    city_info[city]["112_out"][0][0],
-                ),
-            )
-            # print(self.path)
-
-            self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
-            sleep(0.2)
-            self.p.controller.key_press("s", 0.5)
-            sleep(2)
-            coords_status = self.p.get_coords()
-            if coords_status["map_number_tuple"] == city_info[city]["map_number"]:
-                return True
-            else:
-                raise Exception("Failed to leave pc center")
+    def leave_pc_center(self, city):
+        self.go_somewhere(
+            city=city,
+            end_point=(
+                city_info[city]["112_out"][0][1],
+                city_info[city]["112_out"][0][0],
+            ),
+            end_face_dir=0,
+            pc=True,
+        )
+        sleep(0.2)
+        self.p.controller.key_press("s", 0.5)
+        sleep(2)
+        coords_status = self.p.get_coords()
+        if coords_status["map_number_tuple"] == city_info[city]["map_number"]:
+            return True
+        else:
+            raise Exception("Failed to leave pc center")
 
     def pf_move(
         self, end_face_dir=None, transport=None

@@ -31,8 +31,11 @@
     "BATTLE_FRONTIER_coords_tracking_path": "asserts/coords_tracking\\BATTLE_FRONTIER_coords_tracking.csv",
     "Cerulean_City_coords_tracking_path": "asserts/coords_tracking\\Cerulean_City_coords_tracking.csv",
     "FALLARBOR_TOWN_coords_tracking_path": "asserts/coords_tracking\\FALLARBOR_TOWN_coords_tracking.csv",
+    "Hoenn_PC_coords_tracking_path": "asserts/coords_tracking\\Hoenn_PC_coords_tracking.csv",
+    "Kanto_PC_coords_tracking_path": "asserts/coords_tracking\\Kanto_PC_coords_tracking.csv",
     "Mistralton_City_coords_tracking_path": "asserts/coords_tracking\\Mistralton_City_coords_tracking.csv",
     "PETALBURG_CITY_coords_tracking_path": "asserts/coords_tracking\\PETALBURG_CITY_coords_tracking.csv",
     "SOOTOPOLIS_CITY_coords_tracking_path": "asserts/coords_tracking\\SOOTOPOLIS_CITY_coords_tracking.csv",
+    "Unova_PC_coords_tracking_path": "asserts/coords_tracking\\Unova_PC_coords_tracking.csv",
     "VERDANTURF_TOWN_coords_tracking_path": "asserts/coords_tracking\\VERDANTURF_TOWN_coords_tracking.csv"
 }
