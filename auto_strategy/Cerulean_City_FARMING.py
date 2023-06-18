@@ -40,7 +40,7 @@ class Farming_Cerulean_City:
 
     def teleport_and_heal(self):
         self.p.ac.use_teleport()
-        self.p.ac.talk_to_nurse()
+        self.p.ac.talk_to_nurse(city=self.city)
 
     def step_1_go_tree(self):
         self.p.pf.go_somewhere(
@@ -84,8 +84,8 @@ class Farming_Cerulean_City:
                     farming_times += 1
                     if farming_times >= repeat_times:
                         return
-                    self.teleport_and_heal(city="Cerulean_City")
-                    self.leave_pc_center_and_go_farm(city="Cerulean_City")  # 应该已经到了湖里了
+                    self.teleport_and_heal()
+                    self.leave_pc_center_and_go_farm()  # 应该已经到了湖里了
 
                 if (
                     coords_status["x_coords"],

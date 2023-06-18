@@ -383,7 +383,7 @@ class Action_Controller:
                 raise Exception("Not in front of hospital")
 
     @synchronized
-    def talk_to_nurse(self, city=None):
+    def talk_to_nurse(self, city):
         print("Talking to nurse")
         if city_info[city]["area"] in ["Hoenn", "Kanto"]:
             press_delay = 2
@@ -414,9 +414,11 @@ class Action_Controller:
 
         if coords_status["map_number_tuple"][2] == 50 or coords_status[
             "map_number_tuple"
-        ] in [(1, 14, 76), (2, 1, 81)]:
+        ] in [(1, 14, 76), (2, 1, 81), (0, 3, 3)]:
             self.p.controller.key_press("8")
             sleep(3)
+        else:
+            raise Exception("不在open air")
         coords_status = self.p.get_coords()
         if coords_status["map_number_tuple"][2] != 50:
             return True
