@@ -61,7 +61,7 @@ No,Pokemon,Hp,Gender,CatchRate,Types,CatchMethod,Chinese
 60,Poliwag,40,1,255,Water/,1,蚊香蝌蚪
 61,Poliwhirl,65,1,120,Water/,2,蚊香君
 62,Poliwrath,90,1,45,Water/Fighting,3,蚊香泳士
-63,Abra,25,1,200,Psychic/,1,凯西
+63,Abra,25,1,200,Psychic/,0,凯西
 64,Kadabra,40,1,100,Psychic/,3,勇基拉
 65,Alakazam,55,1,50,Psychic/,3,胡地
 66,Machop,70,1,180,Fighting/,2,腕力
