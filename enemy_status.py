@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 import pygame
 
+from send_email import send_email
+
 if TYPE_CHECKING:
     from main import PokeMMO
 
@@ -151,9 +153,11 @@ class EnemyStatus:
 
                 if total_int >= 99999 and enemy_count == 1:  # 闪光
                     play_music()
+                    send_email()
                     pass
                 elif total_int >= 99999 and enemy_count > 1:
                     play_music()
+                    send_email()
                     print("闪光宠出现", name_Lv_OCR, total_int)
                     time.sleep(600)
                     import os
@@ -191,6 +195,7 @@ class EnemyStatus:
                         ]
                         info_dict = info.to_dict(orient="records")
                         self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+                        send_email()
 
                         print(f"{name_OCR} 有可能是闪光")
 
