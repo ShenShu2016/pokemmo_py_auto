@@ -12,12 +12,7 @@ import pandas as pd
 import pytesseract
 
 from action_controller import Action_Controller
-from auto_strategy.BATTLE_FRONTINER_LV_UP import Farming_BATTLE_FRONTINER
-from auto_strategy.FALLARBOR_TOWN_FARMING import Farming_FALLARBOR_TOWN
-from auto_strategy.Mistralton_City_FARMING import Farming_Mistralton_City
-from auto_strategy.PETALBURG_CITY_FARMING import Farming_PETALBURG_CITY
-from auto_strategy.SOOTOPOLIS_CITY_FARMING import Farming_SOOTOPOLIS_CITY
-from auto_strategy.VERDANTURF_TOWN_FARMING import Farming_VERDANTURF_TOWN
+from auto_strategy.auto_importer import *
 from enemy_status import EnemyStatus
 from game_status import GameStatus
 from log_print_save import LogPrintSave
@@ -369,6 +364,11 @@ class PokeMMO:
         print("Hoenn_LV_up started")
         while self.auto_strategy_flag:
             Farming_BATTLE_FRONTINER(self).run(repeat_times=999)
+
+    def Kanto_farming(self):
+        print("Kanto_farming started")
+        while self.auto_strategy_flag:
+            Farming_Cerulean_City(self).run(repeat_times=999)
 
     def Hoenn_farming(self):
         print("Hoenn_farming started")

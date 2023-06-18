@@ -39,10 +39,7 @@ city_info = {
         "112": (43, 32, 1),
         "112_map_number": (1, 2, 65),
         "112_nurse": (7, 4, 1),  # x,y,dir
-        "112_out": [
-            (7, 8, 0),
-            (6, 8, 0),
-        ],  # 把正对着护士的放在第一个
+        "112_out": [(7, 8, 0), (6, 8, 0)],  # 把正对着护士的放在第一个
         "coords_tracking_ready": True,
         "area": "Hoenn",
     },
@@ -108,13 +105,36 @@ city_info = {
         "112_map_number": (2, 0, 109),
         "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
         "112_nurse": (7, 12, 1),  # x,y,dir
-        "area": "Unova"
-        # (105,262,1) 要下自行车zzz
-        # (107,233,1) 烛光零门口（2，1，81）
-        # (16,28,1)(2,1,82) 螺旋塔门口 要变xy了 往上走一步变成（16，28）
-        # (16,23,3)(16,24,3)2楼出口方向出口（2，1，83）
-        # (2,1,86) 楼顶
-        # (2,0,107)  route 7 x,y 不用改
-        # （2，1，83） 2 楼（2，1，84）3楼（2，1，85）4楼（2，1，86）楼顶
+        "area": "Unova",
+    },
+    "Cerulean_City": {
+        "town_map_coords": (763, 338),
+        "map_number": (0, 3, 3),
+        "112": (22, 20, 1),
+        "112_map_number": (0, 3, 7),
+        "112_out": [(7, 8, 0)],
+        "112_nurse": (7, 4, 1),  # x,y,dir
+        "area": "Kanto",
     },
 }
+
+
+def test_city_info():
+    # Test if all keys in dictionary have no spaces
+    for key in city_info.keys():
+        assert " " not in key, f"Error: Key {key} has spaces."
+
+    # Test if required keys exist in each dictionary value
+    for value in city_info.values():
+        assert "town_map_coords" in value, "Error: Missing 'town_map_coords' key."
+        assert "map_number" in value, "Error: Missing 'map_number' key."
+        assert "112" in value, "Error: Missing '112' key."
+        assert "112_map_number" in value, "Error: Missing '112_map_number' key."
+        assert "112_nurse" in value, "Error: Missing '112_nurse' key."
+        assert "112_out" in value, "Error: Missing '112_out' key."
+        assert "area" in value, "Error: Missing 'area' key."
+    print("All tests passed.")
+
+
+if __name__ == "__main__":
+    test_city_info()

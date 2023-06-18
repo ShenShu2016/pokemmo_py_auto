@@ -5,6 +5,7 @@ import random
 from time import sleep
 from typing import TYPE_CHECKING
 
+from auto_strategy.Cerulean_City_FARMING import add_x_y_coords_offset_Cerulean_City
 from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
 from auto_strategy.Mistralton_City_FARMING import add_x_y_coords_offset_Mistralton_City
 from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
@@ -101,7 +102,7 @@ class PathFinder:
 
             prev_node = curr  # 更新前一个节点
 
-        print("完成，没有找到路径")
+        raise ValueError("No path found")
         return None
 
     # 计算从curr到next_node的基本移动成本
@@ -115,7 +116,7 @@ class PathFinder:
             for a in range(max(0, x), min(self.max_y, x + 1))
             for b in range(max(0, y), min(self.max_x, y + 1))
         ):
-            base_cost += 1
+            base_cost += 3
 
         return base_cost
 
@@ -236,16 +237,33 @@ class PathFinder:
                 result.append(next_node)
         return result
 
+    def get_farthest_point(self, rows, coords_status_with_offset, min_x, min_y):
+        origin = np.array(
+            [
+                coords_status_with_offset["y_coords"] - min_y,
+                coords_status_with_offset["x_coords"] - min_x,
+            ]
+        )
+        print("origin", origin)
+        distances = rows.apply(
+            lambda row: self.heuristic((row["y_coords"], row["x_coords"]), origin),
+            axis=1,
+        )
+        farthest_row = rows.loc[distances.idxmax()]
+        print("farthest point", (farthest_row["y_coords"], farthest_row["x_coords"]))
+        return farthest_row["y_coords"], farthest_row["x_coords"]
+
     def go_somewhere(
         self,
         end_point=None,
-        city="SOOTOPOLIS_CITY",
+        city=None,
         style=None,
         end_face_dir=None,
         transport=None,
     ):  # style random_end_point,solid_end_point
         """end_point: (y, x)"""
         df = self.p.df_dict[f"{city}_coords_tracking_csv"]
+        print(f"{city}_coords_tracking_csv")
         df = df.reset_index(drop=True)
 
         # Convert coords to integer and shift to non-negative range
@@ -264,13 +282,17 @@ class PathFinder:
 
         # Set walkable area based on style
         walkable_markers = (
-            [1, 2, 66] if style in ["farming", "ignore_sprite"] else [3, 4, 112]
+            [1, 2, 66]
+            if style in ["farming", "ignore_sprite", "left_right_farming"]
+            else [3, 4, 112]
         )
         for marker in walkable_markers:
             mask = df["mark"] == marker
             self.grid[df[mask]["y_coords"], df[mask]["x_coords"]] = 1
 
-        # print("网格数据：\n", self.grid)
+        # print all grid
+        # for i in self.grid:
+        #     print(i)
 
         offset_func_mapping = {
             "PETALBURG_CITY": add_x_y_coords_offset_PETALBURG_CITY,
@@ -278,19 +300,31 @@ class PathFinder:
             "VERDANTURF_TOWN": add_x_y_coords_offset_VERDANTURF_TOWN,
             "SOOTOPOLIS_CITY": add_x_y_coords_offset_SOOTOPOLIS_CITY,
             "Mistralton_City": add_x_y_coords_offset_Mistralton_City,
+            "Cerulean_City": add_x_y_coords_offset_Cerulean_City,
         }
         offset_func = offset_func_mapping.get(city, lambda x: x)
 
         while True:
+            # print("style", style)
             game_status = self.p.get_gs()
             coords_status = self.p.get_coords()
             coords_status_with_offset = offset_func(coords_status)
+            # print("coords_status_with_offset", coords_status_with_offset)
             if style == "farming":
-                random_row = df[df["mark"] == 66].sample(n=1)
-                end_point = (
-                    random_row["y_coords"].values[0],
-                    random_row["x_coords"].values[0],
+                selected_rows = df[df["mark"] == 66]
+                end_point = self.get_farthest_point(
+                    selected_rows, coords_status_with_offset, min_x=min_x, min_y=min_y
                 )
+            elif style == "left_right_farming":
+                y_coords = coords_status_with_offset["y_coords"]
+                selected_rows = df[
+                    (df["mark"] == 66) & (df["y_coords"] == y_coords - min_y)
+                ]
+                print("selected_rows", selected_rows)
+                end_point = self.get_farthest_point(
+                    selected_rows, coords_status_with_offset, min_x, min_y
+                )
+                # print("end_point", end_point)
 
             # If end_point is reached or enters battle, break the loop
             if (
@@ -298,7 +332,11 @@ class PathFinder:
                 and coords_status_with_offset["y_coords"] - min_y == end_point[0]
             ):
                 break
-            if (style == "farming" or style == "ignore_sprite") and game_status[
+            if (
+                style == "farming"
+                or style == "ignore_sprite"
+                or style == "left_right_farming"
+            ) and game_status[
                 "return_status"
             ] >= 20:  # 进入战斗了
                 break
@@ -308,8 +346,6 @@ class PathFinder:
                 coords_status_with_offset["y_coords"] - min_y,
                 coords_status_with_offset["x_coords"] - min_x,
             )
-
-            # print(f"当前开始坐标: {start_point}, 网格大小: {(self.max_y, self.max_x)}")
             # print("start_point", start_point, "end_point", end_point)
 
             # Find path if start_point is within grid
@@ -320,7 +356,8 @@ class PathFinder:
                 self.pf_move(end_face_dir=end_face_dir, transport=transport)
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
-            sleep(0.005)
+
+            sleep(0.001)
 
     def go_to_nurse(self, city="SOOTOPOLIS_CITY"):
         while True:
@@ -362,8 +399,8 @@ class PathFinder:
             # print(self.path)
 
             self.pf_move(end_face_dir=city_info[city]["112_out"][0][2])
-            sleep(0.5)
-            self.p.controller.key_press("s", 1)
+            sleep(0.2)
+            self.p.controller.key_press("s", 0.5)
             sleep(2)
             coords_status = self.p.get_coords()
             if coords_status["map_number_tuple"] == city_info[city]["map_number"]:
@@ -380,7 +417,7 @@ class PathFinder:
             if (
                 coords_status["map_number_tuple"][2] == 50
                 or coords_status["map_number_tuple"]
-                in [(1, 14, 76), (1, 4, 74), (2, 0, 107), (2, 1, 81)]
+                in [(1, 14, 76), (1, 4, 74), (2, 0, 107), (2, 1, 81), (0, 3, 3)]
             ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
                 transport = "bike"
                 if coords_status["transport"] not in [10, 74, 6, 2]:
@@ -414,11 +451,6 @@ if __name__ == "__main__":
 
     from main import PokeMMO
 
-    pokeMMO = PokeMMO()
+    p = PokeMMO()
     sleep(1)
-    pokeMMO.pf.go_somewhere(
-        # end_point=(10, 16),
-        end_face_dir=None,
-        city="VERDANTURF_TOWN",
-        style="farming",
-    )
+    p.pf.go_somewhere(end_point=(31, 26), end_face_dir=0, city="Cerulean_City")

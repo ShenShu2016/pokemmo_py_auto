@@ -339,6 +339,7 @@ class Action_Controller:
 
     @synchronized
     def use_sweet_sent(self):
+        print("使用 甜甜香气")
         if self.skill_pp_dict["甜甜香气"] >= 5:
             self.p.controller.key_press("2")
             self.skill_pp_dict["甜甜香气"] = self.skill_pp_dict["甜甜香气"] - 5
@@ -384,7 +385,7 @@ class Action_Controller:
     @synchronized
     def talk_to_nurse(self, city=None):
         print("Talking to nurse")
-        if city_info[city]["area"] == "Hoenn":
+        if city_info[city]["area"] in ["Hoenn", "Kanto"]:
             press_delay = 2
         else:
             press_delay = 5
@@ -402,6 +403,10 @@ class Action_Controller:
             sleep(0.1)
 
         raise Exception("Not in water")
+
+    @synchronized
+    def use_cut(self):
+        self.p.controller.key_press("z", 5)
 
     @synchronized
     def use_teleport(self):

@@ -66,7 +66,7 @@ class PokemmoUI:
         self.transport_label.grid(column=1, row=2, sticky=(tk.W, tk.E))
 
         self.farming_buttons = {}
-        button_names = ["Unova", "Hoenn_LV_up", "Hoenn"]
+        button_names = ["Unova", "Hoenn_LV_up", "Hoenn", "Kanto"]
         for index, farming in enumerate(button_names):
             self.farming_buttons[farming] = tk.Button(
                 self.root,
@@ -155,7 +155,7 @@ class PokemmoUI:
 
     def toggle_farming(self, farming):
         # If another farming thread is running, stop it
-        for other_farming in ["Unova", "Hoenn_LV_up", "Hoenn"]:
+        for other_farming in ["Unova", "Hoenn_LV_up", "Hoenn", "Kanto"]:
             if (
                 other_farming != farming
                 and hasattr(self, f"{other_farming}_thread")
