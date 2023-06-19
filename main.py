@@ -375,6 +375,16 @@ class PokeMMO:
         while self.auto_strategy_flag:
             Farming_Fuchsia_City(self).run(repeat_times=999)
 
+    def Sp_Defend_EV_Unova_farming(self):
+        print("Unova_farming started")
+        while self.auto_strategy_flag:
+            Farming_Opelucid_City(self).run(repeat_times=999)
+
+    def Sp_Attack_EV_Unova_farming(self):
+        print("Unova_farming started")
+        while self.auto_strategy_flag:
+            Farming_Opelucid_City_Sp_Attack(self).run(repeat_times=999)
+
     def Hoenn_farming(self):
         print("Hoenn_farming started")
         locations = {

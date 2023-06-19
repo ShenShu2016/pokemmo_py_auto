@@ -66,7 +66,15 @@ class PokemmoUI:
         self.transport_label.grid(column=1, row=2, sticky=(tk.W, tk.E))
 
         self.farming_buttons = {}
-        button_names = ["Unova", "Hoenn_LV_up", "Hoenn", "Kanto", "Attack_EV_Kanto"]
+        button_names = [
+            "Unova",
+            "Hoenn_LV_up",
+            "Hoenn",
+            "Kanto",
+            "Attack_EV_Kanto",
+            "Sp_Defend_EV_Unova",
+            "Sp_Attack_EV_Unova",
+        ]
         for index, farming in enumerate(button_names):
             self.farming_buttons[farming] = tk.Button(
                 self.root,
@@ -161,6 +169,8 @@ class PokemmoUI:
             "Hoenn",
             "Kanto",
             "Attack_EV_Kanto",
+            "Sp_Defend_EV_Unova",
+            "Sp_Attack_EV_Unova",
         ]:
             if (
                 other_farming != farming
@@ -214,7 +224,14 @@ class PokemmoUI:
         )
 
     def stop_threads_and_exit(self):
-        for farming in ["Unova", "Hoenn_LV_up", "Hoenn", "Kanto", "Attack_EV_Kanto"]:
+        for farming in [
+            "Unova",
+            "Hoenn_LV_up",
+            "Hoenn",
+            "Kanto",
+            "Attack_EV_Kanto",
+            "Sp_Defend_EV_Unova",
+        ]:
             if (
                 hasattr(self, f"{farming}_thread")
                 and getattr(self, f"{farming}_thread")

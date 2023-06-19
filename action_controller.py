@@ -420,7 +420,15 @@ class Action_Controller:
 
         if coords_status["map_number_tuple"][2] == 50 or coords_status[
             "map_number_tuple"
-        ] in [(1, 14, 76), (2, 1, 81), (0, 3, 3), (0, 23, 3), (0, 33, 3)]:
+        ] in [
+            (1, 14, 76),
+            (2, 1, 81),
+            (0, 3, 3),
+            (0, 23, 3),
+            (0, 33, 3),
+            (2, 1, 99),
+            (2, 1, 109),
+        ]:
             self.p.controller.key_press("8")
             sleep(3)
         else:

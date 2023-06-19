@@ -135,6 +135,26 @@ city_info = {
         "area": "Kanto",
         "pc_type": "Kanto_PC",
     },
+    "Opelucid_City": {
+        "town_map_coords": (695, 300),
+        "map_number": (2, 0, 120),
+        "112": (425, 174, 1),
+        "112_map_number": (2, 0, 122),
+        "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
+        "112_nurse": (7, 12, 1),  # x,y,dir
+        "area": "Unova",
+        "pc_type": "Unova_PC",
+    },
+    "Opelucid_City_Sp_Attack": {
+        "town_map_coords": (695, 300),
+        "map_number": (2, 0, 120),
+        "112": (425, 174, 1),
+        "112_map_number": (2, 0, 122),
+        "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
+        "112_nurse": (7, 12, 1),  # x,y,dir
+        "area": "Unova",
+        "pc_type": "Unova_PC",
+    },
 }
 
 
