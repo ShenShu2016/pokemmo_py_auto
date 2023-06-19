@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from auto_strategy.Cerulean_City_FARMING import add_x_y_coords_offset_Cerulean_City
 from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
+from auto_strategy.Fuchsia_City_attack_EV import add_x_y_coords_offset_Fuchsia_City
 from auto_strategy.Mistralton_City_FARMING import add_x_y_coords_offset_Mistralton_City
 from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
 from auto_strategy.SOOTOPOLIS_CITY_FARMING import add_x_y_coords_offset_SOOTOPOLIS_CITY
@@ -255,7 +256,8 @@ class PathFinder:
         for marker in walkable_markers:
             mask = df["mark"] == marker
             self.grid[df[mask]["y_coords"], df[mask]["x_coords"]] = 1
-
+        # for i in self.grid:
+        #     print(i)
         offset_func_mapping = {
             "PETALBURG_CITY": add_x_y_coords_offset_PETALBURG_CITY,
             "FALLARBOR_TOWN": add_x_y_coords_offset_FALLARBOR_TOWN,
@@ -263,6 +265,7 @@ class PathFinder:
             "SOOTOPOLIS_CITY": add_x_y_coords_offset_SOOTOPOLIS_CITY,
             "Mistralton_City": add_x_y_coords_offset_Mistralton_City,
             "Cerulean_City": add_x_y_coords_offset_Cerulean_City,
+            "Fuchsia_City": add_x_y_coords_offset_Fuchsia_City,
         }
 
         offset_func = offset_func_mapping.get(city, default_offset_func)
@@ -360,7 +363,16 @@ class PathFinder:
             if (
                 coords_status["map_number_tuple"][2] == 50
                 or coords_status["map_number_tuple"]
-                in [(1, 14, 76), (1, 4, 74), (2, 0, 107), (2, 1, 81), (0, 3, 3)]
+                in [
+                    (1, 14, 76),
+                    (1, 4, 74),
+                    (2, 0, 107),
+                    (2, 1, 81),
+                    (0, 3, 3),
+                    (0, 33, 3),
+                    (0, 0, 24),
+                    (0, 7, 3),
+                ]
             ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
                 transport = "bike"
                 if coords_status["transport"] not in [10, 74, 6, 2]:

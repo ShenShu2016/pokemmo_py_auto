@@ -370,6 +370,11 @@ class PokeMMO:
         while self.auto_strategy_flag:
             Farming_Cerulean_City(self).run(repeat_times=999)
 
+    def Attack_EV_Kanto_farming(self):
+        print("Kanto_farming started")
+        while self.auto_strategy_flag:
+            Farming_Fuchsia_City(self).run(repeat_times=999)
+
     def Hoenn_farming(self):
         print("Hoenn_farming started")
         locations = {

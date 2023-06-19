@@ -380,6 +380,12 @@ class Action_Controller:
                 self.talk_to_nurse(city=city)
                 return True
             else:
+                print(
+                    coords_status["x_coords"],
+                    coords_status["y_coords"],
+                    city_info[city]["112"][0],
+                    city_info[city]["112"][1],
+                )
                 raise Exception("Not in front of hospital")
 
     @synchronized
@@ -414,7 +420,7 @@ class Action_Controller:
 
         if coords_status["map_number_tuple"][2] == 50 or coords_status[
             "map_number_tuple"
-        ] in [(1, 14, 76), (2, 1, 81), (0, 3, 3), (0, 23, 3)]:
+        ] in [(1, 14, 76), (2, 1, 81), (0, 3, 3), (0, 23, 3), (0, 33, 3)]:
             self.p.controller.key_press("8")
             sleep(3)
         else:

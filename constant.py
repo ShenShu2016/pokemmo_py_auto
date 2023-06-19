@@ -125,6 +125,16 @@ city_info = {
         "area": "Kanto",
         "pc_type": "Kanto_PC",
     },
+    "Fuchsia_City": {
+        "town_map_coords": (721, 554),
+        "map_number": (0, 7, 3),
+        "112": (25, 32, 1),
+        "112_map_number": (0, 5, 11),
+        "112_out": [(7, 8, 0)],
+        "112_nurse": (7, 4, 1),  # x,y,dir
+        "area": "Kanto",
+        "pc_type": "Kanto_PC",
+    },
 }
 
 
