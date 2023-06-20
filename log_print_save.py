@@ -12,8 +12,6 @@ if TYPE_CHECKING:
 from collections import deque
 from datetime import datetime
 
-import pandas as pd
-
 
 class LogPrintSave:
     """A class to manage logs, print them to the terminal, and save them to a JSON file."""
@@ -64,7 +62,6 @@ class LogPrintSave:
                         "game_status",
                         "enemy_status",
                         "address",
-                        "money",
                         "x_coords",
                         "y_coords",
                         "map_number_tuple",
@@ -75,7 +72,6 @@ class LogPrintSave:
                         str(new_log["game_status"]),
                         str(new_log["enemy_status"]),
                         str(new_log["state_dict"]["address"]),
-                        int(new_log["state_dict"]["money"]),
                         int(new_log["coords_status"]["x_coords"]),
                         int(new_log["coords_status"]["y_coords"]),
                         str(new_log["coords_status"]["map_number_tuple"]),

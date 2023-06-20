@@ -1,19 +1,24 @@
 import logging
 from ctypes.wintypes import HWND
 from time import sleep
+from typing import TYPE_CHECKING
 
 from pywinauto import Application, keyboard
 
 logging.basicConfig(level=logging.INFO)
 import win32api
 
+if TYPE_CHECKING:
+    from main import PokeMMO
+
 
 class Controller:
     DEFAULT_SLEEP_TIME = 0.02
 
-    def __init__(self, handle: HWND):
+    def __init__(self, handle: HWND, pokeMMO):
         self.app = Application().connect(handle=handle)
         self.window = self.app.windows()[0]
+        self.p = pokeMMO
 
     def move_to(self, x, y, tolerance=0):
         """Move the mouse to a specific position on the window."""
@@ -88,6 +93,18 @@ class Controller:
 
         keyboard.send_keys("{" + key + " down}")
         sleep(delay)
+        keyboard.send_keys("{" + key + " up}")
+
+    def key_press_2(self, key: str, delay: float = 0.2):
+        """Press a key for a certain amount of time."""
+        self.window.set_focus()
+
+        keyboard.send_keys("{" + key + " down}")
+        for _ in range(int(delay / 0.03)):
+            sleep(0.03)
+            if self.p.pf.stop_move_threads:
+                keyboard.send_keys("{" + key + " up}")
+                break
         keyboard.send_keys("{" + key + " up}")
 
     def key_down(self, key: str):

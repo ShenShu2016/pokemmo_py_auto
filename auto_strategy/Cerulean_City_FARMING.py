@@ -46,7 +46,7 @@ class Farming_Cerulean_City:
         self.p.pf.go_somewhere(
             end_point=(31, 26), end_face_dir=0, style="ignore_sprite", city=self.city
         )
-        self.p.controller.key_press("s", 0.5)
+        self.p.controller.key_press("s", 0.3)
 
     def step_2_cut_tree(self):
         self.p.ac.use_cut()

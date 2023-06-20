@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import random
+import threading
 from time import sleep
 from typing import TYPE_CHECKING
 
@@ -38,6 +39,7 @@ class PathFinder:
         self.p = pokeMMO
         self.path = []
         self.keys_and_delays = []
+        self.stop_move_threads = False
 
     # 启发式函数（这里使用曼哈顿距离）
     def heuristic(self, a, b):
@@ -244,14 +246,10 @@ class PathFinder:
         df["y_coords"] -= min_y
         if end_point is not None:
             end_point = (end_point[0] - min_y, end_point[1] - min_x)
-        # Define grid size
+
         self.max_x = df["x_coords"].max() + 1
         self.max_y = df["y_coords"].max() + 1
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
-        # for i in self.grid:
-        #     print(i)
-
-        # Set walkable area based on style
         walkable_markers = (
             [1, 2, 66]
             if style in ["farming", "ignore_sprite", "left_right_farming"]
@@ -276,7 +274,8 @@ class PathFinder:
 
         offset_func = offset_func_mapping.get(city, default_offset_func)
 
-        while True:
+        break_threshold = 20
+        while break_threshold > 0:
             game_status = self.p.get_gs()
             coords_status = self.p.get_coords()
             coords_status_with_offset = offset_func(coords_status)
@@ -305,27 +304,30 @@ class PathFinder:
                 style == "farming"
                 or style == "ignore_sprite"
                 or style == "left_right_farming"
-            ) and game_status[
-                "return_status"
-            ] >= 20:  # 进入战斗了
+            ) and game_status["return_status"] >= 20:
                 break
 
-            # Update start_point and end_point if farming
             start_point = (
                 coords_status_with_offset["y_coords"] - min_y,
                 coords_status_with_offset["x_coords"] - min_x,
             )
             # print("start_point", start_point, "end_point", end_point, min_x, min_y)
-
-            # Find path if start_point is within grid
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
                 # print("开始坐标在网格范围内，开始寻找路径...")
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
                 # print("self.path", self.path, "\033[0m")
-                self.pf_move(end_face_dir=end_face_dir, transport=transport)
+                self.pf_move(
+                    end_face_dir=end_face_dir,
+                    transport=transport,
+                    offset_func=offset_func,
+                    min_x=min_x,
+                    min_y=min_y,
+                )
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
                 raise Exception("开始坐标不在网格范围内，跳过寻找路径")
+
+            break_threshold -= 1
 
             sleep(0.001)
 
@@ -362,8 +364,48 @@ class PathFinder:
             raise Exception("Failed to leave pc center")
 
     def pf_move(
-        self, end_face_dir=None, transport=None
+        self,
+        end_face_dir=None,
+        transport=None,
+        offset_func=None,
+        min_x=None,
+        min_y=None,
     ):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
+        self.stop_move_threads = False  # 全局标识，用来控制线程的运行/停止
+
+        def walk():
+            if self.keys_and_delays is not None:
+                if transport == "run":
+                    self.p.controller.key_down("x")
+                for key, delay in self.keys_and_delays:
+                    if self.stop_move_threads:  # 检查是否应该停止线程
+                        if transport == "run":
+                            self.p.controller.key_up("x")
+                        break
+                    self.p.controller.key_press_2(key, delay)
+                    sleep(0.1)
+                if transport == "run":
+                    self.p.controller.key_up("x")
+            self.stop_move_threads = True  # walk结束后，将全局标识设置为True，用来停止check线程
+
+        def check():
+            while not self.stop_move_threads:  # 使用全局标识来控制循环
+                current_position_with_offset = offset_func(self.p.get_coords())
+
+                current_position = (
+                    current_position_with_offset["y_coords"] - min_y,
+                    current_position_with_offset["x_coords"] - min_x,
+                )
+                if current_position not in self.path:
+                    print("self.path", self.path, "current_position", current_position)
+                    print("走错路了")  # 如果发现位置不在self.path中，打印消息
+                    self.stop_move_threads = True  # 设置全局标识，用来停止walk线程
+                    break
+                if current_position == self.path[-1]:  # 如果位置等于目标位置
+                    self.stop_move_threads = True  # 设置全局标识，用来停止walk线程
+                    break
+                sleep(0.01)
+
         coords_status = self.p.get_coords()
 
         if transport == None:
@@ -403,14 +445,15 @@ class PathFinder:
         )
         # start move
         print(self.keys_and_delays)
-        if self.keys_and_delays is not None:
-            if transport == "run":
-                self.p.controller.key_down("x")
-            for key, delay in self.keys_and_delays:
-                self.p.controller.key_press(key, delay)
-                sleep(0.1)
-            if transport == "run":
-                self.p.controller.key_up("x")
+
+        walk_thread = threading.Thread(target=walk, args=())
+        check_thread = threading.Thread(target=check, args=())
+
+        walk_thread.start()
+        check_thread.start()
+
+        walk_thread.join()
+        check_thread.join()
 
 
 if __name__ == "__main__":

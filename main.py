@@ -66,7 +66,7 @@ class PokeMMO:
         self.game_status_checker = GameStatus(self)
         self.enemy_status_checker = EnemyStatus(self)
 
-        self.controller = Controller(handle=self.handle)
+        self.controller = Controller(handle=self.handle, pokeMMO=self)
 
         self.ac = Action_Controller(self)
         self.word_recognizer = Word_Recognizer()
@@ -124,6 +124,7 @@ class PokeMMO:
         self.ui.run()
 
     def update_img_BRG(self):  # only image will be captured
+        """every 0.05s"""
         while not self.stop_threads_flag:
             # Add the current image, timestamp, and name to the list
             start_time = time.time()
@@ -140,6 +141,7 @@ class PokeMMO:
             sleep(0.05)  # wait for 2 seconds
 
     def update_game_status(self):
+        """every 0.02s"""
         while not self.stop_threads_flag:
             new_game_state = self.game_status_checker.check_game_status()
             with self.gs_lock:
@@ -147,6 +149,7 @@ class PokeMMO:
             sleep(0.02)  # wait for 3 seconds
 
     def update_enemy_status(self):
+        """every 0.02s"""
         while not self.stop_threads_flag:
             new_enemy_status = self.enemy_status_checker.check_enemy_status()
             with self.bs_lock:
@@ -154,6 +157,7 @@ class PokeMMO:
             sleep(0.02)
 
     def update_state_dict(self):
+        """every 3s"""
         while not self.stop_threads_flag:
             # Update every 30 seconds
             sleep(3)
@@ -161,25 +165,19 @@ class PokeMMO:
             my_address = self.get_text_from_box_coords(
                 (30, 0), (250, 25), img_BRG=img_BRG
             )
-            my_money = self.get_text_from_box_coords(
-                (37, 30),
-                (130, 45),
-                config="--psm 6 -c tessedit_char_whitelist=0123456789",
-                img_BRG=img_BRG,
-            )
 
             with self.state_dict_lock:
                 self.state_dict = {
                     "address": my_address,
-                    "money": int(my_money),
                 }
 
     def update_memory_coords(self):
+        """every 0.005s"""
         while not self.stop_threads_flag:
             new_memory_coords = self.mj_coords.read_data()
             with self.coords_lock:
                 self.coords_status = new_memory_coords
-            sleep(0.02)
+            sleep(0.005)
 
     # Use this method to safely access the state_dict variable from other threads
     def get_state_dict(self):
@@ -402,24 +400,31 @@ class PokeMMO:
 
         while self.auto_strategy_flag:  # 主循环现在会检查 run_main_loop 标志
             if previous_location is not None:
-                available_locations = locations.copy()
-                del available_locations[previous_location]  # 移除上一次地点
-                total_weight = sum(available_locations.values())
+                # 获取除上次地点外的所有地点及其权重
+                location_weights = locations.copy()
+                del location_weights[previous_location]  # 移除上一次地点
+                total_weight = sum(location_weights.values())
+                # 计算每个地点被选中的概率
                 probabilities = [
-                    weight / total_weight for weight in available_locations.values()
+                    weight / total_weight for weight in location_weights.values()
                 ]
+                # 随机选择下一个地点
                 next_location = random.choices(
-                    list(available_locations.keys()), probabilities
+                    list(location_weights.keys()), probabilities
                 )[0]
             else:
+                # 第一次运行，随机选择一个地点
                 next_location = random.choices(
                     list(locations.keys()), list(locations.values())
                 )[0]
 
+            # 运行下一个地点的任务
             getattr(self, f"{next_location}_FARMING").run(repeat_times=1)
             sleep(1)
+            # 更新上次地点为当前地点
             previous_location = next_location
-        print("Main loop has stopped.")  # 打印消息表示主循环已停止
+
+        print("主循环已停止。")  # 打印消息表示主循环已停止
 
 
 if __name__ == "__main__":
