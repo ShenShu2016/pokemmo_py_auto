@@ -13,11 +13,6 @@ if TYPE_CHECKING:
     from main import PokeMMO
 
 
-def add_x_y_coords_offset_Lacunosa_Town_Speed(coords_status):
-    coords_status_copy = coords_status.copy()  # Create a copy of the game_status
-    return coords_status_copy  # Return the modified copy
-
-
 class Farming_Lacunosa_Town_Speed:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.p = pokeMMO_instance

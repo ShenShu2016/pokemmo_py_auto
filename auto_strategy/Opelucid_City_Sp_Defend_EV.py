@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
 
 def add_x_y_coords_offset_Opelucid_City(coords_status):
-    print(coords_status, "add_x_y_coords_offset_Opelucid_City")
     coords_status_copy = coords_status.copy()  # Create a copy of the game_status
     if coords_status_copy["map_number_tuple"] == (2, 0, 132):
         coords_status_copy["x_coords"] = coords_status_copy["x_coords"] + 426

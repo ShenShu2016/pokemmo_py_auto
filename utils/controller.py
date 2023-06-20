@@ -28,7 +28,7 @@ class Controller:
         )
         sleep(self.DEFAULT_SLEEP_TIME)
 
-    def click(self, x=None, y=None, tolerance=0, back_to_original=True):
+    def click(self, x=None, y=None, tolerance=0, back_to_original=False):
         """Click at the current mouse position or at a specific position if provided."""
         # Store the original mouse position
         original_position = win32api.GetCursorPos() if back_to_original else None
@@ -51,7 +51,7 @@ class Controller:
         if back_to_original and original_position is not None:
             win32api.SetCursorPos(original_position)
 
-    def click_center(self, point, back_to_original=True):
+    def click_center(self, point, back_to_original=False):
         """Click at the center of the given coordinates."""
         # Store the original mouse position
         original_position = win32api.GetCursorPos() if back_to_original else None

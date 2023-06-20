@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
 
 def add_x_y_coords_offset_FALLARBOR_TOWN(coords_status):
-    print(coords_status, "add_x_y_coords_offset_FALLARBOR_TOWN")
     coords_status_copy = coords_status.copy()  # Create a copy of the game_status
     if coords_status_copy["map_number_tuple"][1] == 28:
         coords_status_copy["x_coords"] = coords_status_copy["x_coords"] + 20

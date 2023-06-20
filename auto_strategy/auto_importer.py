@@ -1,3 +1,4 @@
+from auto_strategy.Accumula_Town_Field import Farming_Accumula_Town_Field
 from auto_strategy.BATTLE_FRONTINER_LV_UP import Farming_BATTLE_FRONTINER
 from auto_strategy.Cerulean_City_FARMING import Farming_Cerulean_City
 from auto_strategy.FALLARBOR_TOWN_FARMING import Farming_FALLARBOR_TOWN

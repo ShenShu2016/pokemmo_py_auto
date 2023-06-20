@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import pytesseract
 
+import update_congifure
 from action_controller import Action_Controller
 from auto_strategy.auto_importer import *
 from enemy_status import EnemyStatus
@@ -36,6 +37,7 @@ class PokeMMO:
         """Initialize the PokeMMO class."""
         self.window_manager = Window_Manager()
         self.handle = self.window_manager.handle
+        update_congifure.init_config_file()
         with open("configure.json", "r") as f:
             self.config = json.load(f)
 
@@ -387,6 +389,11 @@ class PokeMMO:
         print("Unova_farming started")
         while self.auto_strategy_flag:
             Farming_Lacunosa_Town_Speed(self).run(repeat_times=999)
+
+    def Unova_field_farming(self):
+        print("Unova_field_farming started")
+        while self.auto_strategy_flag:
+            Farming_Accumula_Town_Field(self).run(repeat_times=999)
 
     def Hoenn_farming(self):
         print("Hoenn_farming started")

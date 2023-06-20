@@ -429,6 +429,9 @@ class Action_Controller:
             (2, 1, 99),
             (2, 1, 109),
             (2, 1, 112),
+            (2, 1, 113),
+            (2, 1, 61),
+            (2, 1, 141),
         ]:
             self.p.controller.key_press("8")
             sleep(3)

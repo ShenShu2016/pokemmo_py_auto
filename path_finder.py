@@ -15,7 +15,6 @@ from auto_strategy.Opelucid_City_Sp_Attack_EV import (
 )
 from auto_strategy.Opelucid_City_Sp_Defend_EV import add_x_y_coords_offset_Opelucid_City
 from auto_strategy.PETALBURG_CITY_FARMING import add_x_y_coords_offset_PETALBURG_CITY
-from auto_strategy.SOOTOPOLIS_CITY_FARMING import add_x_y_coords_offset_SOOTOPOLIS_CITY
 from auto_strategy.VERDANTURF_TOWN_FARMING import add_x_y_coords_offset_VERDANTURF_TOWN
 
 if TYPE_CHECKING:
@@ -264,7 +263,6 @@ class PathFinder:
             "PETALBURG_CITY": add_x_y_coords_offset_PETALBURG_CITY,
             "FALLARBOR_TOWN": add_x_y_coords_offset_FALLARBOR_TOWN,
             "VERDANTURF_TOWN": add_x_y_coords_offset_VERDANTURF_TOWN,
-            "SOOTOPOLIS_CITY": add_x_y_coords_offset_SOOTOPOLIS_CITY,
             "Mistralton_City": add_x_y_coords_offset_Mistralton_City,
             "Cerulean_City": add_x_y_coords_offset_Cerulean_City,
             "Fuchsia_City": add_x_y_coords_offset_Fuchsia_City,
@@ -426,6 +424,8 @@ class PathFinder:
                     (2, 1, 99),
                     (2, 1, 112),
                     (2, 1, 150),
+                    (2, 1, 61),
+                    (2, 1, 141),
                 ]
             ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
                 transport = "bike"
