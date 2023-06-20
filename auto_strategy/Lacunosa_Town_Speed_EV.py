@@ -55,9 +55,7 @@ class Farming_Lacunosa_Town_Speed:
             print("开始刷怪,或者是回城补给")
             while self.p.get_gs()["return_status"] < 20:
                 game_status = self.p.get_gs()
-                coords_status = add_x_y_coords_offset_Lacunosa_Town_Speed(
-                    self.p.get_coords()
-                )
+                coords_status = self.p.get_coords()
 
                 if self.p.ac.skill_pp_dict["甜甜香气"] < 5:
                     farming_times += 1
@@ -78,17 +76,17 @@ class Farming_Lacunosa_Town_Speed:
             while self.p.auto_strategy_flag:
                 # print("进入战斗")
                 game_status = self.p.get_gs()
-                enemy_status = self.p.get_bs()
+                battle_status = self.p.get_bs()
                 if (
                     game_status["return_status"] == 21
-                    and enemy_status.get("allChecked") == True
-                    and enemy_status.get("enemy_count") == 1
+                    and battle_status.get("allChecked") == True
+                    and battle_status.get("enemy_count") == 1
                 ):
                     self.p.ac.run_from_s21()
 
                 elif (
                     game_status["return_status"] == 21
-                    and enemy_status.get("allChecked") == True
+                    and battle_status.get("allChecked") == True
                 ):
                     self.p.ac.multi_fight_skill_1_from_s21()
 

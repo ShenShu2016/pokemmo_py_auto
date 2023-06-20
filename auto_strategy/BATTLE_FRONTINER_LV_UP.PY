@@ -102,13 +102,13 @@ class Farming_BATTLE_FRONTINER:
             while self.p.auto_strategy_flag:
                 # print("进入战斗")
                 game_status = self.p.get_gs()
-                enemy_status = self.p.get_bs()
+                battle_status = self.p.get_bs()
                 if game_status.get("check_pokemon_summary")[0]:
                     self.p.ac.close_pokemon_summary(game_status)
 
                 if (
                     game_status["return_status"] == 21
-                    and enemy_status.get("allChecked") == True
+                    and battle_status.get("allChecked") == True
                 ):
                     self.p.ac.multi_fight_skill_1_from_s21()
 

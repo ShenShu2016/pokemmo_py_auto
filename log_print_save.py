@@ -1,4 +1,3 @@
-# enemy_status.py
 from __future__ import annotations
 
 import threading
@@ -32,7 +31,7 @@ class LogPrintSave:
             try:
                 # 获取状态和信息
                 game_status = self.pokemmo.get_gs()
-                enemy_status = self.pokemmo.get_bs()
+                battle_status = self.pokemmo.get_bs()
                 state_dict = self.pokemmo.get_state_dict()
                 coords_status = self.pokemmo.get_coords()
 
@@ -45,7 +44,7 @@ class LogPrintSave:
                 # 创建新的日志
                 new_log = {
                     "game_status": game_status,
-                    "enemy_status": enemy_status,
+                    "battle_status": battle_status,
                     "state_dict": state_dict,
                     "coords_status": coords_status,
                     "timestamp": timestamp,
@@ -70,7 +69,7 @@ class LogPrintSave:
 
                     values = (
                         str(new_log["game_status"]),
-                        str(new_log["enemy_status"]),
+                        str(new_log["battle_status"]),
                         str(new_log["state_dict"]["address"]),
                         int(new_log["coords_status"]["x_coords"]),
                         int(new_log["coords_status"]["y_coords"]),
@@ -97,7 +96,9 @@ class LogPrintSave:
         while not self.pokemmo.stop_threads_flag:
             try:
                 print(f"\033[31mgame_status: {self.logs[-1]['game_status']}\033[31m")
-                print(f"\033[32menemy_status: {self.logs[-1]['enemy_status']}\033[32m")
+                print(
+                    f"\033[32mbattle_status: {self.logs[-1]['battle_status']}\033[32m"
+                )
                 print(
                     f"\033[33mcoords_status: {self.logs[-1]['coords_status']}\033[33m"
                 )

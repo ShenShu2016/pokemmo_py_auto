@@ -169,79 +169,79 @@ class Farming_Mistralton_City:
             while self.p.auto_strategy_flag:
                 # print("进入战斗")
                 game_status = self.p.get_gs()
-                enemy_status = self.p.get_bs()
+                battle_status = self.p.get_bs()
                 if game_status.get("check_pokemon_summary")[0]:
                     self.p.ac.iv_shiny_check_release(game_status)
 
                 if (
                     game_status["return_status"] == 21
-                    and enemy_status.get("enemy_1_info") is not None
+                    and battle_status.get("enemy_1_info") is not None
                 ):
-                    if enemy_status.get("enemy_1_info")["CatchMethod"] == 1:
-                        if enemy_status.get("enemy_1_hp_pct") >= 20:
+                    if battle_status.get("enemy_1_info")["CatchMethod"] == 1:
+                        if battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()
 
-                        elif enemy_status.get("enemy_1_hp_pct") < 20:
+                        elif battle_status.get("enemy_1_hp_pct") < 20:
                             self.p.ac.throw_pokeball()
 
-                    elif enemy_status.get("enemy_1_info")["CatchMethod"] == 2:
-                        if enemy_status.get("enemy_1_hp_pct") >= 20:
+                    elif battle_status.get("enemy_1_info")["CatchMethod"] == 2:
+                        if battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()
 
                         elif (
-                            enemy_status.get("enemy_1_hp_pct") < 20
-                            and enemy_status.get("enemy_1_sleeping") == False
+                            battle_status.get("enemy_1_hp_pct") < 20
+                            and battle_status.get("enemy_1_sleeping") == False
                         ):
                             self.p.ac.fight_skill_2_from_s21()  # Spore
 
                         elif (
-                            enemy_status.get("enemy_1_hp_pct") < 20
-                            and enemy_status.get("enemy_1_sleeping") == True
+                            battle_status.get("enemy_1_hp_pct") < 20
+                            and battle_status.get("enemy_1_sleeping") == True
                         ):
                             self.p.ac.throw_pokeball()
                     elif (
-                        enemy_status.get("enemy_1_info")["CatchMethod"] == 0
-                        and int(enemy_status.get("enemy_1_info")["No"]) != 999
+                        battle_status.get("enemy_1_info")["CatchMethod"] == 0
+                        and int(battle_status.get("enemy_1_info")["No"]) != 999
                     ):
                         self.p.ac.run_from_s21()
 
-                    elif enemy_status.get("enemy_1_info")["CatchMethod"] == 11:
+                    elif battle_status.get("enemy_1_info")["CatchMethod"] == 11:
                         if (
                             self.p.ac.is_go_pc()
-                            and enemy_status.get("enemy_1_hp_pct") >= 80
+                            and battle_status.get("enemy_1_hp_pct") >= 80
                         ):
                             self.p.ac.run_from_s21()
-                        elif enemy_status.get("enemy_1_hp_pct") >= 80:
+                        elif battle_status.get("enemy_1_hp_pct") >= 80:
                             self.p.ac.fight_skill_3_from_s21()
                         else:
                             self.p.ac.throw_pokeball()
                     # elif (
-                    #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
+                    #     battle_status.get("enemy_1_info")["CatchMethod"] == 11
                     # ):  # 直接睡了扔球
                     #     if is_go_pc(self.p.ac.skill_pp_dict):
                     #         self.p.ac.run_from_s21()
-                    #     elif enemy_status.get("enemy_1_hp_pct") >= 80:
+                    #     elif battle_status.get("enemy_1_hp_pct") >= 80:
                     #         self.p.ac.fight_skill_4_from_s21()  # 龙之怒
-                    #     elif enemy_status.get("enemy_1_sleeping") == False:
+                    #     elif battle_status.get("enemy_1_sleeping") == False:
                     #         self.p.ac.fight_skill_2_from_s21()
-                    #     elif enemy_status.get("enemy_1_sleeping") == True:
+                    #     elif battle_status.get("enemy_1_sleeping") == True:
                     #         self.p.ac.throw_pokeball()
                     # elif (
-                    #     enemy_status.get("enemy_1_info")["CatchMethod"] == 11
+                    #     battle_status.get("enemy_1_info")["CatchMethod"] == 11
                     # ):  # 直接睡了扔球
                     #     if is_go_pc(self.p.ac.skill_pp_dict):
                     #         self.p.ac.run_from_s21()
-                    #     elif enemy_status.get("enemy_1_sleeping") == False:
+                    #     elif battle_status.get("enemy_1_sleeping") == False:
                     #         self.p.ac.fight_skill_2_from_s21()
-                    #     elif enemy_status.get("enemy_1_sleeping") == True:
+                    #     elif battle_status.get("enemy_1_sleeping") == True:
                     #         self.p.ac.throw_pokeball()
                     else:
                         raise Exception("闪光，有问题！！！")
 
                 elif (
                     game_status["return_status"] == 21
-                    and enemy_status.get("enemy_count") >= 2
-                    and enemy_status.get("allChecked") == True
+                    and battle_status.get("enemy_count") >= 2
+                    and battle_status.get("allChecked") == True
                 ):
                     self.p.ac.run_from_s21()
 

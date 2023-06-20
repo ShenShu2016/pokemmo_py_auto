@@ -1,5 +1,4 @@
 import json
-import logging
 import random
 import threading
 import time
@@ -14,7 +13,7 @@ import pytesseract
 import update_congifure
 from action_controller import Action_Controller
 from auto_strategy.auto_importer import *
-from enemy_status import EnemyStatus
+from battle_status import BattleStatus
 from game_status import GameStatus
 from log_print_save import LogPrintSave
 from path_finder import PathFinder
@@ -24,10 +23,6 @@ from utils.memory_injection.memory_injector_coords import MemoryInjector_Coords
 from utils.SQLiteDB import SQLiteDB
 from utils.window_manager import Window_Manager
 from utils.word_recognizer import Word_Recognizer
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 
 class PokeMMO:
@@ -51,7 +46,7 @@ class PokeMMO:
         self.img_BRG = self.window_manager.get_current_img_BRG()
 
         self.game_status = {"return_status": 0, "skill_pp": {}}
-        self.enemy_status = {}
+        self.battle_status = {}
         self.state_dict = {"address": "", "money": 0}
         self.coords_status = {
             "x_coords": 0,
@@ -66,7 +61,7 @@ class PokeMMO:
         self.load_assets()
 
         self.game_status_checker = GameStatus(self)
-        self.enemy_status_checker = EnemyStatus(self)
+        self.battle_status_checker = BattleStatus(self)
 
         self.controller = Controller(handle=self.handle, pokeMMO=self)
 
@@ -95,7 +90,7 @@ class PokeMMO:
         threading.Thread(target=self.update_img_BRG).start()
         threading.Thread(target=self.update_game_status).start()
         threading.Thread(target=self.update_state_dict).start()
-        threading.Thread(target=self.update_enemy_status).start()
+        threading.Thread(target=self.update_battle_status).start()
         threading.Thread(target=self.update_memory_coords).start()
         threading.Thread(target=self.log_print_save.update_logs).start()
         threading.Thread(target=self.log_print_save.print_logs).start()
@@ -119,7 +114,7 @@ class PokeMMO:
 
                 print(f"Loaded {var_name} from {path}")
                 asset_count += 1
-        logger.info(f"Loaded {asset_count} assets.")
+        print(f"Loaded {asset_count} assets.")
 
     def start_ui(self):
         """Start the user interface."""
@@ -150,12 +145,12 @@ class PokeMMO:
                 self.game_status = new_game_state
             sleep(0.02)  # wait for 3 seconds
 
-    def update_enemy_status(self):
+    def update_battle_status(self):
         """every 0.02s"""
         while not self.stop_threads_flag:
-            new_enemy_status = self.enemy_status_checker.check_enemy_status()
+            new_battle_status = self.battle_status_checker.check_battle_status()
             with self.bs_lock:
-                self.enemy_status = new_enemy_status
+                self.battle_status = new_battle_status
             sleep(0.02)
 
     def update_state_dict(self):
@@ -192,7 +187,7 @@ class PokeMMO:
 
     def get_bs(self):
         with self.bs_lock:
-            return self.enemy_status
+            return self.battle_status
 
     def get_coords(self):
         with self.coords_lock:

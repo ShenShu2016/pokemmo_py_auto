@@ -1,4 +1,3 @@
-# enemy_status.py
 from __future__ import annotations
 
 import time
@@ -43,15 +42,15 @@ def play_music(music_file=r"asserts\unravel.mp3"):
     thread.start()
 
 
-class EnemyStatus:
+class BattleStatus:
     def __init__(self, pokeMMO_instance: PokeMMO):
         self.p = pokeMMO_instance
-        self.enemy_status_dict = {"enemy_count": 0}
+        self.battle_status_dict = {"enemy_count": 0}
         self.game_status_dict = {}
 
     def _check_enemy_number(self):
         if self.game_status_dict.get("return_status") == 1:
-            self.enemy_status_dict = {"enemy_count": None}
+            self.battle_status_dict = {"enemy_count": None}
             return
 
         if self.game_status_dict.get("return_status") in [
@@ -59,7 +58,7 @@ class EnemyStatus:
             21,
             22,
             23,
-        ] and self.enemy_status_dict.get("enemy_count") in [0, None]:
+        ] and self.battle_status_dict.get("enemy_count") in [0, None]:
             self.p.set_encounter_start_time()
             hp_BRG_x_y_list = self.p.find_items(
                 temp_BRG=self.p.hp_BRG,
@@ -72,7 +71,7 @@ class EnemyStatus:
             # print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
             if not hp_BRG_x_y_list:
                 return
-            self.enemy_status_dict["enemy_count"] = len(hp_BRG_x_y_list)
+            self.battle_status_dict["enemy_count"] = len(hp_BRG_x_y_list)
 
     def _check_enemy_hp_individual(self, enemy_index):
         hp_pct = self.p.get_hp_pct(
@@ -80,7 +79,7 @@ class EnemyStatus:
             enemy_hp_bar_coords[enemy_index][1],
             self.img_BRG,
         )
-        self.enemy_status_dict[f"enemy_{enemy_index}_hp_pct"] = hp_pct
+        self.battle_status_dict[f"enemy_{enemy_index}_hp_pct"] = hp_pct
 
     def _check_enemy_hp(self):
         if self.game_status_dict.get("return_status") in [
@@ -89,7 +88,7 @@ class EnemyStatus:
             22,
             23,
         ]:
-            enemy_count = self.enemy_status_dict["enemy_count"]
+            enemy_count = self.battle_status_dict["enemy_count"]
             threads = []
             if enemy_count in [3, 5]:
                 for i in range(2, enemy_count + 2):
@@ -111,13 +110,13 @@ class EnemyStatus:
 
     def _check_enemy_name_lv(self):
         # start_time = time.time()
-        enemy_count = self.enemy_status_dict["enemy_count"]
+        enemy_count = self.battle_status_dict["enemy_count"]
 
         def _process_i(i):
             if (
-                f"enemy_{i}_hp_pct" in self.enemy_status_dict
-                and f"enemy_{i}_name_Lv" not in self.enemy_status_dict
-                and self.enemy_status_dict[f"enemy_{i}_hp_pct"] is not None
+                f"enemy_{i}_hp_pct" in self.battle_status_dict
+                and f"enemy_{i}_name_Lv" not in self.battle_status_dict
+                and self.battle_status_dict[f"enemy_{i}_hp_pct"] is not None
             ):
                 sex_coords = self.p.find_items(
                     temp_BRG=self.p.enemy_male_BRG,
@@ -165,7 +164,7 @@ class EnemyStatus:
                     os.system("taskkill /f /im python.exe")
 
                 if "Lv" in name_Lv_OCR:
-                    self.enemy_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_OCR
+                    self.battle_status_dict[f"enemy_{i}_name_Lv"] = name_Lv_OCR
                     name_OCR = name_Lv_OCR.split("Lv")[0].strip()
                     lv_orc = name_Lv_OCR.split("Lv")[1].strip()
                     info = self.p.pokedex_csv.loc[
@@ -173,7 +172,7 @@ class EnemyStatus:
                     ]
                     if info.empty == False:
                         info_dict = info.to_dict(orient="records")
-                        self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+                        self.battle_status_dict[f"enemy_{i}_info"] = info_dict[0]
                         # 开始插入数据
                         columns = [
                             "pokedex_number",
@@ -194,12 +193,12 @@ class EnemyStatus:
                             self.p.pokedex_csv["No"] == int(999)
                         ]
                         info_dict = info.to_dict(orient="records")
-                        self.enemy_status_dict[f"enemy_{i}_info"] = info_dict[0]
+                        self.battle_status_dict[f"enemy_{i}_info"] = info_dict[0]
                         send_email()
                         print(f"{name_OCR} 有可能是闪光")
 
         threads = []
-        enemy_count = self.enemy_status_dict["enemy_count"]
+        enemy_count = self.battle_status_dict["enemy_count"]
         if enemy_count not in [0, None]:
             if enemy_count == 1:
                 i = 1
@@ -220,7 +219,7 @@ class EnemyStatus:
 
         for t in threads:
             t.join()  # 等待所有线程完成
-        self.enemy_status_dict["allChecked"] = True
+        self.battle_status_dict["allChecked"] = True
 
     def check_enemy_sleep(self):
         # print("检查敌人睡眠状态")
@@ -234,9 +233,9 @@ class EnemyStatus:
         )
         # print("sleeping_sign_coords_list", sleeping_sign_coords_list)
         if len(sleeping_sign_coords_list) > 0:
-            self.enemy_status_dict["enemy_1_sleeping"] = True
+            self.battle_status_dict["enemy_1_sleeping"] = True
         else:
-            self.enemy_status_dict["enemy_1_sleeping"] = False
+            self.battle_status_dict["enemy_1_sleeping"] = False
 
     def check_my_hp(self):
         my_hp_coords = (939, 360), (1134, 362)
@@ -247,10 +246,10 @@ class EnemyStatus:
         if my_hp_pct == 100:
             pass
         else:
-            self.enemy_status_dict["my_hp_pct"] = my_hp_pct
+            self.battle_status_dict["my_hp_pct"] = my_hp_pct
             self.p.ac.first_sprit_hp = my_hp_pct
 
-    def check_enemy_status(self):
+    def check_battle_status(self):
         self.img_BRG = self.p.get_img_BRG()
         self.game_status_dict = self.p.get_gs()
         start_time = time.time()
@@ -276,7 +275,7 @@ class EnemyStatus:
             self.check_enemy_sleep()
 
         check_enemy_sleep_time = time.time() - start_time
-        # print("enemy_status_dict", self.enemy_status_dict)
+        # print("battle_status_dict", self.battle_status_dict)
         if (
             check_enemy_number_time > 0.1
             or check_enemy_hp_time > 0.1
@@ -294,7 +293,7 @@ class EnemyStatus:
                 "check_enemy_sleep_time",
                 check_enemy_sleep_time,
             )
-        return self.enemy_status_dict
+        return self.battle_status_dict
 
 
 if __name__ == "__main__":

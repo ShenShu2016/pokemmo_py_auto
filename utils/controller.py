@@ -1,12 +1,9 @@
-import logging
 from ctypes.wintypes import HWND
 from time import sleep
 from typing import TYPE_CHECKING
 
-from pywinauto import Application, keyboard
-
-logging.basicConfig(level=logging.INFO)
 import win32api
+from pywinauto import Application, keyboard
 
 if TYPE_CHECKING:
     from main import PokeMMO

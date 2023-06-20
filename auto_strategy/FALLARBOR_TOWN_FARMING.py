@@ -97,43 +97,43 @@ class Farming_FALLARBOR_TOWN:
             while self.p.auto_strategy_flag:
                 # print("进入战斗")
                 game_status = self.p.get_gs()
-                enemy_status = self.p.get_bs()
+                battle_status = self.p.get_bs()
                 if self.p.get_gs().get("check_pokemon_summary")[0]:
                     self.p.ac.iv_shiny_check_release(game_status)
 
                 if (
                     game_status["return_status"] == 21
-                    and enemy_status.get("enemy_1_info") is not None
+                    and battle_status.get("enemy_1_info") is not None
                 ):
-                    if enemy_status.get("enemy_1_info")["CatchMethod"] == 1:
-                        if enemy_status.get("enemy_1_hp_pct") >= 20:
+                    if battle_status.get("enemy_1_info")["CatchMethod"] == 1:
+                        if battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()
 
-                        elif enemy_status.get("enemy_1_hp_pct") < 20:
+                        elif battle_status.get("enemy_1_hp_pct") < 20:
                             self.p.ac.throw_pokeball()
 
-                    elif enemy_status.get("enemy_1_info")["CatchMethod"] == 2:
-                        if enemy_status.get("enemy_1_hp_pct") >= 20:
+                    elif battle_status.get("enemy_1_info")["CatchMethod"] == 2:
+                        if battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()
 
                         elif (
-                            enemy_status.get("enemy_1_hp_pct") < 20
-                            and enemy_status.get("enemy_1_sleeping") == False
+                            battle_status.get("enemy_1_hp_pct") < 20
+                            and battle_status.get("enemy_1_sleeping") == False
                         ):
                             self.p.ac.fight_skill_2_from_s21()  # Spore
 
                         elif (
-                            enemy_status.get("enemy_1_hp_pct") < 20
-                            and enemy_status.get("enemy_1_sleeping") == True
+                            battle_status.get("enemy_1_hp_pct") < 20
+                            and battle_status.get("enemy_1_sleeping") == True
                         ):
                             self.p.ac.throw_pokeball()
-                    elif enemy_status.get("enemy_1_info")["CatchMethod"] == 0:
+                    elif battle_status.get("enemy_1_info")["CatchMethod"] == 0:
                         self.p.ac.run_from_s21()
 
                 elif (
                     game_status["return_status"] == 21
-                    and enemy_status.get("enemy_count") >= 2
-                    and enemy_status.get("allChecked") == True
+                    and battle_status.get("enemy_count") >= 2
+                    and battle_status.get("allChecked") == True
                 ):
                     self.p.ac.run_from_s21()
 
