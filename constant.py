@@ -155,6 +155,16 @@ city_info = {
         "area": "Unova",
         "pc_type": "Unova_PC",
     },
+    "Lacunosa_Town_Speed": {
+        "town_map_coords": (867, 298),
+        "map_number": (2, 1, 150),
+        "112": (660, 186, 1),
+        "112_map_number": (2, 1, 151),
+        "112_out": [(7, 19, 0), (6, 19, 0), (8, 19, 0)],
+        "112_nurse": (7, 12, 1),  # x,y,dir
+        "area": "Unova",
+        "pc_type": "Unova_PC",
+    },
 }
 
 

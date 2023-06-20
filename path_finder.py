@@ -325,6 +325,7 @@ class PathFinder:
                 self.pf_move(end_face_dir=end_face_dir, transport=transport)
             else:
                 print("开始坐标不在网格范围内，跳过寻找路径")
+                raise Exception("开始坐标不在网格范围内，跳过寻找路径")
 
             sleep(0.001)
 
@@ -381,6 +382,8 @@ class PathFinder:
                     (2, 0, 120),
                     (2, 0, 132),
                     (2, 1, 99),
+                    (2, 1, 112),
+                    (2, 1, 150),
                 ]
             ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
                 transport = "bike"
