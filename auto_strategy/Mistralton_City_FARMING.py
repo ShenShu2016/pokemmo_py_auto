@@ -59,7 +59,7 @@ class Farming_Mistralton_City:
 
     def teleport_and_heal(self):
         self.p.ac.use_teleport()
-        self.p.ac.talk_to_nurse()  # teleport 就直接面对护士了
+        self.p.ac.talk_to_nurse(city=self.city)  # teleport 就直接面对护士了
 
     def back_to_open_air(self):
         pass
