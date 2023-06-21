@@ -47,7 +47,7 @@ class PokeMMO:
 
         self.game_status = {"return_status": 0, "skill_pp": {}}
         self.battle_status = {}
-        self.state_dict = {"address": "", "money": 0}
+        self.state_dict = {"address": ""}
         self.coords_status = {
             "x_coords": 0,
             "y_coords": 0,
@@ -74,11 +74,6 @@ class PokeMMO:
             "pokemmo.sqlite",
         )
         self.mj_coords = MemoryInjector_Coords()
-
-        self.PETALBURG_CITY_FARMING = Farming_PETALBURG_CITY(self)
-        self.SOOTOPOLIS_CITY_FARMING = Farming_SOOTOPOLIS_CITY(self)
-        self.FALLARBOR_TOWN_FARMING = Farming_FALLARBOR_TOWN(self)
-        self.VERDANTURF_TOWN_FARMING = Farming_VERDANTURF_TOWN(self)
 
         self.auto_strategy_flag = False  # 用来控制所有的自动策略 开始与结束
 

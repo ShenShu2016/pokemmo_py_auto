@@ -104,13 +104,8 @@ class PokemmoUI:
             column=0, row=3, columnspan=2, sticky=(tk.W, tk.E, tk.S), padx=10, pady=10
         )
 
-        self.root.grid_columnconfigure(
-            0, weight=1
-        )  # Make the column fill the entire window width
-        self.root.grid_columnconfigure(
-            1, weight=1
-        )  # Make the column fill the entire window width
-        # self.root.grid_rowconfigure(4, weight=1)  # Make the button row expandable
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
         self.released_label = ttk.Label(
             self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
         )
@@ -126,6 +121,10 @@ class PokemmoUI:
 
         self.pokeball_label.grid(row=4, columnspan=2, sticky=(tk.W, tk.E))
         self.caught_iv_label.grid(row=6, columnspan=2, sticky=(tk.W, tk.E))
+        self.current_enemy = ttk.Label(
+            self.root, text="", font=("Helvetica", 12), padding="5 5 5 5"
+        )
+        self.current_enemy.grid(row=17, columnspan=2, sticky=(tk.W, tk.E))
         self.update_ui()
         self.update_db()
 
@@ -143,6 +142,7 @@ class PokemmoUI:
 
     def update_ui(self):
         game_status = self.p.get_gs()
+        battle_status = self.p.get_bs()
 
         # Update the labels with the new values
         coords_status = self.p.get_coords()
@@ -160,6 +160,7 @@ class PokemmoUI:
         )
         for skill, pp in game_status["skill_pp"].items():
             self.skill_labels[skill].configure(text=f"{skill}: {pp}")
+        self.current_enemy.configure(text=f"当前敌人: {battle_status.get('enemy_1_info')}")
 
         self.root.after(500, self.update_ui)  # Refresh every 500 ms
 
