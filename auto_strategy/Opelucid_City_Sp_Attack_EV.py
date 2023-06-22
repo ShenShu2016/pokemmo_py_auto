@@ -16,7 +16,10 @@ if TYPE_CHECKING:
 def add_x_y_coords_offset_Opelucid_City_Sp_Attack(coords_status):
     coords_status_copy = coords_status.copy()  # Create a copy of the game_status
     if coords_status_copy["map_number_tuple"] == (2, 0, 133):
-        coords_status_copy["x_coords"] = coords_status_copy["x_coords"] + 442
+        # coords_status_copy["x_coords"] = coords_status_copy["x_coords"] + 442
+        coords_status_copy["x_coords"] = (
+            round((coords_status_copy["x_coords"]) * 5 / 17) + 448
+        )
         coords_status_copy["y_coords"] = coords_status_copy["y_coords"] + 169
 
     else:
