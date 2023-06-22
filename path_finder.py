@@ -70,17 +70,6 @@ class PathFinder:
         g_score = {start: 0}
         coords_status = self.p.get_coords()  # 新增：获取初始状态
         current_face_dir = coords_status["face_dir"]  # 新增：获取初始方向
-        # 新增：根据初始方向设置 prev_node
-        if current_face_dir == 0:  # 往y变大方向
-            prev_node = (start[0], start[1] - 1)
-        elif current_face_dir == 1:  # 往y变小方向
-            prev_node = (start[0], start[1] + 1)
-        elif current_face_dir == 2:  # 往x变小方向
-            prev_node = (start[0] + 1, start[1])
-        elif current_face_dir == 3:  # 往x变大方向
-            prev_node = (start[0] - 1, start[1])
-        else:
-            prev_node = None
 
         while heap:
             curr = heapq.heappop(heap)[1]
@@ -89,9 +78,25 @@ class PathFinder:
             if curr == end:
                 path = []
                 while curr is not None:
-                    path.append(curr)
+                    if parent[curr] is not None:
+                        face_dir = self.get_face_direction(parent[curr], curr)
+                        path.append((curr[0], curr[1], face_dir))
+                    else:
+                        path.append((curr[0], curr[1], current_face_dir))  # 起点使用初始方向
                     curr = parent[curr]
-                return path[::-1]
+
+                path = path[::-1]  # 注意这里，我们先反转路径，然后再处理转向
+
+                # 新增：重新遍历路径，添加在原地改变朝向的动作
+                new_path = []
+                for i in range(len(path) - 1):
+                    new_path.append(path[i])
+                    if path[i][2] != path[i + 1][2]:
+                        new_path.append(
+                            (path[i][0], path[i][1], path[i + 1][2])
+                        )  # 当前位置添加一个改变朝向的动作
+                new_path.append(path[-1])
+                return new_path  # 注意这里，由于我们先反转了路径，所以这里不需要再反转
 
             for next_node in self.neighbors(curr):
                 tentative_g_score = g_score[curr] + self.get_base_cost(
@@ -110,10 +115,7 @@ class PathFinder:
                         heapq.heappush(heap, (f_score, next_node))
                         in_heap.add(next_node)
 
-            prev_node = curr  # 更新前一个节点
-
         raise ValueError("No path found")
-        return None
 
     # 计算从curr到next_node的基本移动成本
     def get_base_cost(self, next_node):  # 修改：只计算基本移动成本并且删除了curr参数
@@ -134,76 +136,77 @@ class PathFinder:
     def turned(self, A, B, C):
         return not (A[0] == B[0] == C[0] or A[1] == B[1] == C[1])
 
+    def get_face_direction(self, curr, next_node):
+        if curr[1] == next_node[1]:  # 比较x坐标
+            if curr[0] < next_node[0]:  # y增大
+                return 0
+            else:  # y减小
+                return 1
+        else:
+            if curr[1] < next_node[1]:  # x增大
+                return 3
+            else:  # x减小
+                return 2
+
     def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
         transport_speed = {"bike": 0.075, "walk": 0.25, "run": 0.16, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
+        turn_delay = 0.03  # 原地转向的延迟时间
         coords_status = self.p.get_coords()
         current_face_dir = coords_status["face_dir"]
         if path is None:
             return None
+
         keys_and_delays = []
-        for i in range(1, len(path)):
-            dy = path[i][0] - path[i - 1][0]
-            dx = path[i][1] - path[i - 1][1]
-            if dy == 1:
+        for i in range(len(path)):
+            face_dir = path[i][2]
+            key = None
+            if face_dir == 0:
                 key = "s"
-                new_face_dir = 0
-            elif dy == -1:
+            elif face_dir == 1:
                 key = "w"
-                new_face_dir = 1
-            elif dx == 1:
-                key = "d"
-                new_face_dir = 3
-            elif dx == -1:
+            elif face_dir == 2:
                 key = "a"
-                new_face_dir = 2
-            else:
-                continue
+            elif face_dir == 3:
+                key = "d"
 
-            if current_face_dir != new_face_dir:
-                # 如果当前面向的方向与下一个方向不同，插入一个转向的动作并更新方向
-                keys_and_delays.append((key, 0.03))
-                current_face_dir = new_face_dir
+            if key:
+                if i == 0:
+                    # 如果是起点，仅当起点的方向与目标方向不同时进行转向
+                    if current_face_dir != face_dir:
+                        keys_and_delays.append((key, turn_delay))
+                        current_face_dir = face_dir
+                elif path[i - 1][0] == path[i][0] and path[i - 1][1] == path[i][1]:
+                    # 如果相邻的两个路径点位置相同，即为原地转向
+                    if keys_and_delays and keys_and_delays[-1][0] != key:  # 新增的检查
+                        keys_and_delays.append((key, turn_delay))
+                        current_face_dir = face_dir
+                elif keys_and_delays and keys_and_delays[-1][0] == key:
+                    delay = max(
+                        0.13, keys_and_delays[-1][1] + transport_speed[transport]
+                    )
+                    keys_and_delays[-1] = (
+                        key,
+                        delay,
+                    )
+                else:
+                    delay = max(
+                        0.13, transport_speed[transport] + start_delay[transport]
+                    )
+                    keys_and_delays.append((key, delay))
 
-            # 在确定方向相同之后再添加移动动作
-            if keys_and_delays and keys_and_delays[-1][0] == key:
-                keys_and_delays[-1] = (
-                    key,
-                    keys_and_delays[-1][1] + transport_speed[transport],
-                )
-            else:
-                keys_and_delays.append(
-                    (key, transport_speed[transport] + start_delay[transport])
-                )
+            # 如果指定了最后的面向方向，添加相应的转向动作
+            # if end_face_dir is not None and current_face_dir != end_face_dir:
+            #     if end_face_dir == 0:
+            #         keys_and_delays.append(("s", 0.1))
+            #     elif end_face_dir == 1:
+            #         keys_and_delays.append(("w", 0.1))
+            #     elif end_face_dir == 2:
+            #         keys_and_delays.append(("a", 0.1))
+            #     elif end_face_dir == 3:
+            #         keys_and_delays.append(("d", 0.1))
 
-        # 如果指定了最后的面向方向，添加相应的转向动作
-        if end_face_dir is not None and current_face_dir != end_face_dir:
-            if end_face_dir == 0:
-                keys_and_delays.append(("s", 0.1))
-            elif end_face_dir == 1:
-                keys_and_delays.append(("w", 0.1))
-            elif end_face_dir == 2:
-                keys_and_delays.append(("a", 0.1))
-            elif end_face_dir == 3:
-                keys_and_delays.append(("d", 0.1))
-
-        total_delay = 0
-        default_delay = 2
-        keys_and_delays_two_seconds = []
-        for key_and_delay in keys_and_delays:
-            new_delay = default_delay - total_delay
-            if new_delay < 0.1:
-                # 如果新的延迟时间小于0.1，设置延迟时间为0.1
-                new_delay = 0.1
-            if total_delay + key_and_delay[1] > default_delay:
-                # 如果加上当前的延迟会超过2秒，那么就只加上足够的延迟以达到2秒
-                keys_and_delays_two_seconds.append((key_and_delay[0], new_delay))
-                break
-            else:
-                total_delay += key_and_delay[1]
-                keys_and_delays_two_seconds.append(key_and_delay)
-
-        return keys_and_delays_two_seconds
+        return keys_and_delays
 
     def get_farthest_point(self, rows, coords_status_with_offset, min_x, min_y):
         origin = np.array(
@@ -271,7 +274,7 @@ class PathFinder:
 
         offset_func = offset_func_mapping.get(city, default_offset_func)
 
-        break_threshold = 20
+        break_threshold = 10
         while break_threshold > 0:
             game_status = self.p.get_gs()
             coords_status = self.p.get_coords()
@@ -312,7 +315,8 @@ class PathFinder:
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
                 # print("开始坐标在网格范围内，开始寻找路径...")
                 self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
-                # print("self.path", self.path, "\033[0m")
+                print("-------------------------------------------")
+                print("self.path", self.path, "\033[0m")
                 self.pf_move(
                     end_face_dir=end_face_dir,
                     transport=transport,
@@ -380,7 +384,7 @@ class PathFinder:
                             self.p.controller.key_up("x")
                         break
                     self.p.controller.key_press_2(key, delay)
-                    sleep(0.1)
+                    # sleep(0.1)
                 if transport == "run":
                     self.p.controller.key_up("x")
             self.stop_move_threads = True  # walk结束后，将全局标识设置为True，用来停止check线程
@@ -392,6 +396,7 @@ class PathFinder:
                 current_position = (
                     current_position_with_offset["y_coords"] - min_y,
                     current_position_with_offset["x_coords"] - min_x,
+                    current_position_with_offset["face_dir"],
                 )
                 if current_position not in self.path:
                     print("self.path", self.path, "current_position", current_position)
@@ -444,6 +449,7 @@ class PathFinder:
         )
         # start move
         print(self.keys_and_delays)
+        print("-------------------------------------------")
 
         walk_thread = threading.Thread(target=walk, args=())
         check_thread = threading.Thread(target=check, args=())

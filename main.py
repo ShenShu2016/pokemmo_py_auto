@@ -77,6 +77,11 @@ class PokeMMO:
 
         self.auto_strategy_flag = False  # 用来控制所有的自动策略 开始与结束
 
+        self.SOOTOPOLIS_CITY_FARMING = Farming_SOOTOPOLIS_CITY(self)
+        self.FALLARBOR_TOWN_FARMING = Farming_FALLARBOR_TOWN(self)
+        self.PETALBURG_CITY_FARMING = Farming_PETALBURG_CITY(self)
+        self.VERDANTURF_TOWN_FARMING = Farming_VERDANTURF_TOWN(self)
+
         self.stop_threads_flag = False
         self.ui = PokemmoUI(self)
         self.start_threads()

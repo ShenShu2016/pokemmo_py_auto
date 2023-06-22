@@ -103,6 +103,6 @@ class LogPrintSave:
                     f"\033[33mcoords_status: {self.logs[-1]['coords_status']}\033[33m"
                 )
                 print(f"\033[34mstate_dict: {self.logs[-1]['state_dict']}\033[34m")
-                sleep(5)
+                sleep(60)
             except Exception as e:
                 pass
