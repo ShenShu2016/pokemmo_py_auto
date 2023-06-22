@@ -61,7 +61,7 @@ class PathFinder:
         return result
 
     # A*算法
-    def a_star(self, start, end):
+    def a_star(self, start, end, end_face_dir=None):
         heap = []
         in_heap = set()
         heapq.heappush(heap, (self.heuristic(start, end), start))
@@ -96,6 +96,11 @@ class PathFinder:
                             (path[i][0], path[i][1], path[i + 1][2])
                         )  # 当前位置添加一个改变朝向的动作
                 new_path.append(path[-1])
+                # 如果end_face_dir有值，添加一个新节点表示结束时的方向
+                if end_face_dir is not None:
+                    last_node = new_path[-1]
+                    new_path.append((last_node[0], last_node[1], end_face_dir))
+
                 return new_path  # 注意这里，由于我们先反转了路径，所以这里不需要再反转
 
             for next_node in self.neighbors(curr):
@@ -148,7 +153,11 @@ class PathFinder:
             else:  # x减小
                 return 2
 
-    def path_to_keys_and_delays(self, path, transport="bike", end_face_dir=None):
+    def path_to_keys_and_delays(
+        self,
+        path,
+        transport="bike",
+    ):
         transport_speed = {"bike": 0.075, "walk": 0.25, "run": 0.16, "surf": 0.1}
         start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
         turn_delay = 0.03  # 原地转向的延迟时间
@@ -182,30 +191,20 @@ class PathFinder:
                         keys_and_delays.append((key, turn_delay))
                         current_face_dir = face_dir
                 elif keys_and_delays and keys_and_delays[-1][0] == key:
-                    delay = max(
-                        0.13, keys_and_delays[-1][1] + transport_speed[transport]
+                    delay = round(
+                        max(0.13, keys_and_delays[-1][1] + transport_speed[transport]),
+                        4,
                     )
                     keys_and_delays[-1] = (
                         key,
                         delay,
                     )
                 else:
-                    delay = max(
-                        0.13, transport_speed[transport] + start_delay[transport]
+                    delay = round(
+                        max(0.13, transport_speed[transport] + start_delay[transport]),
+                        4,
                     )
                     keys_and_delays.append((key, delay))
-
-            # 如果指定了最后的面向方向，添加相应的转向动作
-            # if end_face_dir is not None and current_face_dir != end_face_dir:
-            #     if end_face_dir == 0:
-            #         keys_and_delays.append(("s", 0.1))
-            #     elif end_face_dir == 1:
-            #         keys_and_delays.append(("w", 0.1))
-            #     elif end_face_dir == 2:
-            #         keys_and_delays.append(("a", 0.1))
-            #     elif end_face_dir == 3:
-            #         keys_and_delays.append(("d", 0.1))
-
         return keys_and_delays
 
     def get_farthest_point(self, rows, coords_status_with_offset, min_x, min_y):
@@ -314,7 +313,9 @@ class PathFinder:
             # print("start_point", start_point, "end_point", end_point, min_x, min_y)
             if 0 <= start_point[0] < self.max_y and 0 <= start_point[1] < self.max_x:
                 # print("开始坐标在网格范围内，开始寻找路径...")
-                self.path = self.a_star(start=start_point, end=end_point)  #! y在前面
+                self.path = self.a_star(
+                    start=start_point, end=end_point, end_face_dir=end_face_dir
+                )  #! y在前面
                 print("-------------------------------------------")
                 print("self.path", self.path, "\033[0m")
                 self.pf_move(
@@ -445,7 +446,7 @@ class PathFinder:
                 self.p.controller.key_press("3", 0.1)
 
         self.keys_and_delays = self.path_to_keys_and_delays(
-            self.path, transport=transport, end_face_dir=end_face_dir
+            self.path, transport=transport
         )
         # start move
         print(self.keys_and_delays)

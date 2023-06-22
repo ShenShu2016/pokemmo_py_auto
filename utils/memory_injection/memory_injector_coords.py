@@ -125,7 +125,7 @@ class MemoryInjector_Coords:
                 pattern=b"\\x0F\\xBE.\\x10.\\x0F\\xB6.\\x12",
                 return_multiple=True,
             )
-            print("aob_address_list:", self.aob_address_list)
+            # print("aob_address_list:", self.aob_address_list)
             if len(self.aob_address_list) >= 1:
                 self.aob_address_list = [
                     j
@@ -154,21 +154,23 @@ class MemoryInjector_Coords:
             try:
                 self.inject_memory()
                 sleep(1)
-                self.test_data()
-                with open(self.json_file_path, "w") as json_file:
-                    json.dump(
-                        {
-                            "aob_address": self.aob_address,
-                            "TR": self.TR,
-                            "newmem": self.newmem,
-                            "timestamp": time.time(),  # current timestamp
-                        },
-                        json_file,
-                    )
+                result = self.test_data()
+                if result:
+                    with open(self.json_file_path, "w") as json_file:
+                        json.dump(
+                            {
+                                "aob_address": self.aob_address,
+                                "TR": self.TR,
+                                "newmem": self.newmem,
+                                "timestamp": time.time(),  # current timestamp
+                            },
+                            json_file,
+                        )
 
-                print(
-                    f"Injected, aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}, aob_hex_list: {self.aob_hex_list}"
-                )
+                    print(
+                        f"Injected, aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}, aob_hex_list: {self.aob_hex_list}"
+                    )
+                    return
             except Exception as e:
                 print(e)
                 continue
@@ -255,9 +257,10 @@ class MemoryInjector_Coords:
         self.transport = split_bytes_to_int(data, 0, 2)
         if self.transport != 0:
             print("交通状态正常")
+            return True
         else:
             print("交通状态异常")
-            raise Exception("交通状态异常")
+            return False
 
     def read_data(self):
         data = self.pm.read_bytes(self.TR, 4)
