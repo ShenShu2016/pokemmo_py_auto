@@ -10,22 +10,22 @@ if TYPE_CHECKING:
 
 
 class Controller:
-    DEFAULT_SLEEP_TIME = 0.02
-
     def __init__(self, handle: HWND, pokeMMO):
         self.app = Application().connect(handle=handle)
         self.window = self.app.windows()[0]
         self.p = pokeMMO
 
-    def move_to(self, x, y, tolerance=0):
+    def move_to(self, x, y, tolerance=0, wait: float = 0.02):
         """Move the mouse to a specific position on the window."""
         self.window.set_focus()
         self.window.click_input(
             button="move", coords=(int(x) + tolerance, int(y) + tolerance)
         )
-        sleep(self.DEFAULT_SLEEP_TIME)
+        sleep(wait)
 
-    def click(self, x=None, y=None, tolerance=0, back_to_original=False):
+    def click(
+        self, x=None, y=None, tolerance=0, back_to_original=False, wait: float = 0
+    ):
         """Click at the current mouse position or at a specific position if provided."""
         # Store the original mouse position
         original_position = win32api.GetCursorPos() if back_to_original else None
@@ -40,7 +40,7 @@ class Controller:
             sleep(0.05)
             # Click
             self.window.click_input(coords=(x, y))
-            sleep(self.DEFAULT_SLEEP_TIME)
+            sleep(wait)
         else:
             self.window.click_input()
 
@@ -48,7 +48,7 @@ class Controller:
         if back_to_original and original_position is not None:
             win32api.SetCursorPos(original_position)
 
-    def click_center(self, point, back_to_original=False):
+    def click_center(self, point, back_to_original=False, wait: float = 0):
         """Click at the center of the given coordinates."""
         # Store the original mouse position
         original_position = win32api.GetCursorPos() if back_to_original else None
@@ -68,11 +68,11 @@ class Controller:
             sleep(0.05)
             # Click
             self.window.click_input(coords=(int(center_x), int(center_y)))
-            sleep(self.DEFAULT_SLEEP_TIME)
 
             # Move the mouse back to the original position
             if back_to_original and original_position is not None:
                 win32api.SetCursorPos(original_position)
+            sleep(wait)
 
         except Exception as e:
             print(f"Error in click_center: {e}")
@@ -84,15 +84,16 @@ class Controller:
             button="left", press_coords=(x1, y1), release_coords=(x2, y2)
         )
 
-    def key_press(self, key: str, delay: float = 0.2):
+    def key_press(self, key: str, delay: float = 0.2, wait: float = 0):
         """Press a key for a certain amount of time."""
         self.window.set_focus()
 
         keyboard.send_keys("{" + key + " down}")
         sleep(delay)
         keyboard.send_keys("{" + key + " up}")
+        sleep(wait)
 
-    def key_press_2(self, key: str, delay: float = 0.2):
+    def key_press_2(self, key: str, delay: float = 0.2, wait: float = 0):
         """Press a key for a certain amount of time."""
         self.window.set_focus()
 
@@ -103,6 +104,7 @@ class Controller:
                 keyboard.send_keys("{" + key + " up}")
                 break
         keyboard.send_keys("{" + key + " up}")
+        sleep(wait)
 
     def key_down(self, key: str):
         """Press a key down."""
