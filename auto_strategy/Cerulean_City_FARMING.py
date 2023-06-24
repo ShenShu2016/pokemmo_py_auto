@@ -37,6 +37,9 @@ class Farming_Cerulean_City:
 
     def leave_pc_center_and_go_farm(self):
         self.p.pf.leave_pc_center(city=self.city)
+        self.step_1_go_tree()
+        self.step_2_cut_tree()
+        self.step_3_go_farming_are()
 
     def teleport_and_heal(self):
         self.p.ac.use_teleport()
@@ -64,9 +67,6 @@ class Farming_Cerulean_City:
         if result:
             print("飞走成功")
             self.leave_pc_center_and_go_farm()
-            self.step_1_go_tree()
-            self.step_2_cut_tree()
-            self.step_3_go_farming_are()
         else:
             raise Exception("飞不走")
 
