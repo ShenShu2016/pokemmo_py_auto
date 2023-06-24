@@ -175,6 +175,16 @@ city_info = {
         "area": "Unova",
         "pc_type": "Unova_PC",
     },
+    "Fallarbor_Town_Ditto": {
+        "town_map_coords": (403, 241),
+        "map_number": (1, 13, 50),
+        "112": (14, 8, 1),
+        "112_map_number": (1, 4, 55),
+        "112_nurse": (7, 4, 1),  # x,y,dir
+        "112_out": [(7, 8, 0), (6, 8, 0)],
+        "area": "Hoenn",
+        "pc_type": "Hoenn_PC",
+    },
 }
 
 

@@ -255,7 +255,7 @@ class MemoryInjector_Coords:
         # print("x_address", x_address, hex(x_address))
         data = self.pm.read_bytes(x_address, 10 + 80)
         self.transport = split_bytes_to_int(data, 0, 2)
-        if self.transport != 0:
+        if self.transport != 0 and self.transport <= 100:
             print("交通状态正常")
             return True
         else:

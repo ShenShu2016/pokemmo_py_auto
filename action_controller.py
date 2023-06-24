@@ -43,6 +43,7 @@ class Action_Controller:
             "蘑菇孢子": 0,
             "黑夜魔影": 0,
             "skill_4": 0,
+            "替身": 0,
         }
 
     @staticmethod
@@ -122,6 +123,16 @@ class Action_Controller:
         sleep(5)
 
     @synchronized
+    def fight_skill_替身_from_s21(self):
+        sleep(0.15)
+        self.p.controller.click(314, 508, tolerance=10)
+        sleep(0.17)
+        self.p.controller.click(528, 558, tolerance=10)
+        self.my_recent_actions_list.append(("fight_skill_替身_from_s21", time.time()))
+        self.skill_pp_dict["替身"] = self.skill_pp_dict["替身"] - 1
+        sleep(5)
+
+    @synchronized
     def run_from_s21(self):
         sleep(0.15)
         self.p.controller.click(522, 557, tolerance=15)
@@ -173,7 +184,7 @@ class Action_Controller:
         self.p.controller.click(iv_icon_x, iv_icon_y, tolerance=0)
         print("Clicking Pokemon Summary IV at %s, %s" % (iv_icon_x, iv_icon_y))
 
-    def iv_shiny_check_release(self, game_status):
+    def iv_shiny_check_release(self, game_status, release=True):
         def check_shiny():
             # ... 这里是检查Shiny的代码
             shiny_x_y_list = self.p.find_items(
@@ -231,7 +242,11 @@ class Action_Controller:
                 display=False,
             )
             print("IV 31 List:", iv_31_x_y_list)
-            return len(iv_31_x_y_list) >= 1
+            if len(iv_31_x_y_list) >= 1:
+                self.p.db.insert_31_iv_data()
+                return True
+            else:
+                return False
 
         def check_in_iv_page():
             iv_icon_top_l = (
@@ -280,7 +295,11 @@ class Action_Controller:
             is_iv31 = iv_31_future.result()
             is_in_iv_page = in_iv_page_future.result()
 
-            if not (is_shiny or is_secret_shiny or is_iv31) and is_in_iv_page == True:
+            if (
+                not (is_shiny or is_secret_shiny or is_iv31)
+                and is_in_iv_page == True
+                and release == True
+            ):
                 timestamp_str = time.strftime(
                     "%Y%m%d%H%M%S", time.localtime(time.time())
                 )
@@ -321,12 +340,15 @@ class Action_Controller:
                     self.p.db.insert_release_data()
                     sleep(0.4)  # 太快破电脑受不了
                     self.p.controller.click(680, 348)
+                    self.p.db.insert_release_data(release=True)
+
                 else:
                     self.p.ac.close_pokemon_summary(game_status)
+                    self.p.db.insert_release_data(release=False)
 
             else:
                 self.p.ac.close_pokemon_summary(game_status)
-                self.p.db.insert_31_iv_data()
+                self.p.db.insert_release_data(release=False)
 
     @synchronized
     def restart_from_hospital(self):
@@ -461,6 +483,7 @@ class Action_Controller:
             "蘑菇孢子": 24,
             "黑夜魔影": 18,
             "skill_4": 12,
+            "替身": 10,
         }
         self.first_sprit_hp = 100
 
@@ -480,6 +503,9 @@ class Action_Controller:
             return True
         elif self.first_sprit_hp <= 30:
             print("精灵血量过低，回家")
+            return True
+        elif self.skill_pp_dict["替身"] < 1:
+            print("替身 用完，回家")
             return True
 
 

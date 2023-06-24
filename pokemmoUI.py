@@ -33,7 +33,7 @@ class PokemmoUI:
             padding="10 10 10 10",
         )
         self.status_label.grid(column=0, row=0, columnspan=2, sticky=(tk.W, tk.E))
-        skills = ["点到为止", "甜甜香气", "蘑菇孢子", "黑夜魔影", "skill_4"]
+        skills = ["点到为止", "甜甜香气", "蘑菇孢子", "黑夜魔影", "skill_4", "替身"]
         self.skill_labels = {}
 
         for index, skill in enumerate(skills):
@@ -76,6 +76,7 @@ class PokemmoUI:
             "Sp_Attack_EV_Unova",
             "Speed_EV_Unova",
             "Unova_field",
+            "Hoenn_Ditto",
         ]
         for index, farming in enumerate(button_names):
             self.farming_buttons[farming] = tk.Button(
@@ -176,6 +177,7 @@ class PokemmoUI:
             "Sp_Attack_EV_Unova",
             "Speed_EV_Unova",
             "Unova_field",
+            "Hoenn_Ditto",
         ]:
             if (
                 other_farming != farming
@@ -238,6 +240,7 @@ class PokemmoUI:
             "Sp_Defend_EV_Unova",
             "Speed_EV_Unova",
             "Unova_field",
+            "Hoenn_Ditto",
         ]:
             if (
                 hasattr(self, f"{farming}_thread")

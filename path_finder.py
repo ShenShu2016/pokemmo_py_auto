@@ -6,6 +6,9 @@ from time import sleep
 from typing import TYPE_CHECKING
 
 from auto_strategy.Cerulean_City_FARMING import add_x_y_coords_offset_Cerulean_City
+from auto_strategy.Fallarbor_Town_Ditto_FARMING import (
+    add_x_y_coords_offset_Fallarbor_Town_Ditto,
+)
 from auto_strategy.FALLARBOR_TOWN_FARMING import add_x_y_coords_offset_FALLARBOR_TOWN
 from auto_strategy.Fuchsia_City_attack_EV import add_x_y_coords_offset_Fuchsia_City
 from auto_strategy.Mistralton_City_FARMING import add_x_y_coords_offset_Mistralton_City
@@ -251,7 +254,7 @@ class PathFinder:
         self.max_y = df["y_coords"].max() + 1
         self.grid = np.zeros((self.max_y, self.max_x), dtype=int)
         walkable_markers = (
-            [1, 2, 66]
+            [1, 2, 66, 4]
             if style in ["farming", "ignore_sprite", "left_right_farming"]
             else [3, 4, 112]
         )
@@ -269,6 +272,7 @@ class PathFinder:
             "Fuchsia_City": add_x_y_coords_offset_Fuchsia_City,
             "Opelucid_City": add_x_y_coords_offset_Opelucid_City,
             "Opelucid_City_Sp_Attack": add_x_y_coords_offset_Opelucid_City_Sp_Attack,
+            "Fallarbor_Town_Ditto": add_x_y_coords_offset_Fallarbor_Town_Ditto,
         }
 
         offset_func = offset_func_mapping.get(city, default_offset_func)
@@ -431,6 +435,7 @@ class PathFinder:
                     (2, 1, 150),
                     (2, 1, 61),
                     (2, 1, 141),
+                    (1, 98, 74),
                 ]
             ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
                 transport = "bike"

@@ -112,10 +112,22 @@ class SQLiteDB:
 
     def count_today_released(self):
         today = datetime.now().strftime("%Y-%m-%d")
-        query = "SELECT COUNT(*) FROM action WHERE release=1 AND timestamp >= ?"
+
+        query = "SELECT release, COUNT(*) FROM action WHERE release IN (0, 1) AND timestamp >= ? GROUP BY release"
         parameters = (today,)
+
         result = self.select_data(query, parameters)
-        return result[0][0]
+
+        counts = {}
+        for row in result:
+            release = row[0]
+            count = row[1]
+            counts[release] = count
+
+        count_release_1 = counts.get(1, 0)
+        count_release_0 = counts.get(0, 0)
+
+        return (count_release_1, count_release_0)
 
     def count_today_pokeball(self):
         today = datetime.now().strftime("%Y-%m-%d")
@@ -138,12 +150,12 @@ class SQLiteDB:
         value = (True, ball_type, self.p.encounter_start_time)
         self.insert_data("action", columns, value)
 
-    def insert_release_data(self):
+    def insert_release_data(self, release=True):
         """
         Inserts a boolean value and timestamp into the 'action' table of the database.
         """
         columns = ["release", "timestamp"]
-        value = (True, self.p.encounter_start_time)
+        value = (release, self.p.encounter_start_time)
         self.insert_data("action", columns, value)
 
     def insert_31_iv_data(self):

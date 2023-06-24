@@ -130,7 +130,7 @@ No,Pokemon,Hp,Gender,CatchRate,Types,CatchMethod,Chinese
 129,Magikarp,20,1,255,Water/,1,鲤鱼王
 130,Gyarados,95,1,45,Water/Flying,3,暴鲤龙
 131,Lapras,130,1,45,Water/Ice,3,拉普拉斯
-132,Ditto,48,0,35,Normal/,3,百变怪
+132,Ditto,48,0,35,Normal/,132,百变怪
 133,Eevee,55,1,45,Normal/,3,伊布
 134,Vaporeon,130,1,45,Water/,3,水伊布
 135,Jolteon,65,1,45,Electric/,3,雷伊布
@@ -649,4 +649,4 @@ No,Pokemon,Hp,Gender,CatchRate,Types,CatchMethod,Chinese
 648,Meloetta(a),100,0,3,Normal/Psychic,3,美洛耶塔
 649,Meloetta(p),100,0,3,Normal/Fighting,3,盖诺赛克特
 650,Genesect,71,0,3,Bug/Steel,3,蛋
-999,Shiny,71,0,3,Bug/Steel,3,闪光
+999,Shiny,71,0,3,Bug/Steel,2,闪光
