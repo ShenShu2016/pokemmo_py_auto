@@ -166,9 +166,9 @@ class Action_Controller:
         else:
             bag_arrow_page = self.p.find_items(
                 temp_BRG=self.p.bag_arrow_page_BRG,
-                top_l=(468, 346),
+                top_l=(455, 328),
                 threshold=0.98,
-                bottom_r=(495, 371),
+                bottom_r=(514, 361),
                 display=False,
                 max_matches=1,
             )
@@ -197,6 +197,8 @@ class Action_Controller:
                         sleep(3)
                         break
                     raise Exception("找不到球")
+            else:
+                raise Exception("找不翻页按钮")
 
     @synchronized
     def close_pokemon_summary(self, game_status):
@@ -286,11 +288,11 @@ class Action_Controller:
 
         def check_in_iv_page():
             iv_icon_top_l = (
-                pokemon_summary_sign_mid_x - 393,
-                pokemon_summary_sign_mid_y - 13,
+                pokemon_summary_sign_mid_x - 400,
+                pokemon_summary_sign_mid_y - 15,
             )
             iv_icon_bottom_r = (
-                pokemon_summary_sign_mid_x - 373,
+                pokemon_summary_sign_mid_x - 263,
                 pokemon_summary_sign_mid_y + 15,
             )  # Round down
             iv_page_list = self.p.find_items(
@@ -301,6 +303,9 @@ class Action_Controller:
                 display=False,
                 max_matches=1,
             )
+            result = len(iv_page_list) >= 1
+            if not result:
+                print("Not in IV page!")
             return len(iv_page_list) >= 1
 
         if game_status["check_pokemon_summary"][0]:
@@ -331,6 +336,7 @@ class Action_Controller:
             is_iv31 = iv_31_future.result()
             is_in_iv_page = in_iv_page_future.result()
 
+            print("is_in_iv_page", is_in_iv_page == True)
             if (
                 not (is_shiny or is_secret_shiny or is_iv31)
                 and is_in_iv_page == True
@@ -353,12 +359,12 @@ class Action_Controller:
                 sleep(0.1)
 
                 confirm_release_area_top_l = (
-                    pokemon_summary_sign_mid_x - 454,
-                    pokemon_summary_sign_mid_y + 143,
+                    pokemon_summary_sign_mid_x - 460,
+                    pokemon_summary_sign_mid_y + 122,
                 )  # Round up
                 confirm_release_area_bottom_r = (
-                    pokemon_summary_sign_mid_x - 353,
-                    pokemon_summary_sign_mid_y + 168,
+                    pokemon_summary_sign_mid_x - 230,
+                    pokemon_summary_sign_mid_y + 227,
                 )  # Round up
 
                 confirm_release_x_y_list = self.p.find_items(
@@ -373,7 +379,6 @@ class Action_Controller:
                 if len(confirm_release_x_y_list) == 1:
                     # Click the first two elements of the tuple (x and y coords).
                     self.p.controller.click_center(confirm_release_x_y_list[0])
-                    self.p.db.insert_release_data()
                     sleep(0.4)  # 太快破电脑受不了
                     self.p.controller.click(680, 348)
                     self.p.db.insert_release_data(release=True)
@@ -492,7 +497,7 @@ class Action_Controller:
             (2, 1, 141),
         ]:
             self.p.controller.key_press("8")
-            sleep(3)
+            sleep(5)
         else:
             raise Exception("不在open air")
         coords_status = self.p.get_coords()

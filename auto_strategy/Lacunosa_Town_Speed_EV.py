@@ -29,8 +29,7 @@ class Farming_Lacunosa_Town_Speed:
     def leave_pc_center_and_go_farm(self):
         self.p.pf.leave_pc_center(city=self.city)
         self.p.pf.go_somewhere(
-            city=self.city,
-            style="farming",  # 编号66
+            city=self.city, style="ignore_sprite", end_point=(184, 625)  # 编号66
         )
 
     def teleport_and_heal(self):
@@ -87,6 +86,7 @@ class Farming_Lacunosa_Town_Speed:
                 elif (
                     game_status["return_status"] == 21
                     and battle_status.get("allChecked") == True
+                    and battle_status.get("enemy_count") > 1
                 ):
                     self.p.ac.multi_fight_skill_1_from_s21()
 

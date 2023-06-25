@@ -321,7 +321,7 @@ class PathFinder:
                     start=start_point, end=end_point, end_face_dir=end_face_dir
                 )  #! y在前面
                 print("-------------------------------------------")
-                print("self.path", self.path, "\033[0m")
+                # print("self.path", self.path, "\033[0m")
                 self.pf_move(
                     end_face_dir=end_face_dir,
                     transport=transport,
