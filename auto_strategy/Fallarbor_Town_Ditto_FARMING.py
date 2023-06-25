@@ -52,11 +52,12 @@ class Farming_Fallarbor_Town_Ditto:
     def teleport_and_heal(self):
         self.p.ac.use_dig()
         self.go_outside()
+        sleep(3)
         self.p.ac.use_teleport()
         self.p.ac.talk_to_nurse(city=self.city)  # teleport 就直接面对护士了
 
     def go_outside(self):
-        self.p.pf.go_somewhere(end_point=(-11, 6), city=self.city, transport="walk")
+        self.p.pf.go_somewhere(end_point=(6, -11), city=self.city, transport="walk")
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
@@ -141,7 +142,7 @@ class Farming_Fallarbor_Town_Ditto:
                             battle_status.get("enemy_1_hp_pct") < 20
                             and battle_status.get("enemy_1_sleeping") == True
                         ):
-                            self.p.ac.throw_pokeball()
+                            self.p.ac.throw_pokeball(pokeball_type="repeat_ball")
                     elif battle_status.get("enemy_1_info")["CatchMethod"] == 2:
                         if battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()

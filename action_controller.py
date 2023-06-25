@@ -140,16 +140,18 @@ class Action_Controller:
         print("Running from battle")
 
     @synchronized
-    def throw_pokeball(self, pokeball_type="pokeball"):
+    def throw_pokeball(self, pokeball_type="poke_ball"):
         sleep(0.2)
         self.p.controller.click(527, 506, tolerance=15)  # 点击背包
         sleep(0.3)
+        attr_name = f"{pokeball_type}_BRG"
+        temp_BRG = getattr(self.p, attr_name, None)
         if (
             len(
                 self.p.find_items(
-                    temp_BRG=self.p.poke_ball_BRG,
-                    top_l=(521, 395),
-                    bottom_r=(563, 438),
+                    temp_BRG=temp_BRG,
+                    top_l=(516, 372),
+                    bottom_r=(574, 480),
                     max_matches=1,
                     threshold=0.99,
                 )
@@ -158,9 +160,43 @@ class Action_Controller:
         ):
             print("扔球")
             self.p.controller.key_press("z", 1)
-            self.p.db.insert_ball_throw_data("poke_ball")
-            print("Throwing Pokeball")
+            self.p.db.insert_ball_throw_data(pokeball_type)
+            print(f"Throwing {pokeball_type}")
             sleep(3)
+        else:
+            bag_arrow_page = self.p.find_items(
+                temp_BRG=self.p.bag_arrow_page_BRG,
+                top_l=(468, 346),
+                threshold=0.98,
+                bottom_r=(495, 371),
+                display=False,
+                max_matches=1,
+            )
+            if len(bag_arrow_page) > 0:
+                for i in range(3):
+                    self.p.controller.key_press("d", wait=0.2)
+                self.p.controller.key_press("a")
+
+                # 寻找指定的球
+                for i in range(15):
+                    ball_type_pic = self.p.find_items(
+                        temp_BRG=temp_BRG,
+                        top_l=(516, 372),
+                        bottom_r=(574, 480),
+                        max_matches=1,
+                        threshold=0.99,
+                    )
+                    if len(ball_type_pic) == 0:
+                        print("按s")
+                        self.p.controller.key_press("s", wait=0.2)
+                        continue
+                    elif len(ball_type_pic) == 1:
+                        print("扔球")
+                        self.p.controller.key_press("z", wait=5)  # 扔球
+                        self.p.db.insert_ball_throw_data(pokeball_type)
+                        sleep(3)
+                        break
+                    raise Exception("找不到球")
 
     @synchronized
     def close_pokemon_summary(self, game_status):
@@ -483,7 +519,7 @@ class Action_Controller:
             "蘑菇孢子": 24,
             "黑夜魔影": 18,
             "skill_4": 12,
-            "替身": 10,
+            "替身": 16,
         }
         self.first_sprit_hp = 100
 

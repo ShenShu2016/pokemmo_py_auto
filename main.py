@@ -438,28 +438,61 @@ if __name__ == "__main__":
     pokeMMO = PokeMMO()
     sleep(1)
     pokeMMO.start_ui()
+    ball_type = "repeat_ball"
 
     while True:
-        game_states = pokeMMO.get_gs()
-        if game_states["check_pokemon_summary"][0]:
-            coords = game_states["check_pokemon_summary"][1][0]
-            pokemon_summary_sign_mid_x = (coords[0] + coords[2]) / 2
-            pokemon_summary_sign_mid_y = (coords[1] + coords[3]) / 2
-            iv_icon_top_l = (
-                pokemon_summary_sign_mid_x - 393,
-                pokemon_summary_sign_mid_y - 13,
+        # 先判断是不是我要的球，是的话直接扔
+        # 不是的话，找箭头，找到箭头，右边3下左边一下，然后确定是球页面，然后找球
+        attr_name = f"{ball_type}_BRG"
+        temp_BRG = getattr(pokeMMO, attr_name, None)
+        if (
+            len(
+                pokeMMO.find_items(
+                    temp_BRG=temp_BRG,
+                    top_l=(516, 372),
+                    bottom_r=(574, 480),
+                    max_matches=1,
+                    threshold=0.99,
+                )
             )
-            iv_icon_bottom_r = (
-                pokemon_summary_sign_mid_x - 373,
-                pokemon_summary_sign_mid_y + 15,
-            )  # Round down
-            iv_page_list = pokeMMO.find_items(
-                temp_BRG=pokeMMO.sprite_iv_page_BRG,
-                top_l=iv_icon_top_l,
-                threshold=0.97,
-                bottom_r=iv_icon_bottom_r,
+            > 0
+        ):
+            print("扔球")
+            pokeMMO.controller.key_press("z", 1)
+            pokeMMO.db.insert_ball_throw_data(ball_type)
+            print(f"Throwing {ball_type}")
+            sleep(3)
+        else:
+            bag_arrow_page = pokeMMO.find_items(
+                temp_BRG=pokeMMO.bag_arrow_page_BRG,
+                top_l=(468, 346),
+                threshold=0.98,
+                bottom_r=(495, 371),
                 display=False,
                 max_matches=1,
             )
-            print(iv_page_list)
-        sleep(3)
+            if len(bag_arrow_page) > 0:
+                for i in range(3):
+                    pokeMMO.controller.key_press("d", wait=0.2)
+                pokeMMO.controller.key_press("a")
+
+                # 寻找指定的球
+                for i in range(15):
+                    ball_type_pic = pokeMMO.find_items(
+                        temp_BRG=temp_BRG,
+                        top_l=(516, 372),
+                        bottom_r=(574, 480),
+                        max_matches=1,
+                        threshold=0.99,
+                    )
+                    if len(ball_type_pic) == 0:
+                        print("按s")
+                        pokeMMO.controller.key_press("s", wait=0.2)
+                        continue
+                    elif len(ball_type_pic) == 1:
+                        print("扔球")
+                        pokeMMO.controller.key_press("z", wait=5)  # 扔球
+                        break
+                    raise Exception("找不到球")
+
+        sleep(5)
