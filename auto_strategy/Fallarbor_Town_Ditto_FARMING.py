@@ -86,6 +86,7 @@ class Farming_Fallarbor_Town_Ditto:
                     if farming_times >= repeat_times:
                         self.p.ac.use_dig()
                         self.go_outside()
+                        self.teleport_and_heal()
 
                         return
                     self.teleport_and_heal()

@@ -393,7 +393,7 @@ class PokeMMO:
     def Hoenn_Ditto_farming(self):
         print("Hoenn_Ditto_farming started")
         while self.auto_strategy_flag:
-            Farming_Fallarbor_Town_Ditto(self).run(repeat_times=999)
+            Farming_Fallarbor_Town_Ditto(self).run(repeat_times=5)
 
     def Hoenn_farming(self):
         print("Hoenn_farming started")
