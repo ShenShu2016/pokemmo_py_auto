@@ -24,7 +24,13 @@ class Controller:
         sleep(wait)
 
     def click(
-        self, x=None, y=None, tolerance=0, back_to_original=False, wait: float = 0
+        self,
+        x=None,
+        y=None,
+        tolerance=0,
+        back_to_original=False,
+        wait: float = 0,
+        button="left",
     ):
         """Click at the current mouse position or at a specific position if provided."""
         # Store the original mouse position
@@ -39,16 +45,18 @@ class Controller:
             # Wait for a moment
             sleep(0.05)
             # Click
-            self.window.click_input(coords=(x, y))
+            self.window.click_input(coords=(x, y), button=button)
             sleep(wait)
         else:
-            self.window.click_input()
+            self.window.click_input(button=button)
 
         # Move the mouse back to the original position
         if back_to_original and original_position is not None:
             win32api.SetCursorPos(original_position)
 
-    def click_center(self, point, back_to_original=False, wait: float = 0):
+    def click_center(
+        self, point, back_to_original=False, wait: float = 0, button="left"
+    ):
         """Click at the center of the given coordinates."""
         # Store the original mouse position
         original_position = win32api.GetCursorPos() if back_to_original else None
@@ -67,7 +75,9 @@ class Controller:
             # Wait for a moment
             sleep(0.05)
             # Click
-            self.window.click_input(coords=(int(center_x), int(center_y)))
+            self.window.click_input(
+                coords=(int(center_x), int(center_y)), button=button
+            )
 
             # Move the mouse back to the original position
             if back_to_original and original_position is not None:
@@ -116,12 +126,15 @@ class Controller:
         self.window.set_focus()
         keyboard.send_keys("{" + key + " up}")
 
+    def send_keys(self, keys: str, wait: float = 0):
+        """Send keys at the current cursor position."""
+        self.window.set_focus()
+        # Send keys
+        keyboard.send_keys(keys)
+        sleep(wait)
+
 
 if __name__ == "__main__":
     from main import PokeMMO
 
     pokeMMO = PokeMMO()
-
-    controller = Controller(pokeMMO.handle)
-    controller.key_press("a", 0.5)
-    controller.key_press("d", 0.5)

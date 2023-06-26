@@ -77,6 +77,7 @@ class PokemmoUI:
             "Speed_EV_Unova",
             "Unova_field",
             "Hoenn_Ditto",
+            "Mail_Ditto",
         ]
         for index, farming in enumerate(button_names):
             self.farming_buttons[farming] = tk.Button(
@@ -178,6 +179,7 @@ class PokemmoUI:
             "Speed_EV_Unova",
             "Unova_field",
             "Hoenn_Ditto",
+            "Mail_Ditto",
         ]:
             if (
                 other_farming != farming
@@ -241,6 +243,7 @@ class PokemmoUI:
             "Speed_EV_Unova",
             "Unova_field",
             "Hoenn_Ditto",
+            "Mail_Ditto",
         ]:
             if (
                 hasattr(self, f"{farming}_thread")

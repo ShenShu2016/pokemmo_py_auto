@@ -282,6 +282,8 @@ class PokeMMO:
             img_BRG = img_BRG[
                 int(top_l[1]) : int(bottom_r[1]), int(top_l[0]) : int(bottom_r[0])
             ]
+        else:
+            top_l, bottom_r = (0, 0), (img_BRG.shape[1], img_BRG.shape[0])
 
         # Perform template matching
         result = cv2.matchTemplate(img_BRG, temp_BRG, cv2.TM_CCORR_NORMED)
@@ -394,6 +396,11 @@ class PokeMMO:
         print("Hoenn_Ditto_farming started")
         while self.auto_strategy_flag:
             Farming_Fallarbor_Town_Ditto(self).run(repeat_times=5)
+
+    def Mail_Ditto_farming(self):
+        print("Mail_ditto_farming started")
+        # while self.auto_strategy_flag:
+        Mail_Ditto(self, to_send="Lanbaiaa", total_to_send=60).run()
 
     def Hoenn_farming(self):
         print("Hoenn_farming started")
