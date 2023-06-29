@@ -31,6 +31,7 @@ class Farming_Lacunosa_Town_Speed:
         self.p.pf.go_somewhere(
             city=self.city, style="ignore_sprite", end_point=(184, 625)  # 编号66
         )
+        sleep(2)
 
     def teleport_and_heal(self):
         self.p.ac.use_teleport()
