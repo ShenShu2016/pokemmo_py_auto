@@ -143,7 +143,7 @@ class Farming_Fallarbor_Town_Ditto:
                             battle_status.get("enemy_1_hp_pct") < 20
                             and battle_status.get("enemy_1_sleeping") == True
                         ):
-                            self.p.ac.throw_pokeball(pokeball_type="repeat_ball")
+                            self.p.ac.throw_pokeball(pokeball_type="dark_ball")
                     elif battle_status.get("enemy_1_info")["CatchMethod"] == 2:
                         if battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()

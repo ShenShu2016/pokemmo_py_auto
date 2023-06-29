@@ -6,6 +6,7 @@
     "battle_in_progress_path": "asserts/template\\battle_in_progress.png",
     "battle_option_path": "asserts/template\\battle_option.png",
     "confirm_release_path": "asserts/template\\confirm_release.png",
+    "dark_ball_path": "asserts/template\\dark_ball.png",
     "enemy_female_path": "asserts/template\\enemy_female.png",
     "enemy_male_path": "asserts/template\\enemy_male.png",
     "great_ball_path": "asserts/template\\great_ball.png",

@@ -37,9 +37,9 @@ class Mail_Ditto:
         if len(coords_list) >= count:
             print("ready to mail")
             for coords in coords_list[:count]:
-                self.p.controller.click_center(coords, wait=0.2)
+                self.p.controller.click_center(coords, wait=0.1)
 
-            sleep(0.5)
+            sleep(0.2)
             print("正在右键")
             self.p.controller.click_center(coords, button="right")
             sleep(0.2)
@@ -68,18 +68,18 @@ class Mail_Ditto:
             bottom_r=(1062, 660),
         )
         if len(result_list) == 1:
-            self.p.controller.click(x=868, y=601, wait=0.5)
+            self.p.controller.click(x=868, y=601, wait=0.2)
             # 这个时候光标应该移动到了收件人的输入框
-            self.p.controller.send_keys(self.to_send, wait=0.5)
+            self.p.controller.send_keys(self.to_send, wait=0.2)
 
-            self.p.controller.click(x=868, y=601, wait=0.5)
+            self.p.controller.click(x=868, y=601, wait=0.2)
             # 这个时候光标应该移动到了内容的输入框
             new_content = f"{5*(i)+1}to{5*(i)+5}" + self.content
-            self.p.controller.send_keys(new_content, wait=0.5)
-            self.p.controller.click(x=868, y=601, wait=0.5)
+            self.p.controller.send_keys(new_content, wait=0.2)
+            self.p.controller.click(x=868, y=601, wait=0.2)
 
     def close_email(self):
-        self.p.controller.click(x=923, y=151, wait=0.5)
+        self.p.controller.click(x=923, y=151, wait=0.2)
 
     def run(self):
         divided_value = self.total_to_send // 5  # 除以5的结果
