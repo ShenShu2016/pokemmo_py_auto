@@ -92,13 +92,16 @@ class Action_Controller:
         print("Using Earthquake")
 
     @synchronized
-    def fight_skill_2_from_s21(self):  # Spore
+    def fight_skill_2_from_s21(self, skill="蘑菇孢子"):  # Spore
         sleep(0.15)
         self.p.controller.click(314, 508, tolerance=10)
         sleep(0.17)
         self.p.controller.click(526, 508, tolerance=10)
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
-        self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
+        if skill == "蘑菇孢子":
+            self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
+        elif skill == "借助":
+            self.skill_pp_dict["借助"] = self.skill_pp_dict["借助"] - 1
         sleep(5)
         print("Using Spore")
 
@@ -525,6 +528,7 @@ class Action_Controller:
             "黑夜魔影": 18,
             "skill_4": 12,
             "替身": 16,
+            "借助": 32,
         }
         self.first_sprit_hp = 100
 
@@ -547,6 +551,9 @@ class Action_Controller:
             return True
         elif self.skill_pp_dict["替身"] < 1:
             print("替身 用完，回家")
+            return True
+        elif self.skill_pp_dict["借助"] < 1:
+            print("借助 用完，回家")
             return True
 
 

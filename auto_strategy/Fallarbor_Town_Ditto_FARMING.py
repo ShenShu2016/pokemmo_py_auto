@@ -93,13 +93,13 @@ class Farming_Fallarbor_Town_Ditto:
                     self.leave_pc_center_and_go_farm()
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
-                if (
-                    coords_status["x_coords"],
-                    coords_status["y_coords"],
-                ) in self.farming_coords:
-                    # Trigger the desired operation
-                    self.p.ac.use_sweet_sent()
-                    # pass
+                # if (
+                #     coords_status["x_coords"],
+                #     coords_status["y_coords"],
+                # ) in self.farming_coords:
+                #     # Trigger the desired operation
+                #     self.p.ac.use_sweet_sent()
+                #     # pass
 
                 self.p.pf.go_somewhere(
                     end_point=None,
@@ -119,31 +119,43 @@ class Farming_Fallarbor_Town_Ditto:
                     game_status["return_status"] == 21
                     and battle_status.get("enemy_1_info") is not None
                 ):
-                    if (
-                        battle_status.get("enemy_1_info")["No"]
-                        in [
-                            293,
-                            294,
-                        ]
-                        or self.p.ac.is_go_pc()
-                    ):  # 碰到别的东西逃跑
+                    if battle_status.get("enemy_1_info")["No"] in [
+                        293,
+                        294,
+                    ]:  # 碰到别的东西逃跑
                         self.p.ac.run_from_s21()
                     elif battle_status.get("enemy_1_info")["CatchMethod"] == 132:
-                        if self.is替身 == False:
-                            self.p.ac.fight_skill_替身_from_s21()
-                            self.is替身 = True
+                        if battle_status.get(
+                            "enemy_1_hp_pct"
+                        ) < 20 and battle_status.get("enemy_1_sleeping"):
+                            self.p.ac.throw_pokeball(pokeball_type="dark_ball")
+                        elif self.p.ac.is_go_pc():
+                            self.p.ac.run_from_s21()
+
                         elif battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()
                         elif (
                             battle_status.get("enemy_1_hp_pct") < 20
                             and battle_status.get("enemy_1_sleeping") == False
                         ):
-                            self.p.ac.fight_skill_2_from_s21()
-                        elif (
-                            battle_status.get("enemy_1_hp_pct") < 20
-                            and battle_status.get("enemy_1_sleeping") == True
-                        ):
-                            self.p.ac.throw_pokeball(pokeball_type="dark_ball")
+                            self.p.ac.fight_skill_2_from_s21(skill="借助")
+
+                    # elif battle_status.get("enemy_1_info")["CatchMethod"] == 132:
+                    #     if self.is替身 == False:
+                    #         self.p.ac.fight_skill_替身_from_s21()
+                    #         self.is替身 = True
+                    #     elif battle_status.get("enemy_1_hp_pct") >= 20:
+                    #         self.p.ac.fight_skill_1_from_s21()
+                    #     elif (
+                    #         battle_status.get("enemy_1_hp_pct") < 20
+                    #         and battle_status.get("enemy_1_sleeping") == False
+                    #     ):
+                    #         self.p.ac.fight_skill_2_from_s21()
+                    #     elif (
+                    #         battle_status.get("enemy_1_hp_pct") < 20
+                    #         and battle_status.get("enemy_1_sleeping") == True
+                    #     ):
+                    #         self.p.ac.throw_pokeball(pokeball_type="dark_ball")
                     elif battle_status.get("enemy_1_info")["CatchMethod"] == 2:
                         if battle_status.get("enemy_1_hp_pct") >= 20:
                             self.p.ac.fight_skill_1_from_s21()
