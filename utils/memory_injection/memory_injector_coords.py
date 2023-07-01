@@ -122,7 +122,7 @@ class MemoryInjector_Coords:
         while True:
             self.aob_address_list = pattern_scan_all(
                 handle=self.pm.process_handle,
-                pattern=b"\\x0F\\xBE.\\x10.\\x0F\\xB6.\\x12",
+                pattern=b"\\x0F\\xBE.\\x10.\\x0F\\xB6.\\x12",  # 44 0FBE ?? 10 0FBE ?? 11
                 return_multiple=True,
             )
             # print("aob_address_list:", self.aob_address_list)
