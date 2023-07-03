@@ -532,7 +532,7 @@ class Action_Controller:
         }
         self.first_sprit_hp = 100
 
-    def is_go_pc(self):
+    def is_go_pc(self, ignore_hp=False):
         """判断是否需要回城补给"""
         if self.skill_pp_dict["点到为止"] < 5:
             print("点到为止 用完，回家")
@@ -546,7 +546,7 @@ class Action_Controller:
         elif self.skill_pp_dict["黑夜魔影"] < 1:
             print("黑夜魔影 用完，回家")
             return True
-        elif self.first_sprit_hp <= 30:
+        elif self.first_sprit_hp <= 30 and not ignore_hp:
             print("精灵血量过低，回家")
             return True
         elif self.skill_pp_dict["替身"] < 1:

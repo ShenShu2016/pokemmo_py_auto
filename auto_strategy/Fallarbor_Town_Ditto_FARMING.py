@@ -81,7 +81,7 @@ class Farming_Fallarbor_Town_Ditto:
                 )
                 if game_status.get("check_pokemon_summary")[0]:
                     self.p.ac.iv_shiny_check_release(game_status)
-                if self.p.ac.is_go_pc():
+                if self.p.ac.is_go_pc(ignore_hp=True):
                     farming_times += 1
                     if farming_times >= repeat_times:
                         self.p.ac.use_dig()
@@ -129,7 +129,7 @@ class Farming_Fallarbor_Town_Ditto:
                             "enemy_1_hp_pct"
                         ) < 20 and battle_status.get("enemy_1_sleeping"):
                             self.p.ac.throw_pokeball(pokeball_type="dark_ball")
-                        elif self.p.ac.is_go_pc():
+                        elif self.p.ac.is_go_pc(ignore_hp=True):
                             self.p.ac.run_from_s21()
 
                         elif battle_status.get("enemy_1_hp_pct") >= 20:
