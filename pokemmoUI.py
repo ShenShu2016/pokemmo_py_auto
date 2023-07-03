@@ -33,7 +33,7 @@ class PokemmoUI:
             padding="10 10 10 10",
         )
         self.status_label.grid(column=0, row=0, columnspan=2, sticky=(tk.W, tk.E))
-        skills = ["点到为止", "甜甜香气", "蘑菇孢子", "黑夜魔影", "skill_4", "替身"]
+        skills = ["点到为止", "甜甜香气", "蘑菇孢子", "黑夜魔影", "skill_4", "替身", "借助"]
         self.skill_labels = {}
 
         for index, skill in enumerate(skills):
@@ -42,7 +42,7 @@ class PokemmoUI:
             )
             self.skill_labels[skill].grid(
                 column=index % 2,
-                row=7 + index // 2,
+                row=13 + index // 2,
                 sticky=(tk.W, tk.E),
             )
         self.xy_label = ttk.Label(
@@ -89,7 +89,7 @@ class PokemmoUI:
             )
             self.farming_buttons[farming].grid(
                 column=index % 2,
-                row=10 + index // 2,
+                row=7 + index // 2,
                 sticky=(tk.W, tk.E, tk.S),
                 padx=2,
                 pady=2,

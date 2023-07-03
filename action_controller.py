@@ -44,6 +44,7 @@ class Action_Controller:
             "黑夜魔影": 0,
             "skill_4": 0,
             "替身": 0,
+            "借助": 0,
         }
 
     @staticmethod
