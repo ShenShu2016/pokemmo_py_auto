@@ -400,7 +400,7 @@ class PokeMMO:
     def Mail_Ditto_farming(self):
         print("Mail_ditto_farming started")
         # while self.auto_strategy_flag:
-        Mail_Ditto(self, to_send="Lanbaiaa", total_to_send=60).run()
+        Mail_Ditto(self, to_send="AAcxkAA", total_to_send=60).run()
 
     def Hoenn_farming(self):
         print("Hoenn_farming started")

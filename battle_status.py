@@ -62,13 +62,13 @@ class BattleStatus:
             self.p.set_encounter_start_time()
             hp_BRG_x_y_list = self.p.find_items(
                 temp_BRG=self.p.hp_BRG,
-                threshold=0.995,
+                threshold=0.985,
                 max_matches=5,
                 top_l=(0, 70),
                 bottom_r=(1080, 170),
                 img_BRG=self.img_BRG,
             )
-            # print(f"hp_BRG_x_y_list: {hp_BRG_x_y_list}")
+            print(f"找到的敌人数量: {len(hp_BRG_x_y_list)}")
             if not hp_BRG_x_y_list:
                 return
             self.battle_status_dict["enemy_count"] = len(hp_BRG_x_y_list)

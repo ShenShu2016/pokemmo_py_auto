@@ -260,7 +260,7 @@ class MemoryInjector_Coords:
             return True
         else:
             print("交通状态异常")
-            return False
+            return True  # 现在没办法判断交通状态，所以直接返回True
 
     def read_data(self):
         data = self.pm.read_bytes(self.TR, 4)

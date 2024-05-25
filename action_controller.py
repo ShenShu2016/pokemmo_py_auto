@@ -333,7 +333,9 @@ class Action_Controller:
                 shiny_future = executor.submit(check_shiny)
                 secret_shiny_future = executor.submit(check_secret_shiny)
                 iv_31_future = executor.submit(check_iv_31)
-                in_iv_page_future = executor.submit(check_in_iv_page)  # 用于判断是否在IV页面
+                in_iv_page_future = executor.submit(
+                    check_in_iv_page
+                )  # 用于判断是否在IV页面
 
             is_shiny = shiny_future.result()
             is_secret_shiny = secret_shiny_future.result()
@@ -468,12 +470,18 @@ class Action_Controller:
 
     @synchronized
     def use_surf(self):
-        self.p.controller.key_press("z", 1.5)
+        self.p.controller.key_press("z", 3)
 
-        for i in range(10):
-            if self.p.get_coords()["transport"] in [1, 11, 75, 65, 7]:
-                return True
-            sleep(0.1)
+        # for i in range(10):
+        #     if self.p.get_coords()["transport"] in [
+        #         1,
+        #         11,
+        #         75,
+        #         65,
+        #         7,
+        #     ]:  # transport 现在完全没法用
+        #         return True
+        #     sleep(0.1)
 
         raise Exception("Not in water")
 
