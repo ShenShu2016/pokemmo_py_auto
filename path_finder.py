@@ -85,7 +85,9 @@ class PathFinder:
                         face_dir = self.get_face_direction(parent[curr], curr)
                         path.append((curr[0], curr[1], face_dir))
                     else:
-                        path.append((curr[0], curr[1], current_face_dir))  # 起点使用初始方向
+                        path.append(
+                            (curr[0], curr[1], current_face_dir)
+                        )  # 起点使用初始方向
                     curr = parent[curr]
 
                 path = path[::-1]  # 注意这里，我们先反转路径，然后再处理转向
@@ -161,7 +163,12 @@ class PathFinder:
         path,
         transport="bike",
     ):
-        transport_speed = {"bike": 0.075, "walk": 0.25, "run": 0.16, "surf": 0.1}
+        transport_speed = {
+            "bike": 0.045,
+            "walk": 0.25,
+            "run": 0.16,
+            "surf": 0.1,
+        }  # 成反比,延迟越小代表速度越快
         start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
         turn_delay = 0.03  # 原地转向的延迟时间
         coords_status = self.p.get_coords()
@@ -195,7 +202,7 @@ class PathFinder:
                         current_face_dir = face_dir
                 elif keys_and_delays and keys_and_delays[-1][0] == key:
                     delay = round(
-                        max(0.13, keys_and_delays[-1][1] + transport_speed[transport]),
+                        max(0, keys_and_delays[-1][1] + transport_speed[transport]),
                         4,
                     )
                     keys_and_delays[-1] = (
@@ -204,7 +211,7 @@ class PathFinder:
                     )
                 else:
                     delay = round(
-                        max(0.13, transport_speed[transport] + start_delay[transport]),
+                        max(0.00, transport_speed[transport] + start_delay[transport]),
                         4,
                     )
                     keys_and_delays.append((key, delay))
@@ -345,6 +352,7 @@ class PathFinder:
                 city_info[city]["112_nurse"][0],
             ),
             end_face_dir=1,
+            transport="walk",
             pc=True,
         )
         print("到达了护士那里")
@@ -358,6 +366,7 @@ class PathFinder:
                 city_info[city]["112_out"][0][0],
             ),
             end_face_dir=0,
+            transport="walk",
             pc=True,
         )
         sleep(0.2)
@@ -376,7 +385,8 @@ class PathFinder:
         offset_func=None,
         min_x=None,
         min_y=None,
-    ):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3
+    ):  # 面朝方向移动 w 方向是 s : 0，a: 2, d: 3\
+        print("pf_move start, transport:", transport)
         self.stop_move_threads = False  # 全局标识，用来控制线程的运行/停止
 
         def walk():
@@ -392,7 +402,9 @@ class PathFinder:
                     # sleep(0.1)
                 if transport == "run":
                     self.p.controller.key_up("x")
-            self.stop_move_threads = True  # walk结束后，将全局标识设置为True，用来停止check线程
+            self.stop_move_threads = (
+                True  # walk结束后，将全局标识设置为True，用来停止check线程
+            )
 
         def check():
             while not self.stop_move_threads:  # 使用全局标识来控制循环
@@ -406,6 +418,7 @@ class PathFinder:
                 if current_position not in self.path:
                     print("self.path", self.path, "current_position", current_position)
                     print("走错路了")  # 如果发现位置不在self.path中，打印消息
+                    # sleep(0.1)
                     self.stop_move_threads = True  # 设置全局标识，用来停止walk线程
                     break
                 if current_position == self.path[-1]:  # 如果位置等于目标位置
@@ -414,41 +427,49 @@ class PathFinder:
                 sleep(0.01)
 
         coords_status = self.p.get_coords()
+        if coords_status["transport"] != "bike" and transport == "bike":
+            self.p.ac.use_bike()
+        elif coords_status["transport"] != "surf" and transport == "surf":
+            self.p.ac.use_surf()
+        elif coords_status["transport"] != "run" and transport == "run":
+            pass
+        elif coords_status["transport"] != "walk" and transport == "walk":
+            pass
 
-        if transport == None:
-            if (
-                coords_status["map_number_tuple"][2] == 50
-                or coords_status["map_number_tuple"]
-                in [
-                    (1, 14, 76),
-                    (1, 4, 74),
-                    (2, 0, 107),
-                    (2, 1, 81),
-                    (0, 3, 3),
-                    (0, 33, 3),
-                    (0, 0, 24),
-                    (0, 7, 3),
-                    (2, 0, 120),
-                    (2, 0, 132),
-                    (2, 1, 99),
-                    (2, 1, 112),
-                    (2, 1, 150),
-                    (2, 1, 61),
-                    (2, 1, 141),
-                    (1, 98, 74),
-                ]
-            ) and coords_status["transport"] not in [1, 11, 65, 75, 7]:
-                transport = "bike"
-                if coords_status["transport"] not in [10, 74, 6, 2]:
-                    self.p.controller.key_press("3", 0.1)
+        # if transport == None:  # 这个transport 是pf_move的参数
+        #     if (
+        #         coords_status["map_number_tuple"][2] == 50
+        #         or coords_status["map_number_tuple"]
+        #         in [
+        #             (1, 14, 76),
+        #             (1, 4, 74),
+        #             (2, 0, 107),
+        #             (2, 1, 81),
+        #             (0, 3, 3),
+        #             (0, 33, 3),
+        #             (0, 0, 24),
+        #             (0, 7, 3),
+        #             (2, 0, 120),
+        #             (2, 0, 132),
+        #             (2, 1, 99),
+        #             (2, 1, 112),
+        #             (2, 1, 150),
+        #             (2, 1, 61),
+        #             (2, 1, 141),
+        #             (1, 98, 74),
+        #         ]
+        #     ) and coords_status["transport"] != "surf":
+        #         transport = "bike"
+        #         if coords_status["transport"] != "bike":
+        #             self.p.ac.use_bike()
 
-            elif coords_status["transport"] in [1, 11, 75, 65, 7]:
-                transport = "surf"
-            else:
-                transport = "run"
-        elif transport == "walk" or transport == "run":
-            if coords_status["transport"] in [10, 74, 6, 2]:
-                self.p.controller.key_press("3", 0.1)
+        #     elif coords_status["transport"] == "surf":
+        #         transport = "surf"
+        #     else:
+        #         transport = "run"
+        # elif transport == "walk" or transport == "run":
+        #     if coords_status["transport"] == "bike":
+        #         self.p.ac.use_bike()
 
         self.keys_and_delays = self.path_to_keys_and_delays(
             self.path, transport=transport

@@ -327,9 +327,9 @@ class Action_Controller:
                 pokemon_summary_sign_mid_x + 33,
                 pokemon_summary_sign_mid_y + 152,
             )  # Round down
-            sleep(0.5)
+            sleep(0.5)  # should be 0.5
             img_BRG = self.p.get_img_BRG()
-            with ThreadPoolExecutor(max_workers=3) as executor:
+            with ThreadPoolExecutor(max_workers=4) as executor:
                 shiny_future = executor.submit(check_shiny)
                 secret_shiny_future = executor.submit(check_secret_shiny)
                 iv_31_future = executor.submit(check_iv_31)
@@ -412,11 +412,15 @@ class Action_Controller:
         if self.skill_pp_dict["甜甜香气"] >= 5:
             self.p.controller.key_press("2")
             self.skill_pp_dict["甜甜香气"] = self.skill_pp_dict["甜甜香气"] - 5
-            sleep(3)
+            sleep(5)  # 其实应该加个判断，看有没有成功
 
     def fly_to_city(self, city="SOOTOPOLIS_CITY", locate_teleport=False):
         self.p.controller.key_press("7")
         sleep(0.2)
+        with self.p.coords_lock:
+            self.p.coords_status["transport"] = (
+                "walk"  # 飞了之后会变成走路,骑自行车之后也会走路
+            )
         for i in range(2):
             self.p.controller.click(
                 city_info[city]["town_map_coords"][0],
@@ -461,7 +465,7 @@ class Action_Controller:
     def talk_to_nurse(self, city):
         print("Talking to nurse")
         if city_info[city]["area"] in ["Hoenn", "Kanto"]:
-            press_delay = 2
+            press_delay = 5
         else:
             press_delay = 5
         self.p.controller.key_press("z", press_delay)  # 合众 比较久
@@ -469,8 +473,33 @@ class Action_Controller:
         return True  #!现在没办法鉴别有没有成功
 
     @synchronized
+    def use_bike(self):
+        print("使用自行车")
+        self.p.controller.key_press("3", 1)
+        with self.p.coords_lock:
+            self.p.coords_status["transport"] = "bike"
+
+        return True
+
+    @synchronized
     def use_surf(self):
-        self.p.controller.key_press("z", 3)
+        """
+        如何判断是否在水里？
+        冲浪前后的坐标不一样!
+        """
+        print("使用冲浪")
+        start_coords = self.p.get_coords()
+        self.p.controller.key_press("z", 5)
+        with self.p.coords_lock:
+            self.p.coords_status["transport"] = "surf"
+        end_coords = self.p.get_coords()
+        if (start_coords["x_coords"], start_coords["y_coords"]) == (
+            end_coords["x_coords"],
+            end_coords["y_coords"],
+        ):
+            raise Exception("Not in water")
+        else:
+            return True
 
         # for i in range(10):
         #     if self.p.get_coords()["transport"] in [
@@ -483,14 +512,16 @@ class Action_Controller:
         #         return True
         #     sleep(0.1)
 
-        raise Exception("Not in water")
+        # raise Exception("Not in water")
 
     @synchronized
     def use_cut(self):
+        print("使用cut")
         self.p.controller.key_press("z", 5)
 
     @synchronized
     def use_teleport(self):
+        print("使用传送")
         coords_status = self.p.get_coords()
 
         if coords_status["map_number_tuple"][2] == 50 or coords_status[
@@ -509,6 +540,8 @@ class Action_Controller:
             (2, 1, 141),
         ]:
             self.p.controller.key_press("8")
+            with self.p.coords_lock:
+                self.p.coords_status["transport"] = "walk"
             sleep(5)
         else:
             raise Exception("不在open air")
@@ -520,9 +553,12 @@ class Action_Controller:
 
     @synchronized
     def use_dig(self):
+        print("使用挖洞")
         coords_status = self.p.get_coords()
         if coords_status["map_number_tuple"][2] == 74:
             self.p.controller.key_press("9")
+            with self.p.coords_lock:
+                self.p.coords_status["transport"] = "unkown"
             sleep(5)
         if self.p.get_coords()["map_number_tuple"][2] != 74:
             return True

@@ -54,6 +54,7 @@ class Farming_BATTLE_FRONTINER:
         # 去湖边
         my_edge_choice = random.choice(self.lake_edge_face_dir_list)
         self.p.pf.go_somewhere(
+            transport="bike",  # 用自行车
             end_point=(my_edge_choice[0], my_edge_choice[1]),
             end_face_dir=my_edge_choice[2],
             city=self.city,
@@ -92,7 +93,9 @@ class Farming_BATTLE_FRONTINER:
                 if self.p.ac.skill_pp_dict["甜甜香气"] < 5:
                     farming_times += 1
                     if farming_times >= repeat_times:
-                        print("刷怪次数达到上限!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                        print(
+                            "刷怪次数达到上限!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                        )
                         return
                     self.teleport_and_heal()
                     self.leave_pc_center_and_go_farm()  # 应该已经到了湖里了
@@ -123,7 +126,9 @@ if __name__ == "__main__":
 
     root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.append(root_path)
-    current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+    current_dir = os.path.dirname(
+        os.path.abspath(__file__)
+    )  # 获取当前脚本所在目录的绝对路径
     package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
     sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 

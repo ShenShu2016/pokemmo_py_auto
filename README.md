@@ -11,3 +11,8 @@ assert 里面 main-hub.png monster-info.png 需要覆盖
 
 
 <string id="5019">9999999 {00}</string>
+
+
+10, 74, 6, 2 是bike
+
+1, 11, 65, 75, 7 好像是冲浪

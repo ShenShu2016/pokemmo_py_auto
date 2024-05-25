@@ -28,7 +28,7 @@ from utils.word_recognizer import Word_Recognizer
 class PokeMMO:
     """A class to interact with the PokeMMO game."""
 
-    def __init__(self):
+    def __init__(self, dev_mode=False):
         """Initialize the PokeMMO class."""
         self.window_manager = Window_Manager()
         self.handle = self.window_manager.handle
@@ -53,7 +53,7 @@ class PokeMMO:
             "y_coords": 0,
             "map_number_tuple": (0, 0, 0),
             "face_dir": 0,
-            "transport": 0,
+            "transport": "unknown",
         }
         self.encounter_start_time = None
 
@@ -73,7 +73,8 @@ class PokeMMO:
             self,
             "pokemmo.sqlite",
         )
-        self.mj_coords = MemoryInjector_Coords()
+        if not dev_mode:
+            self.mj_coords = MemoryInjector_Coords()
 
         self.auto_strategy_flag = False  # 用来控制所有的自动策略 开始与结束
 
@@ -84,7 +85,8 @@ class PokeMMO:
 
         self.stop_threads_flag = False
         self.ui = PokemmoUI(self)
-        self.start_threads()
+        if not dev_mode:
+            self.start_threads()
 
     def start_threads(self):
         threading.Thread(target=self.update_img_BRG).start()
@@ -173,7 +175,7 @@ class PokeMMO:
         while not self.stop_threads_flag:
             new_memory_coords = self.mj_coords.read_data()
             with self.coords_lock:
-                self.coords_status = new_memory_coords
+                self.coords_status.update(new_memory_coords)
             sleep(0.005)
 
     # Use this method to safely access the state_dict variable from other threads
@@ -278,6 +280,7 @@ class PokeMMO:
         # print(top_l, bottom_r)
         if img_BRG is None:
             img_BRG = self.get_img_BRG()
+        original_img_BRG = img_BRG.copy()
         if top_l and bottom_r:
             img_BRG = img_BRG[
                 int(top_l[1]) : int(bottom_r[1]), int(top_l[0]) : int(bottom_r[0])
@@ -298,7 +301,8 @@ class PokeMMO:
         num_matches = len(result[0])  # Get the number of matches
         if num_matches > max_matches:
             print(f"Too many matches for template: {num_matches}")
-            return None
+            if not display:
+                return None
         if num_matches != 0:
             # print(f"Number of matches: {num_matches}")
             pass
@@ -319,8 +323,12 @@ class PokeMMO:
             for pt in match_coords:
                 print(pt)
                 # Draw a rectangle on the original image
-                cv2.rectangle(img_BRG, pt[:2], pt[2:], (0, 0, 255), 2)
-            cv2.imshow("Match Template", img_BRG)
+                cv2.rectangle(original_img_BRG, pt[:2], pt[2:], (0, 0, 255), 2)
+            print(f"Number of matches: {num_matches}")
+            # print(f"Match coords with percentage: {modify here}")
+
+            cv2.imshow("Match Template", original_img_BRG)
+
             cv2.waitKey()
 
         return match_coords
@@ -442,64 +450,13 @@ class PokeMMO:
 
 
 if __name__ == "__main__":
-    pokeMMO = PokeMMO()
+    pokeMMO = PokeMMO(dev_mode=True)
     sleep(1)
-    pokeMMO.start_ui()
-    ball_type = "repeat_ball"
-
-    while True:
-        # 先判断是不是我要的球，是的话直接扔
-        # 不是的话，找箭头，找到箭头，右边3下左边一下，然后确定是球页面，然后找球
-        attr_name = f"{ball_type}_BRG"
-        temp_BRG = getattr(pokeMMO, attr_name, None)
-        if (
-            len(
-                pokeMMO.find_items(
-                    temp_BRG=temp_BRG,
-                    top_l=(516, 372),
-                    bottom_r=(574, 480),
-                    max_matches=1,
-                    threshold=0.99,
-                )
-            )
-            > 0
-        ):
-            print("扔球")
-            pokeMMO.controller.key_press("z", 1)
-            pokeMMO.db.insert_ball_throw_data(ball_type)
-            print(f"Throwing {ball_type}")
-            sleep(3)
-        else:
-            bag_arrow_page = pokeMMO.find_items(
-                temp_BRG=pokeMMO.bag_arrow_page_BRG,
-                top_l=(468, 346),
-                threshold=0.98,
-                bottom_r=(495, 371),
-                display=False,
-                max_matches=1,
-            )
-            if len(bag_arrow_page) > 0:
-                for i in range(3):
-                    pokeMMO.controller.key_press("d", wait=0.2)
-                pokeMMO.controller.key_press("a")
-
-                # 寻找指定的球
-                for i in range(15):
-                    ball_type_pic = pokeMMO.find_items(
-                        temp_BRG=temp_BRG,
-                        top_l=(516, 372),
-                        bottom_r=(574, 480),
-                        max_matches=1,
-                        threshold=0.99,
-                    )
-                    if len(ball_type_pic) == 0:
-                        print("按s")
-                        pokeMMO.controller.key_press("s", wait=0.2)
-                        continue
-                    elif len(ball_type_pic) == 1:
-                        print("扔球")
-                        pokeMMO.controller.key_press("z", wait=5)  # 扔球
-                        break
-                    raise Exception("找不到球")
-
-        sleep(5)
+    pokeMMO.find_items(
+        temp_BRG=pokeMMO.iv_31_BRG,
+        # top_l=(419, 223),
+        threshold=0.70,
+        # bottom_r=(685, 264),
+        display=True,
+        max_matches=100,
+    )

@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+current_dir = os.path.dirname(
+    os.path.abspath(__file__)
+)  # 获取当前脚本所在目录的绝对路径
 package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
 sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 import random
@@ -68,6 +70,7 @@ class Farming_SOOTOPOLIS_CITY:
             end_point=(my_edge_choice[0], my_edge_choice[1]),
             end_face_dir=my_edge_choice[2],
             city=self.city,
+            transport="bike",
         )
 
         # 冲浪

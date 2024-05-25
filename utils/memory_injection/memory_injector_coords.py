@@ -79,7 +79,6 @@ class MemoryInjector_Coords:
                 0,
             ),
             "face_dir": 0,
-            "transport": 0,
         }
 
         # Adding a path to your json file
@@ -254,13 +253,13 @@ class MemoryInjector_Coords:
         x_address = value - 4 - 80
         # print("x_address", x_address, hex(x_address))
         data = self.pm.read_bytes(x_address, 10 + 80)
-        self.transport = split_bytes_to_int(data, 0, 2)
-        if self.transport != 0 and self.transport <= 100:
-            print("交通状态正常")
-            return True
-        else:
-            print("交通状态异常")
-            return True  # 现在没办法判断交通状态，所以直接返回True
+        # self.transport = 0  # split_bytes_to_int(data, 0, 2)
+        # if self.transport != 0 and self.transport <= 100:
+        #     print("交通状态正常")
+        #     return True
+        # else:
+        #     print("交通状态异常")
+        #     return True  # 现在没办法判断交通状态，所以直接返回True
 
     def read_data(self):
         data = self.pm.read_bytes(self.TR, 4)
@@ -273,7 +272,7 @@ class MemoryInjector_Coords:
         self.y_coords = split_bytes_to_int(data, 2 + 80, 4 + 80)
         self.map_number = split_bytes_to_int(data, 4 + 80, 5 + 80)
         self.face_dir = hex(data[9 + 80])[-1]
-        self.transport = split_bytes_to_int(data, 0, 2)
+
         self.memory_info_dict = {
             "x_coords": self.x_coords,
             "y_coords": self.y_coords,
@@ -283,7 +282,6 @@ class MemoryInjector_Coords:
                 int(data[4 + 80 + 1]),
             ),
             "face_dir": int(self.face_dir),
-            "transport": self.transport,
         }
         return self.memory_info_dict
 
