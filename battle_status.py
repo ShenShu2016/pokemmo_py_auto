@@ -62,13 +62,14 @@ class BattleStatus:
             self.p.set_encounter_start_time()
             hp_BRG_x_y_list = self.p.find_items(
                 temp_BRG=self.p.hp_BRG,
-                threshold=0.985,
+                threshold=0.992,
                 max_matches=5,
                 top_l=(0, 70),
                 bottom_r=(1080, 170),
                 img_BRG=self.img_BRG,
             )
-            print(f"找到的敌人数量: {len(hp_BRG_x_y_list)}")
+            if len(hp_BRG_x_y_list) > 0:
+                print(f"找到的敌人数量: {len(hp_BRG_x_y_list)}")
             if not hp_BRG_x_y_list:
                 return
             self.battle_status_dict["enemy_count"] = len(hp_BRG_x_y_list)
@@ -150,7 +151,7 @@ class BattleStatus:
                 numeric_string = "".join(filter(str.isdigit, name_Lv_OCR))
                 total_int = int(numeric_string)
 
-                if total_int >= 99999 and enemy_count == 1:  # 闪光
+                if total_int >= 99999 and enemy_count == 1:  # 闪光 必定要大于99999
                     play_music()
                     send_email()
                     pass
@@ -185,6 +186,9 @@ class BattleStatus:
                             int(lv_orc),
                             enemy_count,
                             self.p.encounter_start_time,
+                        )
+                        print(
+                            f" {name_Lv_OCR} 等级{lv_orc} {info['Chinese']} 捕捉率: {info['CatchRate']}"
                         )
 
                         self.p.db.insert_data("encounter", columns, values)
@@ -276,22 +280,29 @@ class BattleStatus:
 
         check_enemy_sleep_time = time.time() - start_time
         # print("battle_status_dict", self.battle_status_dict)
-        if (
-            check_enemy_number_time > 0.1
-            or check_enemy_hp_time > 0.1
-            or check_enemy_name_lv_time > 0.1
-            or check_enemy_sleep_time > 0.1
-        ):
+        if check_enemy_number_time > 0.1:
             print(
                 "检查敌人状态使用时间:",
                 "check_enemy_number_time",
-                check_enemy_number_time,
+                round(check_enemy_number_time, 2),
+            )
+        if check_enemy_hp_time > 0.1:
+            print(
+                "检查敌人状态使用时间:",
                 "check_enemy_hp_time",
-                check_enemy_hp_time,
+                round(check_enemy_hp_time, 2),
+            )
+        if check_enemy_name_lv_time > 0.1:
+            print(
+                "检查敌人状态使用时间:",
                 "check_enemy_name_lv_time",
-                check_enemy_name_lv_time,
+                round(check_enemy_name_lv_time, 2),
+            )
+        if check_enemy_sleep_time > 0.1:
+            print(
+                "检查敌人状态使用时间:",
                 "check_enemy_sleep_time",
-                check_enemy_sleep_time,
+                round(check_enemy_sleep_time, 2),
             )
         return self.battle_status_dict
 

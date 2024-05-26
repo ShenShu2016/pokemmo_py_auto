@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+current_dir = os.path.dirname(
+    os.path.abspath(__file__)
+)  # 获取当前脚本所在目录的绝对路径
 package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
 sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 from time import sleep
@@ -45,6 +47,7 @@ class Farming_Fuchsia_City:
         self.p.pf.go_somewhere(
             city=self.city,
             style="farming",  # 编号66
+            transport="bike",
         )
 
     def teleport_and_heal(self):
@@ -74,7 +77,9 @@ class Farming_Fuchsia_City:
                 if self.p.ac.skill_pp_dict["甜甜香气"] < 5:
                     farming_times += 1
                     if farming_times >= repeat_times:
-                        print("刷怪次数达到上限!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                        print(
+                            "刷怪次数达到上限!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                        )
                         return
                     self.teleport_and_heal()
                     self.leave_pc_center_and_go_farm()  # 应该已经到了湖里了

@@ -114,7 +114,7 @@ class PokeMMO:
                     setattr(self, var_name, pd.read_csv(path))
                     self.df_dict[var_name] = getattr(self, var_name)
 
-                print(f"Loaded {var_name} from {path}")
+                # print(f"Loaded {var_name} from {path}")
                 asset_count += 1
         print(f"Loaded {asset_count} assets.")
 
@@ -292,13 +292,11 @@ class PokeMMO:
         result = cv2.matchTemplate(img_BRG, temp_BRG, cv2.TM_CCORR_NORMED)
 
         # Apply the threshold to the result
-        _, result = cv2.threshold(result, threshold, 1.0, cv2.THRESH_BINARY)
-        # print(f"Result: {result}")
-        result = np.where(result >= threshold)  #! i don't know what this does
-        # print(f"Result: {result}")
+        _, thresholded_result = cv2.threshold(result, threshold, 1.0, cv2.THRESH_BINARY)
+        match_locations = np.where(thresholded_result >= threshold)
 
         # Check the number of matches
-        num_matches = len(result[0])  # Get the number of matches
+        num_matches = len(match_locations[0])  # Get the number of matches
         if num_matches > max_matches:
             print(f"Too many matches for template: {num_matches}")
             if not display:
@@ -309,7 +307,9 @@ class PokeMMO:
 
         h, w = temp_BRG.shape[:2]
         match_coords = []
-        for index, pt in enumerate(zip(*result[::-1])):
+        match_percentages = []
+
+        for index, pt in enumerate(zip(*match_locations[::-1])):
             match_coords.append(
                 (
                     pt[0] + top_l[0],
@@ -318,17 +318,20 @@ class PokeMMO:
                     pt[1] + h + top_l[1],
                 )
             )
+            match_percentages.append(result[pt[1], pt[0]])
 
         if display:
             for pt in match_coords:
                 print(pt)
                 # Draw a rectangle on the original image
                 cv2.rectangle(original_img_BRG, pt[:2], pt[2:], (0, 0, 255), 2)
+
             print(f"Number of matches: {num_matches}")
-            # print(f"Match coords with percentage: {modify here}")
+            print("Match coords with percentage:")
+            for coords, percentage in zip(match_coords, match_percentages):
+                print(f"Coords: {coords}, Similarity: {percentage * 100:.2f}%")
 
             cv2.imshow("Match Template", original_img_BRG)
-
             cv2.waitKey()
 
         return match_coords
@@ -450,13 +453,15 @@ class PokeMMO:
 
 
 if __name__ == "__main__":
-    pokeMMO = PokeMMO(dev_mode=True)
-    sleep(1)
-    pokeMMO.find_items(
-        temp_BRG=pokeMMO.iv_31_BRG,
-        # top_l=(419, 223),
-        threshold=0.70,
-        # bottom_r=(685, 264),
-        display=True,
-        max_matches=100,
-    )
+    pokeMMO = PokeMMO()
+    pokeMMO.start_ui()
+    # pokeMMO = PokeMMO(dev_mode=True)
+    # sleep(1)
+    # pokeMMO.find_items(
+    #     temp_BRG=pokeMMO.iv_31_BRG,
+    #     # top_l=(419, 223),
+    #     threshold=0.70,
+    #     # bottom_r=(685, 264),
+    #     display=True,
+    #     max_matches=100,
+    # )

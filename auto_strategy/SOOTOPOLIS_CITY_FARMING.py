@@ -126,6 +126,7 @@ class Farming_SOOTOPOLIS_CITY:
                     end_face_dir=None,
                     city="SOOTOPOLIS_CITY",
                     style="farming",
+                    transport="surf",
                 )
 
             while self.p.auto_strategy_flag:

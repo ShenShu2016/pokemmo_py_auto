@@ -170,9 +170,9 @@ class Action_Controller:
         else:
             bag_arrow_page = self.p.find_items(
                 temp_BRG=self.p.bag_arrow_page_BRG,
-                top_l=(455, 328),
-                threshold=0.98,
-                bottom_r=(514, 361),
+                top_l=(426, 336),
+                threshold=0.99,
+                bottom_r=(527, 510),
                 display=False,
                 max_matches=1,
             )
@@ -364,14 +364,8 @@ class Action_Controller:
                 self.p.controller.click(*pc_release_icon_coords)
                 sleep(0.1)
 
-                confirm_release_area_top_l = (
-                    pokemon_summary_sign_mid_x - 460,
-                    pokemon_summary_sign_mid_y + 122,
-                )  # Round up
-                confirm_release_area_bottom_r = (
-                    pokemon_summary_sign_mid_x - 230,
-                    pokemon_summary_sign_mid_y + 227,
-                )  # Round up
+                confirm_release_area_top_l = (364, 266)  # Round up
+                confirm_release_area_bottom_r = (1025, 557)  # Round up
 
                 confirm_release_x_y_list = self.p.find_items(
                     temp_BRG=self.p.confirm_release_BRG,
@@ -386,7 +380,7 @@ class Action_Controller:
                     # Click the first two elements of the tuple (x and y coords).
                     self.p.controller.click_center(confirm_release_x_y_list[0])
                     sleep(0.4)  # 太快破电脑受不了
-                    self.p.controller.click(680, 348)
+                    self.p.controller.click(683, 367)
                     self.p.db.insert_release_data(release=True)
 
                 else:
@@ -467,7 +461,7 @@ class Action_Controller:
         if city_info[city]["area"] in ["Hoenn", "Kanto"]:
             press_delay = 5
         else:
-            press_delay = 5
+            press_delay = 10
         self.p.controller.key_press("z", press_delay)  # 合众 比较久
         self.rest_pp_health()
         return True  #!现在没办法鉴别有没有成功
@@ -488,31 +482,22 @@ class Action_Controller:
         冲浪前后的坐标不一样!
         """
         print("使用冲浪")
-        start_coords = self.p.get_coords()
+        start_coords = self.p.get_coords().copy()
+        print("start_coords", start_coords)
         self.p.controller.key_press("z", 5)
-        with self.p.coords_lock:
-            self.p.coords_status["transport"] = "surf"
-        end_coords = self.p.get_coords()
-        if (start_coords["x_coords"], start_coords["y_coords"]) == (
-            end_coords["x_coords"],
-            end_coords["y_coords"],
-        ):
+
+        end_coords = self.p.get_coords().copy()
+        print("end_coords", end_coords)
+        if start_coords == end_coords:
+            print(
+                (start_coords["x_coords"], start_coords["y_coords"]),
+                (end_coords["x_coords"], end_coords["y_coords"]),
+            )
             raise Exception("Not in water")
         else:
+            with self.p.coords_lock:
+                self.p.coords_status["transport"] = "surf"
             return True
-
-        # for i in range(10):
-        #     if self.p.get_coords()["transport"] in [
-        #         1,
-        #         11,
-        #         75,
-        #         65,
-        #         7,
-        #     ]:  # transport 现在完全没法用
-        #         return True
-        #     sleep(0.1)
-
-        # raise Exception("Not in water")
 
     @synchronized
     def use_cut(self):

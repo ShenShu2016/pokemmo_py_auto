@@ -43,11 +43,11 @@ def get_lea_magic_number(aob_hex_list) -> str:
     }
 
     hex_str = "".join(aob_hex_list)
-    print(hex_str)
+    # print(hex_str)
     shellcode = bytes.fromhex(hex_str)
     md = Cs(CS_ARCH_X86, CS_MODE_64)
     for i in md.disasm(shellcode, 0x1000):
-        print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
+        # print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
         op_str = i.op_str
         matches = re.findall(r"r\d+", op_str)
         if matches:
@@ -96,21 +96,21 @@ class MemoryInjector_Coords:
                 self.aob_address = data.get("aob_address", 0)
                 self.TR = data.get("TR", None)
                 self.newmem = data.get("newmem", None)
-                print(
-                    f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
-                )
+                # print(
+                #     f"Read data from json file. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                # )
 
             # Try to read data
             try:
                 self.test_data()
-                print(
-                    f"Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
-                )
+                # print(
+                #     f"Reading data succeeded with stored addresses. aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}"
+                # )
             except Exception as e:
-                print(
-                    "Reading data failed with stored addresses, starting normal scanning and injection process:",
-                    e,
-                )
+                # print(
+                #     "Reading data failed with stored addresses, starting normal scanning and injection process:",
+                #     e,
+                # )
                 self.aob_address = self.aob_scan()
                 self.try_the_aob()
         else:
@@ -135,10 +135,10 @@ class MemoryInjector_Coords:
                     ][0]
                     in ["45", "41"]
                 ]
-                print("aob_address_list after 45 41:", self.aob_address_list)
+                # print("aob_address_list after 45 41:", self.aob_address_list)
                 return
             if len(self.aob_address_list) < 1:
-                print(f"retrying...")
+                # print(f"retrying...")
                 sleep(0.5)
 
     def try_the_aob(self):
@@ -148,7 +148,7 @@ class MemoryInjector_Coords:
                 hex(b)[2:].zfill(2).upper()
                 for b in self.pm.read_bytes(self.aob_address, 5)
             ]
-            print("aob_hex_list:", self.aob_hex_list, self.aob_address)
+            # print("aob_hex_list:", self.aob_hex_list, self.aob_address)
 
             try:
                 self.inject_memory()
@@ -166,9 +166,9 @@ class MemoryInjector_Coords:
                             json_file,
                         )
 
-                    print(
-                        f"Injected, aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}, aob_hex_list: {self.aob_hex_list}"
-                    )
+                    # print(
+                    #     f"Injected, aob_address: {self.aob_address}, TR: {self.TR}, newmem: {self.newmem}, aob_hex_list: {self.aob_hex_list}"
+                    # )
                     return
             except Exception as e:
                 print(e)
@@ -198,9 +198,9 @@ class MemoryInjector_Coords:
         jmp_addr_1 = len(part_head_combine) + self.newmem
         target_addr_1 = self.aob_address + 5
         offset_1 = calculate_jmp_offset(jmp_addr_1, target_addr_1)
-        print("offset_1", offset_1)
+        # print("offset_1", offset_1)
         offset_1_le = to_signed_32_bit_le(offset_1)
-        print("offset_1_le", offset_1_le)
+        # print("offset_1_le", offset_1_le)
 
         # Create shell code
         hex_values = (
@@ -208,7 +208,7 @@ class MemoryInjector_Coords:
             + jmp_place
             + [offset_1_le[0:1], offset_1_le[1:2], offset_1_le[2:3], offset_1_le[3:4]]
         )
-        print("newmem hex_values", hex_values)
+        # print("newmem hex_values", hex_values)
         inject_hex_shellcode = self.convert_hex_values_to_bytes(hex_values)
 
         # Write shell code to new memory

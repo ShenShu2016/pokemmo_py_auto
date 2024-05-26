@@ -1,4 +1,4 @@
-target_words_dict = {
+target_words_dict = {  # 废弃的
     "battle_option_OCR": [
         # "FIGHT",
         "Select your attack move",

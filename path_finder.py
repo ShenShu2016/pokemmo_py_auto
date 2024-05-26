@@ -164,10 +164,10 @@ class PathFinder:
         transport="bike",
     ):
         transport_speed = {
-            "bike": 0.045,
+            "bike": 0.068,
             "walk": 0.25,
             "run": 0.16,
-            "surf": 0.1,
+            "surf": 0.08,
         }  # 成反比,延迟越小代表速度越快
         start_delay = {"bike": 0.0, "walk": 0.2, "run": 0, "surf": 0.0}  # 启动延迟
         turn_delay = 0.03  # 原地转向的延迟时间
@@ -191,9 +191,10 @@ class PathFinder:
 
             if key:
                 if i == 0:
+                    # pass
                     # 如果是起点，仅当起点的方向与目标方向不同时进行转向
                     if current_face_dir != face_dir:
-                        keys_and_delays.append((key, turn_delay))
+                        keys_and_delays.append((key, 0.03))
                         current_face_dir = face_dir
                 elif path[i - 1][0] == path[i][0] and path[i - 1][1] == path[i][1]:
                     # 如果相邻的两个路径点位置相同，即为原地转向
@@ -211,7 +212,7 @@ class PathFinder:
                     )
                 else:
                     delay = round(
-                        max(0.00, transport_speed[transport] + start_delay[transport]),
+                        max(0, transport_speed[transport] + start_delay[transport]),
                         4,
                     )
                     keys_and_delays.append((key, delay))
@@ -352,7 +353,7 @@ class PathFinder:
                 city_info[city]["112_nurse"][0],
             ),
             end_face_dir=1,
-            transport="walk",
+            transport="run",
             pc=True,
         )
         print("到达了护士那里")
@@ -366,7 +367,7 @@ class PathFinder:
                 city_info[city]["112_out"][0][0],
             ),
             end_face_dir=0,
-            transport="walk",
+            transport="run",
             pc=True,
         )
         sleep(0.2)
@@ -398,7 +399,7 @@ class PathFinder:
                         if transport == "run":
                             self.p.controller.key_up("x")
                         break
-                    self.p.controller.key_press_2(key, delay)
+                    self.p.controller.key_press_2(key, delay, wait=0.1)
                     # sleep(0.1)
                 if transport == "run":
                     self.p.controller.key_up("x")
@@ -430,6 +431,7 @@ class PathFinder:
         if coords_status["transport"] != "bike" and transport == "bike":
             self.p.ac.use_bike()
         elif coords_status["transport"] != "surf" and transport == "surf":
+            raise Exception("surf is not supported")
             self.p.ac.use_surf()
         elif coords_status["transport"] != "run" and transport == "run":
             pass
