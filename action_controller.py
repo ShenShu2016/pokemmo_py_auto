@@ -222,9 +222,9 @@ class Action_Controller:
         coords = game_status["check_pokemon_summary"][1][0]
         iv_icon_x = (coords[0] + coords[2]) / 2 - 386
         iv_icon_y = (coords[1] + coords[3]) / 2 + 3
-        print(iv_icon_x, iv_icon_y)
+        # print(iv_icon_x, iv_icon_y)
         self.p.controller.click(iv_icon_x, iv_icon_y, tolerance=0)
-        print("Clicking Pokemon Summary IV at %s, %s" % (iv_icon_x, iv_icon_y))
+        # print("Clicking Pokemon Summary IV at %s, %s" % (iv_icon_x, iv_icon_y))
 
     def iv_shiny_check_release(self, game_status, release=True):
         def check_shiny():
@@ -255,7 +255,7 @@ class Action_Controller:
                 img_BRG=img_BRG,
                 display=False,
             )
-            print("secret_shiny_x_y_list", secret_shiny_x_y_list)
+            # print("secret_shiny_x_y_list", secret_shiny_x_y_list)
             if len(secret_shiny_x_y_list) >= 1:
                 print("Secret Shiny!")
                 self.p.ac.close_pokemon_summary(game_status)
@@ -342,7 +342,7 @@ class Action_Controller:
             is_iv31 = iv_31_future.result()
             is_in_iv_page = in_iv_page_future.result()
 
-            print("is_in_iv_page", is_in_iv_page == True)
+            # print("is_in_iv_page", is_in_iv_page == True)
             if (
                 not (is_shiny or is_secret_shiny or is_iv31)
                 and is_in_iv_page == True
@@ -552,7 +552,7 @@ class Action_Controller:
 
     def rest_pp_health(self):
         self.skill_pp_dict = {
-            "点到为止": 48,
+            "点到为止": 8,
             "甜甜香气": 32,
             "蘑菇孢子": 24,
             "黑夜魔影": 18,

@@ -399,7 +399,7 @@ class PathFinder:
                         if transport == "run":
                             self.p.controller.key_up("x")
                         break
-                    self.p.controller.key_press_2(key, delay, wait=0.1)
+                    self.p.controller.key_press_2(key, delay, wait=0)
                     # sleep(0.1)
                 if transport == "run":
                     self.p.controller.key_up("x")
