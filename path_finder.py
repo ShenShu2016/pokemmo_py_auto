@@ -417,7 +417,9 @@ class PathFinder:
                     current_position_with_offset["face_dir"],
                 )
                 if current_position not in self.path:
-                    print("self.path", self.path, "current_position", current_position)
+                    print(
+                        "self.path", self.path[:3], "current_position", current_position
+                    )
                     print("走错路了")  # 如果发现位置不在self.path中，打印消息
                     # sleep(0.1)
                     self.stop_move_threads = True  # 设置全局标识，用来停止walk线程
@@ -477,7 +479,7 @@ class PathFinder:
             self.path, transport=transport
         )
         # start move
-        print(self.keys_and_delays)
+        print(self.keys_and_delays[0:3])
         print("-------------------------------------------")
 
         walk_thread = threading.Thread(target=walk, args=())

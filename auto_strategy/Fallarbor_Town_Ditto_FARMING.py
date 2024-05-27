@@ -59,7 +59,10 @@ class Farming_Fallarbor_Town_Ditto:
         self.p.ac.talk_to_nurse(city=self.city)  # teleport 就直接面对护士了
 
     def go_outside(self):
-        self.p.pf.go_somewhere(end_point=(6, -11), city=self.city)
+        self.p.pf.go_somewhere(end_point=(6, -11), city=self.city, transport="run")
+
+    def go_cave(self):
+        self.p.pf.go_somewhere(end_point=(-27, -11), city=self.city, transport="run")
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
@@ -73,6 +76,7 @@ class Farming_Fallarbor_Town_Ditto:
             raise Exception("飞不走")
 
         farming_times = 0
+        just_started = True
         while self.p.auto_strategy_flag:
             print("开始刷怪,或者是回城补给")
             while self.p.get_gs()["return_status"] < 20:
@@ -93,6 +97,7 @@ class Farming_Fallarbor_Town_Ditto:
                         return
                     self.teleport_and_heal()
                     self.leave_pc_center_and_go_farm()
+                    self.go_cave()
 
                 # Check if there are any rows where both x_coords and y_coords are equal to 66
                 # if (
@@ -102,6 +107,10 @@ class Farming_Fallarbor_Town_Ditto:
                 #     # Trigger the desired operation
                 #     self.p.ac.use_sweet_sent()
                 #     # pass
+                if farming_times == 0 and just_started:
+                    self.go_cave()
+                    just_started = False
+                    sleep(1)
 
                 self.p.pf.go_somewhere(
                     end_point=None,
@@ -131,7 +140,7 @@ class Farming_Fallarbor_Town_Ditto:
                         if battle_status.get(
                             "enemy_1_hp_pct"
                         ) < 20 and battle_status.get("enemy_1_sleeping"):
-                            self.p.ac.throw_pokeball(pokeball_type="poke_ball")
+                            self.p.ac.throw_pokeball(pokeball_type="dark_ball")
                         elif self.p.ac.is_go_pc(ignore_hp=True):
                             self.p.ac.run_from_s21()
 

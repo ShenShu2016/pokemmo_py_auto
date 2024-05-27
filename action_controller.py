@@ -78,8 +78,8 @@ class Action_Controller:
         self.p.controller.click(312, 507, tolerance=5)
         self.my_recent_actions_list.append(("fight_skill_1_from_s21", time.time()))
         self.skill_pp_dict["点到为止"] = self.skill_pp_dict["点到为止"] - 1
+        print("使用点到为止")
         sleep(5)
-        print("Using False Swipe")
 
     @synchronized
     def multi_fight_skill_1_from_s21(self):  # 地震
@@ -101,10 +101,11 @@ class Action_Controller:
         self.my_recent_actions_list.append(("fight_skill_2_from_s21", time.time()))
         if skill == "蘑菇孢子":
             self.skill_pp_dict["蘑菇孢子"] = self.skill_pp_dict["蘑菇孢子"] - 1
+            print("使用蘑菇孢子")
         elif skill == "借助":
             self.skill_pp_dict["借助"] = self.skill_pp_dict["借助"] - 1
+            print("使用借助")
         sleep(5)
-        print("Using Spore")
 
     @synchronized
     def fight_skill_3_from_s21(self):
@@ -162,10 +163,9 @@ class Action_Controller:
             )
             > 0
         ):
-            print("扔球")
+            print(f"扔{pokeball_type}")
             self.p.controller.key_press("z", 1)
             self.p.db.insert_ball_throw_data(pokeball_type)
-            print(f"Throwing {pokeball_type}")
             sleep(3)
         else:
             bag_arrow_page = self.p.find_items(
@@ -195,7 +195,7 @@ class Action_Controller:
                         self.p.controller.key_press("s", wait=0.2)
                         continue
                     elif len(ball_type_pic) == 1:
-                        print("扔球")
+                        print(f"扔{pokeball_type}")
                         self.p.controller.key_press("z", wait=5)  # 扔球
                         self.p.db.insert_ball_throw_data(pokeball_type)
                         sleep(3)

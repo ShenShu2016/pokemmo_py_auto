@@ -24,6 +24,7 @@
     "secret_shiny_path": "asserts/template\\secret_shiny.png",
     "send_email_path": "asserts/template\\send_email.png",
     "shiny_path": "asserts/template\\shiny.png",
+    "sleep_ball_path": "asserts/template\\sleep_ball.png",
     "sprite_iv_page_path": "asserts/template\\sprite_iv_page.png",
     "ultra_ball_path": "asserts/template\\ultra_ball.png",
     "which_skill_to_forget_path": "asserts/template\\which_skill_to_forget.png",

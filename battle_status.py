@@ -286,19 +286,19 @@ class BattleStatus:
                 "check_enemy_number_time",
                 round(check_enemy_number_time, 2),
             )
-        if check_enemy_hp_time > 0.1:
+        if check_enemy_hp_time > 1:
             print(
                 "检查敌人状态使用时间:",
                 "check_enemy_hp_time",
                 round(check_enemy_hp_time, 2),
             )
-        if check_enemy_name_lv_time > 0.1:
+        if check_enemy_name_lv_time > 1:
             print(
                 "检查敌人状态使用时间:",
                 "check_enemy_name_lv_time",
                 round(check_enemy_name_lv_time, 2),
             )
-        if check_enemy_sleep_time > 0.1:
+        if check_enemy_sleep_time > 1:
             print(
                 "检查敌人状态使用时间:",
                 "check_enemy_sleep_time",
