@@ -108,6 +108,8 @@ class Farming_BATTLE_FRONTINER:
                 battle_status = self.p.get_bs()
                 if game_status.get("check_pokemon_summary")[0]:
                     self.p.ac.close_pokemon_summary(game_status)
+                if game_status.get("check_learn_new_skill"):
+                    self.p.ac.learn_new_skill(game_status)
 
                 if (
                     game_status["return_status"] == 21

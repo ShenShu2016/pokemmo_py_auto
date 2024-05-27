@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+current_dir = os.path.dirname(
+    os.path.abspath(__file__)
+)  # 获取当前脚本所在目录的绝对路径
 package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
 sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 from time import sleep
@@ -106,6 +108,7 @@ class Farming_Fallarbor_Town_Ditto:
                     end_face_dir=None,
                     city=self.city,
                     style="farming",  # 编号66
+                    transport="bike",
                 )
 
             while self.p.auto_strategy_flag:
@@ -128,7 +131,7 @@ class Farming_Fallarbor_Town_Ditto:
                         if battle_status.get(
                             "enemy_1_hp_pct"
                         ) < 20 and battle_status.get("enemy_1_sleeping"):
-                            self.p.ac.throw_pokeball(pokeball_type="dark_ball")
+                            self.p.ac.throw_pokeball(pokeball_type="poke_ball")
                         elif self.p.ac.is_go_pc(ignore_hp=True):
                             self.p.ac.run_from_s21()
 

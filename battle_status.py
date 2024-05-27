@@ -188,7 +188,7 @@ class BattleStatus:
                             self.p.encounter_start_time,
                         )
                         print(
-                            f" {name_Lv_OCR} 等级{lv_orc} {info['Chinese']} 捕捉率: {info['CatchRate']}"
+                            f"OCR: {name_Lv_OCR} {info['Chinese'].values[0]}, 等级: {lv_orc}, 捕捉率: {info['CatchRate'].values[0]}"
                         )
 
                         self.p.db.insert_data("encounter", columns, values)

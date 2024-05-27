@@ -26,6 +26,7 @@
     "shiny_path": "asserts/template\\shiny.png",
     "sprite_iv_page_path": "asserts/template\\sprite_iv_page.png",
     "ultra_ball_path": "asserts/template\\ultra_ball.png",
+    "which_skill_to_forget_path": "asserts/template\\which_skill_to_forget.png",
     "Accumula_Town_Field_coords_tracking_path": "asserts/coords_tracking\\Accumula_Town_Field_coords_tracking.csv",
     "BATTLE_FRONTIER_coords_tracking_path": "asserts/coords_tracking\\BATTLE_FRONTIER_coords_tracking.csv",
     "Cerulean_City_coords_tracking_path": "asserts/coords_tracking\\Cerulean_City_coords_tracking.csv",

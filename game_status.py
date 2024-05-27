@@ -24,7 +24,7 @@ class GameStatus:
             top_l=(726, 581),
             bottom_r=(797, 591),
             temp_BRG=self.p.battle_in_progress_BRG,
-            threshold=0.99,
+            threshold=0.97,
             max_matches=5,
         )
         return len(battle_in_progress_coords_list) > 0
@@ -52,6 +52,17 @@ class GameStatus:
         )
         return (len(pokemon_summary_coords_list) > 0, pokemon_summary_coords_list)
 
+    def check_learn_new_skill(self):
+        learn_new_skill_coords_list = self.p.find_items(
+            img_BRG=self.img_BRG,
+            top_l=(606, 474),
+            bottom_r=(754, 529),
+            temp_BRG=self.p.which_skill_to_forget_BRG,
+            threshold=0.99,
+            max_matches=5,
+        )
+        return len(learn_new_skill_coords_list) > 0
+
     def check_game_status(self):
         self.game_status_dict = {
             "return_status": 0,
@@ -59,6 +70,7 @@ class GameStatus:
                 False,
                 [],
             ),  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
+            "check_learn_new_skill": False,
         }
         return_status = 0
 
@@ -69,10 +81,12 @@ class GameStatus:
             battle_in_progress_future = executor.submit(self.is_battle_in_progress)
             battle_option_ready_future = executor.submit(self.is_battle_option_ready)
             check_pokemon_summary_future = executor.submit(self.check_pokemon_summary)
+            check_learn_new_skill_future = executor.submit(self.check_learn_new_skill)
 
             self.is_battle_in_progress_status = battle_in_progress_future.result()
             self.is_battle_option_ready_status = battle_option_ready_future.result()
             self.check_pokemon_summary_status = check_pokemon_summary_future.result()
+            self.check_learn_new_skill_status = check_learn_new_skill_future.result()
 
         if self.is_battle_option_ready_status:
             return_status = 21
@@ -85,6 +99,7 @@ class GameStatus:
             "return_status": return_status,
             "check_pokemon_summary": self.check_pokemon_summary_status,  # 可以这样，多线程，每个操作都是不同线程然后用个lock就行了
             "skill_pp": self.skill_pp_dict,
+            "check_learn_new_skill": self.check_learn_new_skill_status,
         }
 
         return self.game_status_dict

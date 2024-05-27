@@ -95,14 +95,14 @@ class LogPrintSave:
         print("Starting print_logs")
         while not self.pokemmo.stop_threads_flag:
             try:
-                print(f"\033[31mgame_status: {self.logs[-1]['game_status']}\033[31m")
-                print(
-                    f"\033[32mbattle_status: {self.logs[-1]['battle_status']}\033[32m"
-                )
-                print(
-                    f"\033[33mcoords_status: {self.logs[-1]['coords_status']}\033[33m"
-                )
-                print(f"\033[34mstate_dict: {self.logs[-1]['state_dict']}\033[34m")
+                # print(f"\033[31mgame_status: {self.logs[-1]['game_status']}\033[31m")
+                # print(
+                #     f"\033[32mbattle_status: {self.logs[-1]['battle_status']}\033[32m"
+                # )
+                # print(
+                #     f"\033[33mcoords_status: {self.logs[-1]['coords_status']}\033[33m"
+                # )
+                # print(f"\033[34mstate_dict: {self.logs[-1]['state_dict']}\033[34m")
                 sleep(60)
             except Exception as e:
                 pass

@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在目录的绝对路径
+current_dir = os.path.dirname(
+    os.path.abspath(__file__)
+)  # 获取当前脚本所在目录的绝对路径
 package_path = os.path.join(current_dir, "..")  # 获取上级目录的路径
 sys.path.append(package_path)  # 将上级目录添加到模块搜索路径中
 from time import sleep
@@ -86,7 +88,8 @@ class Farming_Accumula_Town_Field:
                 battle_status = self.p.get_bs()
                 if game_status.get("check_pokemon_summary")[0]:
                     self.p.ac.iv_shiny_check_release(game_status)
-
+                if game_status.get("check_learn_new_skill"):
+                    self.p.ac.learn_new_skill(game_status)
                 if (
                     game_status["return_status"] == 21
                     and battle_status.get("enemy_1_info") is not None

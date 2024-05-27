@@ -226,6 +226,12 @@ class Action_Controller:
         self.p.controller.click(iv_icon_x, iv_icon_y, tolerance=0)
         # print("Clicking Pokemon Summary IV at %s, %s" % (iv_icon_x, iv_icon_y))
 
+    def learn_new_skill(self, game_status):
+        if game_status["check_learn_new_skill"] == True:
+            self.p.controller.click(778, 495, wait=1)
+            self.p.controller.click(684, 370, wait=1)
+            print("忘掉新技能")
+
     def iv_shiny_check_release(self, game_status, release=True):
         def check_shiny():
             # ... 这里是检查Shiny的代码
@@ -302,7 +308,7 @@ class Action_Controller:
             iv_page_list = self.p.find_items(
                 temp_BRG=self.p.sprite_iv_page_BRG,
                 top_l=iv_icon_top_l,
-                threshold=0.97,
+                threshold=0.99,
                 bottom_r=iv_icon_bottom_r,
                 display=False,
                 max_matches=1,
@@ -552,7 +558,7 @@ class Action_Controller:
 
     def rest_pp_health(self):
         self.skill_pp_dict = {
-            "点到为止": 8,
+            "点到为止": 48,
             "甜甜香气": 32,
             "蘑菇孢子": 24,
             "黑夜魔影": 18,
