@@ -77,9 +77,11 @@ class Farming_Fallarbor_Town_Ditto:
 
         farming_times = 0
         just_started = True
+        round_count = 1
         while self.p.auto_strategy_flag:
             print("开始刷怪,或者是回城补给")
             while self.p.get_gs()["return_status"] < 20:
+                round_count = 1
                 coords_status = self.p.get_coords()
                 game_status = self.p.get_gs()
                 coords_status = add_x_y_coords_offset_Fallarbor_Town_Ditto(
@@ -121,6 +123,7 @@ class Farming_Fallarbor_Town_Ditto:
                 )
 
             while self.p.auto_strategy_flag:
+                # print(round_count)
                 # print("进入战斗")
                 game_status = self.p.get_gs()
                 battle_status = self.p.get_bs()
@@ -136,22 +139,46 @@ class Farming_Fallarbor_Town_Ditto:
                         294,
                     ]:  # 碰到别的东西逃跑
                         self.p.ac.run_from_s21()
-                    elif battle_status.get("enemy_1_info")["CatchMethod"] == 132:
-                        if battle_status.get(
-                            "enemy_1_hp_pct"
-                        ) < 20 and battle_status.get("enemy_1_sleeping"):
-                            self.p.ac.throw_pokeball(pokeball_type="dark_ball")
-                        elif self.p.ac.is_go_pc(ignore_hp=True):
-                            self.p.ac.run_from_s21()
+                    # elif battle_status.get("enemy_1_info")["CatchMethod"] == 132:
+                    #     if battle_status.get(
+                    #         "enemy_1_hp_pct"
+                    #     ) < 20 and battle_status.get("enemy_1_sleeping"):
+                    #         self.p.ac.throw_pokeball(pokeball_type="dark_ball")
+                    #     elif self.p.ac.is_go_pc(ignore_hp=True):
+                    #         self.p.ac.run_from_s21()
 
-                        elif battle_status.get("enemy_1_hp_pct") >= 20:
-                            self.p.ac.fight_skill_1_from_s21()
-                        elif (
+                    #     elif battle_status.get("enemy_1_hp_pct") >= 20:
+                    #         self.p.ac.fight_skill_1_from_s21()
+                    #     elif (
+                    #         battle_status.get("enemy_1_hp_pct") < 20
+                    #         and battle_status.get("enemy_1_sleeping") == False
+                    #     ):
+                    #         self.p.ac.fight_skill_2_from_s21(skill="借助")
+
+                    elif battle_status.get("enemy_1_info")["CatchMethod"] == 132:
+                        if (
                             battle_status.get("enemy_1_hp_pct") < 20
+                            and battle_status.get("enemy_1_sleeping")
+                            and round_count in (3, 4, 5, 6)
+                        ):
+                            self.p.ac.throw_pokeball(pokeball_type="sleep_ball")
+                            round_count += 1
+                        elif self.p.ac.is_go_pc(ignore_hp=True) or (
+                            round_count >= 3
                             and battle_status.get("enemy_1_sleeping") == False
                         ):
-                            self.p.ac.fight_skill_2_from_s21(skill="借助")
+                            self.p.ac.run_from_s21()
 
+                        elif round_count == 1:
+                            round_count += 1
+                            self.p.ac.fight_skill_2_from_s21()
+                            # self.p.ac.fight_skill_1_from_s21()  # 点到为止
+                        elif (
+                            battle_status.get("enemy_1_sleeping") == True
+                            and round_count == 2
+                        ):
+                            round_count += 1
+                            self.p.ac.fight_skill_1_from_s21()
                     # elif battle_status.get("enemy_1_info")["CatchMethod"] == 132:
                     #     if self.is替身 == False:
                     #         self.p.ac.fight_skill_替身_from_s21()
