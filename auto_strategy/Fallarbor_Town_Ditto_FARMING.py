@@ -63,6 +63,7 @@ class Farming_Fallarbor_Town_Ditto:
 
     def go_cave(self):
         self.p.pf.go_somewhere(end_point=(-27, -11), city=self.city, transport="run")
+        sleep(3)
 
     def run(self, repeat_times=10):
         # 首先要确认是否能飞走
@@ -163,7 +164,7 @@ class Farming_Fallarbor_Town_Ditto:
                         ):
                             self.p.ac.throw_pokeball(pokeball_type="sleep_ball")
                             round_count += 1
-                        elif self.p.ac.is_go_pc(ignore_hp=True) or (
+                        elif (self.p.ac.is_go_pc(ignore_hp=True) and battle_status.get("enemy_1_sleeping") == False and  battle_status.get("enemy_1_hp_pct") > 20) or (
                             round_count >= 3
                             and battle_status.get("enemy_1_sleeping") == False
                         ):

@@ -141,7 +141,7 @@ class Action_Controller:
     def run_from_s21(self):
         sleep(0.15)
         self.p.controller.click(522, 557, tolerance=15)
-        sleep(4)
+        sleep(2)
         print("Running from battle")
 
     @synchronized
