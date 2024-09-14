@@ -1,4 +1,6 @@
 # pokemmo_py_auto
+学习python的练手项目
+
 安装包用英语安装
 
 assert 里面 main-hub.png monster-info.png 需要覆盖
